@@ -1,4 +1,4 @@
-import { act, render, screen } from '@testing-library/react';
+import { act, render, screen, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
@@ -87,9 +87,10 @@ describe('routing and guards', () => {
     vi.mocked(households.listMembers).mockResolvedValue([]);
     renderApp('/', signedIn);
     await screen.findByRole('heading', { name: 'Flat 4B' });
-    await userEvent.click(screen.getByRole('link', { name: 'Expenses' }));
-    expect(screen.getByRole('heading', { level: 1, name: 'Expenses' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Expenses' })).toHaveAttribute('aria-current', 'page');
+    const nav = within(screen.getByRole('navigation', { name: 'Main' }));
+    await userEvent.click(nav.getByRole('link', { name: 'Expenses' }));
+    expect(await screen.findByRole('heading', { level: 1, name: 'Expenses' })).toBeInTheDocument();
+    expect(nav.getByRole('link', { name: 'Expenses' })).toHaveAttribute('aria-current', 'page');
   });
 
   it('a user who already has a household cannot open the set-up screen', async () => {

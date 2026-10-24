@@ -44,6 +44,48 @@ export async function createHouseholdWithInvite(page: Page, householdName: strin
   return code;
 }
 
+/** Join with a code and confirm; lands on the household home. */
+export async function joinAndConfirm(page: Page, code: string, householdName: string): Promise<void> {
+  await joinWithCode(page, code);
+  await page.getByRole('button', { name: 'Join household' }).click();
+  await expect(page.getByRole('heading', { level: 1, name: householdName })).toBeVisible();
+}
+
+/** A household with an owner and two more members, each signed in on their own browser context. */
+export async function threePersonHousehold(browser: Browser, names: [string, string, string], householdName: string) {
+  const a = await newUser(browser, names[0]);
+  const b = await newUser(browser, names[1]);
+  const c = await newUser(browser, names[2]);
+  const code = await createHouseholdWithInvite(a.page, householdName);
+  await joinAndConfirm(b.page, code, householdName);
+  await joinAndConfirm(c.page, code, householdName);
+  return { a, b, c };
+}
+
+/** Adds an equal-split expense through the UI (everyone selected). */
+export async function addEqualExpense(page: Page, title: string, amount: string): Promise<void> {
+  await page.goto('/#/expenses/new');
+  await page.getByLabel('What was this for?').fill(title);
+  await page.getByLabel(/Total amount/).fill(amount);
+  await page.getByRole('button', { name: 'Save expense' }).click();
+  await expect(page.getByText('Expense saved.')).toBeVisible();
+}
+
+/** Reload first: re-opening the same hash is not a navigation, and live updates arrive in Phase 7. */
+export async function youOwe(page: Page): Promise<string> {
+  await page.goto('/#/expenses');
+  await page.reload();
+  await expect(page.getByTestId('you-owe')).toBeVisible();
+  return (await page.getByTestId('you-owe').innerText()).trim();
+}
+
+export async function youAreOwed(page: Page): Promise<string> {
+  await page.goto('/#/expenses');
+  await page.reload();
+  await expect(page.getByTestId('you-are-owed')).toBeVisible();
+  return (await page.getByTestId('you-are-owed').innerText()).trim();
+}
+
 export async function joinWithCode(page: Page, code: string): Promise<void> {
   await page.getByRole('link', { name: /Join a household/ }).click();
   await page.getByLabel('Invite code').fill(code);

@@ -18,6 +18,13 @@ import { HouseholdSettingsScreen } from '@/features/household/HouseholdSettingsS
 import { InvitesScreen } from '@/features/household/InvitesScreen';
 import { JoinHouseholdScreen } from '@/features/household/JoinHouseholdScreen';
 import { MembersScreen } from '@/features/household/MembersScreen';
+import { BalancesScreen } from '@/features/expenses/BalancesScreen';
+import { ExpenseDetailsScreen } from '@/features/expenses/ExpenseDetailsScreen';
+import { ExpenseFormScreen } from '@/features/expenses/ExpenseFormScreen';
+import { ExpenseListScreen } from '@/features/expenses/ExpenseListScreen';
+import { ExpensesScreen } from '@/features/expenses/ExpensesScreen';
+import { RecordSettlementScreen } from '@/features/expenses/RecordSettlementScreen';
+import { SettlementsScreen } from '@/features/expenses/SettlementsScreen';
 import { AppShell } from '@/features/shell/AppShell';
 import { PlaceholderTab, YouTab } from '@/features/shell/Tabs';
 import { readEnv } from '@/lib/env';
@@ -43,7 +50,14 @@ export function AppRoutes() {
           <Route path="/start/join" element={<JoinHouseholdScreen />} />
           <Route element={<AppShell />}>
             <Route index element={<HomeScreen />} />
-            <Route path="expenses" element={<PlaceholderTab />} />
+            <Route path="expenses" element={<ExpensesScreen />} />
+            <Route path="expenses/all" element={<ExpenseListScreen />} />
+            <Route path="expenses/new" element={<ExpenseFormScreen />} />
+            <Route path="expenses/balances" element={<BalancesScreen />} />
+            <Route path="expenses/settlements" element={<SettlementsScreen />} />
+            <Route path="expenses/settle" element={<RecordSettlementScreen />} />
+            <Route path="expenses/:id" element={<ExpenseDetailsScreen />} />
+            <Route path="expenses/:id/edit" element={<ExpenseFormScreen />} />
             <Route path="chores" element={<PlaceholderTab />} />
             <Route path="house" element={<PlaceholderTab />} />
             <Route path="you" element={<YouTab />} />

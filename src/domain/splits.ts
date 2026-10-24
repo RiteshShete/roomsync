@@ -96,3 +96,22 @@ export function buildShares(totalMinor: number, input: SplitInput): SplitResult 
 export function isSplitMethod(v: string): v is SplitMethod {
   return v === 'equal' || v === 'custom' || v === 'percentage';
 }
+
+/**
+ * Parse a percentage like "33.34" into basis points (1% = 100bp) using string math: up to two
+ * decimals, 0..100 inclusive. Returns null when invalid.
+ */
+export function parsePercentBp(input: string): number | null {
+  const cleaned = input.trim().replace(/%$/, '').trim();
+  const m = /^(\d{1,3})(?:\.(\d{0,2}))?$/.exec(cleaned);
+  if (!m) return null;
+  const bp = Number(m[1]) * 100 + Number((m[2] ?? '').padEnd(2, '0') || '0');
+  return bp <= TOTAL_BP ? bp : null;
+}
+
+/** 3334 -> "33.34", 5000 -> "50", 100 -> "1". */
+export function formatPercentBp(bp: number): string {
+  const whole = Math.floor(bp / 100);
+  const frac = bp % 100;
+  return frac === 0 ? String(whole) : `${whole}.${String(frac).padStart(2, '0').replace(/0$/, '')}`;
+}

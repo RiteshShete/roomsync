@@ -78,7 +78,7 @@ export function mockApi({ me = membership(), members = [aarav, riya, kunal] }: {
 }
 
 /** Renders the whole route table, as a real user would experience it. */
-export function renderApp(path: string, session: SessionState = signedIn) {
+export function renderApp(path: string | { pathname: string; state?: unknown }, session: SessionState = signedIn) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: 0 } } });
   const utils = render(
     <QueryClientProvider client={client}>

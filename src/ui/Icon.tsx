@@ -16,6 +16,10 @@ const PATHS = {
   alert: 'M12 8v5M12 17h.01M10.3 3.9L2.4 18a2 2 0 001.7 3h15.8a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z',
   close: 'M6 6l12 12M18 6L6 18',
   mail: 'M3 6h18v12H3zM3 7l9 6 9-6',
+  calendar: 'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4',
+  filter: 'M3 5h18M6 12h12M10 19h4',
+  receipt: 'M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6',
+  swap: 'M7 7h13M16 3l4 4-4 4M17 17H4M8 13l-4 4 4 4',
 } as const;
 
 export type IconName = keyof typeof PATHS;

@@ -151,6 +151,36 @@ export async function listMembers(householdId: string): Promise<Member[]> {
   }));
 }
 
+export type MemberWithLeft = Omit<Member, 'status'> & { status: 'active' | 'leaving' | 'left' };
+
+/**
+ * Every member the household has ever had, including people who left. Needed to show names on
+ * history (expenses, settlements) that involve someone who has since moved out.
+ */
+export async function listAllMembers(householdId: string): Promise<MemberWithLeft[]> {
+  const supabase = getSupabase();
+  const { data: rows, error } = await supabase
+    .from('household_members')
+    .select('id, user_id, role, status, joined_at, move_out_effective_date')
+    .eq('household_id', householdId)
+    .order('joined_at', { ascending: true });
+  if (error) throw toAppError(error);
+  const ids = [...new Set(rows.map((r) => r.user_id))];
+  const { data: profiles, error: pErr } = await supabase.from('profiles').select('id, display_name, avatar_color').in('id', ids);
+  if (pErr) throw toAppError(pErr);
+  const byId = new Map(profiles.map((p) => [p.id, p]));
+  return rows.map((r) => ({
+    memberId: r.id,
+    userId: r.user_id,
+    role: r.role as Role,
+    status: r.status as MemberWithLeft['status'],
+    displayName: byId.get(r.user_id)?.display_name ?? 'Former member',
+    avatarColor: byId.get(r.user_id)?.avatar_color ?? '#6b5f57',
+    joinedAt: r.joined_at,
+    moveOutEffectiveDate: r.move_out_effective_date,
+  }));
+}
+
 export async function setMemberRole(memberId: string, role: 'admin' | 'member'): Promise<void> {
   const { error } = await getSupabase().rpc('set_member_role', { p_member_id: memberId, p_role: role });
   if (error) throw toAppError(error);

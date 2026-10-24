@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 import {
   addDays, addMonths, buildShares, computeBalances, equalShares, explainBalance, formatMoney,
   inviteState, isIsoDate, isValidInviteFormat, minorToInput, nextAssignee, nextOccurrence,
-  normalizeInviteCode, parseAmount, percentageShares, pruneRotation, suggestTransfers,
+  normalizeInviteCode, parseAmount, parsePercentBp, formatPercentBp, percentageShares, pruneRotation, suggestTransfers,
 } from './index';
 import type { ExpenseRecord, SettlementRecord } from './types';
 
@@ -222,5 +222,22 @@ describe('invites', () => {
     expect(inviteState(base, '2026-06-02T00:00:00Z')).toBe('expired');
     expect(inviteState({ ...base, useCount: 2 }, now)).toBe('used_up');
     expect(inviteState({ ...base, maxUses: null, useCount: 99 }, now)).toBe('ok');
+  });
+});
+
+describe('percentages in basis points', () => {
+  it.each([
+    ['50', 5000], ['33.34', 3334], ['33.3', 3330], ['0', 0], ['100', 10000], ['0.01', 1], [' 12.5 % ', 1250], ['7.', 700],
+  ])('parses %j as %i bp', (input, bp) => expect(parsePercentBp(input)).toBe(bp));
+
+  it.each(['', 'abc', '-5', '100.01', '101', '1.234', '1e2', '.5', '1,5'])('rejects %j', (input) =>
+    expect(parsePercentBp(input)).toBeNull());
+
+  it('formats without trailing zeros and round-trips', () => {
+    expect(formatPercentBp(3334)).toBe('33.34');
+    expect(formatPercentBp(5000)).toBe('50');
+    expect(formatPercentBp(3330)).toBe('33.3');
+    expect(formatPercentBp(1)).toBe('0.01');
+    for (const bp of [0, 1, 99, 100, 3333, 3334, 10000]) expect(parsePercentBp(formatPercentBp(bp))).toBe(bp);
   });
 });

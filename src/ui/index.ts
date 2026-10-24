@@ -14,3 +14,4 @@ export { SelectField, type SelectFieldProps } from './SelectField';
 export { Toggle, type ToggleProps } from './Toggle';
 export { PillLink, type PillVariant } from './PillLink';
 export { HeaderTabs } from './Header';
+export { Fab } from './Fab';

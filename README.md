@@ -2,7 +2,7 @@
 
 Shared living, simplified. Shared expenses, chores, groceries, announcements and move-out in one mobile-first app.
 
-> Status: Phase 4 of 13 (households and membership). You can sign up, create or join a household with an invite code, manage members and settings, and archive it. Expenses, chores, groceries and the rest arrive phase by phase. See `PLAN.md` and `PROGRESS.md`.
+> Status: Phase 5 of 13 (expenses and settlements). You can create or join a household, add and split expenses (equal, custom, percentage), see balances and suggested payments, and record, reverse or dispute settlements. Chores, groceries, the activity centre and move-out arrive phase by phase. See `PLAN.md` and `PROGRESS.md`.
 
 ## Prerequisites
 - Node 22+ (`node -v`)
