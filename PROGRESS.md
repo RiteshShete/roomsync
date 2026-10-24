@@ -6,8 +6,23 @@ Read this at the start of every session; update it at the end.
 | Phase | State |
 |---|---|
 | 0 Bootstrap | Done (`phase-0`) |
-| 1 Schema and security | Done (`phase-1`) — awaiting owner "continue" |
-| 2–13 | Not started |
+| 1 Schema and security | Done (`phase-1`) |
+| 2 Database functions | Done (`phase-2`) — awaiting owner "continue" |
+| 3–13 | Not started |
+
+## Phase 2 decisions and deviations
+- **`preview_invite` / `join_household` return `{ok:false, error:'invalid_invite:<reason>'}` instead of raising.** PLAN §6 says RPCs raise these. A raised error rolls back the failed-attempt row, so the 10-failures/hour throttle could never trigger. The `src/api` wrapper (Phase 3/4) must turn `ok:false` into the matching client error. Other errors (`already_member`, auth) still raise.
+- **Argument style:** typed `p_*` parameters; shares are a JSON array `[{member_id, share_amount_minor, percent_bp?}]`. Return values: `create_invite` → `{invite_id, code, expires_at}` (code shown once), `edit_expense` → `{version, settlements_exist, impact[]}`, `complete_chore` → `{next_chore_id, next_assignee_member_id, skipped_member_ids}`, `reopen_chore` → `{cancelled_successor_id}`; mutating RPCs on versioned rows return the new `version`.
+- **`private.ctx()`** is the single entry point for auth, reconcile, membership and archive checks. Non-members always get `not_found`.
+- **Rotation only considers `active` members** (a `leaving` member is skipped; they can still receive a manually assigned chore or expense).
+- **Settlements may involve `left` members** so their unresolved balance can be settled explicitly; balances of left members stay listed.
+- **Settlement transitions:** recorded→reversed (admin/recorder), recorded→disputed (admin, or the other party who did not record it; reason required), disputed→reversed (admin/recorder), disputed→recorded (admin, or whoever raised the dispute). `reversed` is final.
+- **Audit snapshots omit expense notes**; activity metadata has titles/amounts only.
+- **Deferred constraints:** RPCs that depend on them call `set constraints all deferred` first and `immediate` after (found by tests: a mode change earlier in a transaction broke `transfer_ownership` and the second `add_expense`).
+- **SQL mirrors:** `private.next_occurrence` and `private.next_assignee` mirror `src/domain/rotation.ts`; `private.compute_balances` mirrors `src/domain/balances.ts`. Shared vectors: `rotation.test.sql` and `balances.test.sql` vs `domain.test.ts`. Splits are validated (not computed) in SQL; the ₹1,000/3 vector is in `expenses.test.sql` and `constraints.test.sql`.
+- **Test design:** each RPC test file starts from the same fixture (4-member House A created through the real RPCs, House B, an outsider) and logs in as each user via `set_config('role'/'request.jwt.claims')`. 700 assertions in 11 files. Mutation-checked (breaking the balance rule, the recurrence rule and the admin check each failed tests).
+- **Generated types:** `npm run db:types` → `src/lib/database.types.ts` (unformatted; the CLI suggests `npx oxfmt`, not applied).
+- **UI mockups received** (`UI/`, 29 PNGs): notes and conflicts with the spec are in `docs/ui-reference-notes.md`; decisions needed before Phase 3/4/6/7.
 
 ## Phase 1 decisions and deviations
 - **`expense_shares.household_id` added** (not in PLAN §6) and `unique (id, household_id)` on `household_members`, `expenses`, `chores`. This allows composite foreign keys, so the database itself guarantees payer, participants, assignees, settlement parties and activity actors belong to the row's household. Phase 2 RPCs must fill `household_id` on shares. The deferred constraint trigger therefore only checks sums, equal spread (≤ 1 minor unit), percentage totals (10000 bp) and that each percentage share is within 1 minor unit of its exact value.

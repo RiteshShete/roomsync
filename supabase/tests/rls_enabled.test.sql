@@ -54,11 +54,23 @@ select ok(not has_column_privilege('authenticated', 'public.chores', 'completed_
 select ok(not has_column_privilege('authenticated', 'public.invitations', 'code_hash', 'select'),
   'invitation code_hash is not readable');
 
--- No function in public or private is executable by anon or PUBLIC (our own functions only).
+-- Only `health` is callable by anon, in either of our schemas.
 select ok(not has_function_privilege('anon', p.oid, 'execute'),
   'anon cannot execute ' || n.nspname || '.' || p.proname)
 from pg_proc p join pg_namespace n on n.oid = p.pronamespace
-where n.nspname in ('public', 'private') order by n.nspname, p.proname;
+where n.nspname in ('public', 'private') and p.proname <> 'health' order by n.nspname, p.proname;
+select ok(has_function_privilege('anon', 'public.health()', 'execute'), 'anon can call health()');
+
+-- RPC internals live in `private` and are not callable through the API, except the RLS helpers.
+select is(
+  (select array_agg(p.proname::text order by p.proname) from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+    where n.nspname = 'private' and has_function_privilege('authenticated', p.oid, 'execute')),
+  array['all_members_in_household', 'household_is_active', 'is_active_member', 'is_admin', 'is_assignable_member',
+        'is_member', 'is_member_of_member', 'is_my_member', 'my_member_id', 'shares_household_with'],
+  'authenticated can execute only the RLS helper functions in private');
+-- Every public function is an intended RPC: authenticated may execute it and PUBLIC may not.
+select ok(has_function_privilege('authenticated', p.oid, 'execute'), 'authenticated can call public.' || p.proname)
+from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' order by p.proname;
 
 -- Every security definer function in our schemas pins search_path to empty.
 select is(

@@ -27,6 +27,35 @@ Every `security definer` function, what it checks, and why it is safe. Add a row
 | `lock_currency()`, `check_money_currency()` | yes | triggers | Read `households`/`expenses`/`settlements` regardless of RLS |
 | `check_expense_invariants()` | yes | deferred trigger | Share sum, equal spread, percentage totals |
 
+## Phase 2 RPCs (schema `public`, all `security definer`, `search_path = ''`, EXECUTE only for `authenticated`; `health` also for `anon`)
+Every RPC starts with `private.ctx(household_id)`: `auth.uid()` must be set (`permission_denied`), the household is reconciled (lazy move-out), the caller must be a non-left member (else `not_found`, so foreign ids look missing), and writes to an archived household raise `household_archived`. Role checks below are on top of that.
+
+| RPC | Role check | Other checks |
+|---|---|---|
+| `create_household` | any authenticated user | no existing non-left membership (`already_member`) |
+| `update_household` | owner/admin | `expected_version`; currency lock trigger |
+| `set_household_archived` | owner | allowed while archived (restore) |
+| `set_member_role` | owner | target not owner/left; only admin/member |
+| `transfer_ownership` | owner | target active, not self; demote-then-promote with deferred owner check |
+| `start_move_out` / `cancel_move_out` | self, owner for anyone, admin for non-owners | date 0–90 days; owner → `owner_must_transfer` / `sole_member` |
+| `add_move_out_dispute` | the leaving member only | status must be `leaving` |
+| `reconcile_household` | anyone who ever belonged | idempotent; also runs inside every RPC |
+| `household_balances` | member | |
+| `create_invite` / `revoke_invite` | owner/admin | ≤ 20 active invites; code returned once, only SHA-256 stored |
+| `preview_invite` / `join_household` | logged-in non-member | throttle 10 failures/hour; failures are returned (not raised) so attempts persist; max 12 members |
+| `add_expense` | member | participants active/leaving; shares validated by deferred trigger |
+| `edit_expense` / `delete_expense` / `restore_expense` | owner/admin any, member own | `expected_version`; audit before/after; soft delete |
+| `record_settlement` | owner/admin any pair, member only as payer or recipient | date not in the future; parties belong to the household |
+| `set_settlement_status` | see transition table in the function | reason required to dispute; `reversed` is final |
+| `complete_chore` / `reopen_chore` | admin, creator, assignee (any member if unassigned) | successor handling; `later_occurrence_completed` |
+| `mark_activity_read` / `mark_all_activity_read` | member | only the caller's own read state |
+| `export_my_household_data` | member | no emails, no invitation data |
+| `health` | public | returns `'ok'` |
+
+Private internals (`ctx`, `reconcile`, `emit_*`, `compute_balances`, `next_*`, `resolve_invite`, code generation/hashing) are not executable by API roles; `rls_enabled.test.sql` pins the exact list of private functions `authenticated` may run.
+
+Transaction note: RPCs that rely on deferred constraints run `set constraints all deferred` before writing and `all immediate` after, so they behave the same even if an earlier statement in the transaction changed the mode.
+
 Guard triggers `guard_grocery_purchaser`, `guard_announcement_pin`, `bump_version`, `set_updated_at`, `forbid_household_change` run as the invoker on purpose, so they see the real caller.
 
 ## Known limits
