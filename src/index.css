@@ -1,0 +1,141 @@
+@import 'tailwindcss';
+
+/*
+ * Design tokens. Palette and shapes follow the UI mockups (warm peach/coral on cream, rounded cards).
+ * Two deliberate accessibility departures from the mockups: action fills use a deeper coral so white
+ * text meets 4.5:1, and amber buttons carry dark text. Brand coral (--brand) is for fills/icons/tints.
+ * Contrast pairs checked: ink/bg 14:1, ink-2/bg 5.8:1, on-primary/primary 4.9:1, primary/bg 4.6:1.
+ */
+:root {
+  --bg: #fdf7f1;
+  --surface: #ffffff;
+  --surface-tint: #fde8d6;
+  --surface-sunken: #f7ede3;
+  --ink: #2b2622;
+  --ink-2: #6b5f57;
+  --border: #ebddd0;
+  --primary: #c8432b;
+  --primary-pressed: #a93822;
+  --on-primary: #ffffff;
+  --brand: #ff8f77;
+  --brand-soft: #ffe5dc;
+  --amber: #ffb800;
+  --amber-pressed: #e6a600;
+  --on-amber: #3b2a00;
+  --success: #0f7a52;
+  --success-soft: #e3f5ec;
+  --warning: #8a5a00;
+  --warning-soft: #fff3d6;
+  --danger: #b3261e;
+  --danger-soft: #fde7e5;
+  --info: #4b3fb0;
+  --info-soft: #ece9fb;
+  --focus: #3b5bdb;
+  --scrim: rgb(43 38 34 / 0.5);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #17120f;
+    --surface: #211a16;
+    --surface-tint: #3a2a22;
+    --surface-sunken: #2b221d;
+    --ink: #f6eee8;
+    --ink-2: #cdbdb1;
+    --border: #3a2e27;
+    --primary: #ff9c82;
+    --primary-pressed: #ffb29d;
+    --on-primary: #2a0f07;
+    --brand: #ff9c82;
+    --brand-soft: #4a2c22;
+    --amber: #ffc83d;
+    --amber-pressed: #ffd466;
+    --on-amber: #2b1f00;
+    --success: #4bd0a0;
+    --success-soft: #16352a;
+    --warning: #ffc857;
+    --warning-soft: #3d2f10;
+    --danger: #ff8a80;
+    --danger-soft: #45201d;
+    --info: #b8b0ff;
+    --info-soft: #2a2550;
+    --focus: #8fa8ff;
+    --scrim: rgb(0 0 0 / 0.6);
+    color-scheme: dark;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-tint: var(--surface-tint);
+  --color-sunken: var(--surface-sunken);
+  --color-ink: var(--ink);
+  --color-ink2: var(--ink-2);
+  --color-line: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-pressed: var(--primary-pressed);
+  --color-on-primary: var(--on-primary);
+  --color-brand: var(--brand);
+  --color-brand-soft: var(--brand-soft);
+  --color-amber: var(--amber);
+  --color-amber-pressed: var(--amber-pressed);
+  --color-on-amber: var(--on-amber);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-scrim: var(--scrim);
+  /* System/rounded stack only: no external font requests. Nunito is used if installed. */
+  --font-sans: 'Nunito', ui-rounded, 'SF Pro Rounded', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --radius-card: 1.25rem;
+  --radius-control: 1rem;
+}
+
+@layer base {
+  html {
+    background: var(--bg);
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+  :focus-visible {
+    outline: 3px solid var(--focus);
+    outline-offset: 2px;
+  }
+  button,
+  [role='button'],
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Respect reduced motion everywhere. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.hero-glow {
+  background:
+    radial-gradient(60% 40% at 15% 25%, color-mix(in srgb, var(--brand) 38%, transparent), transparent 70%),
+    radial-gradient(55% 35% at 90% 80%, color-mix(in srgb, var(--brand) 28%, transparent), transparent 70%),
+    var(--bg);
+}

@@ -7,8 +7,23 @@ Read this at the start of every session; update it at the end.
 |---|---|
 | 0 Bootstrap | Done (`phase-0`) |
 | 1 Schema and security | Done (`phase-1`) |
-| 2 Database functions | Done (`phase-2`) — awaiting owner "continue" |
-| 3–13 | Not started |
+| 2 Database functions | Done (`phase-2`) |
+| 3 App foundation and auth | Done (`phase-3`) — awaiting owner "continue" |
+| 4–13 | Not started |
+
+## Phase 3 decisions and deviations
+- **Open design questions were not answered, so spec/plan defaults were used** (owner replied "continue"): navigation is Home / Expenses / Chores / House / You (not the mockups' Shopping/Tasks/Finance/Settings); no chat tab, no points/leaderboard, no QR scan, no photo/receipt upload, no reminders. **Visual style comes from the mockups** (warm cream/peach/coral, rounded cards, amber onboarding pills). Any of the skipped features can be added later as its own phase; see `docs/ui-reference-notes.md` for the list.
+- **Two accessibility departures from the mockups:** action buttons use a deeper coral (`#C8432B`, white text 4.9:1) because the mockup's `#FF9C82` with white text is ~2.2:1; amber buttons carry dark text. Brand coral is kept for the logo, tints, and icons.
+- **Fonts:** system/rounded stack with Nunito if installed. No external font requests (PLAN §8 Phase 3).
+- **Offline copy** is "You’re offline. Changes you make now won’t be saved." instead of spec §16's "may not be synced", because nothing syncs (CLAUDE.md rule 4).
+- **Not-yet-built controls are disabled with a visible reason**: Create/Join household cards ("Household setup arrives in the next update."), the notifications bell ("The activity centre arrives in a later update."). Tabs other than You show a plain "Coming soon" state. Disabled controls use `aria-disabled` (stay focusable, reason via `aria-describedby`).
+- **"I have an invite"** goes to sign-up with a hint (join needs an account; the join screen is Phase 4).
+- **Auth:** email + password, PKCE, `HashRouter`; password-reset emails return to the app root (`?code=` is exchanged by supabase-js). Password minimum is 8 on the client **and** enforced by the server (`supabase/config.toml` `minimum_password_length = 8`; hosted project must be set the same in Phase 10).
+- **Env safety:** `readEnv` rejects a `sb_secret_…` or `service_role` key in the client env and shows a readable screen instead. Build output was scanned: only the publishable key is in the bundle.
+- **Error mapper** (`src/lib/errors.ts`) covers the whole PLAN §6 vocabulary, auth errors, network failures, Postgres `42501`/`23505`; unknown errors show the generic message and raw text is never shown. `preview_invite`/`join_household` `ok:false` results will be converted in Phase 4's `src/api`.
+- **Seed script** `npm run seed:dev` (`scripts/seed-dev.mjs`): refuses non-local URLs; gets the local keys from the environment or `supabase status` at run time (never stored); creates Aarav, Riya, Kunal, Sneha (`@roomsync.test`, password `roomsync-local-1`) and "Flat 4B" through the real RPCs: 10 expenses (equal/custom/percentage, one edited), 1 settlement, 5 chores (weekly rotation, one completed so the next was spawned), 4 groceries, 2 announcements (one pinned). Idempotent: re-running just prints the accounts. Split math in the script duplicates the rule from `src/domain/splits.ts` (the DB validates it).
+- **Testing:** 235 unit tests (domain 49 + UI primitives, auth validation/screens, routing guards, env, errors, offline, error boundary). A scratch Playwright run (not committed) confirmed in a real browser: validation, sign-up → set-up screen, session survives reload, log in as the seeded user, sign out, wrong password keeps the typed email, no console errors. Real e2e specs start in Phase 4.
+- **Known follow-ups:** bundle is ~625 kB (code-splitting in Phase 9); the set-up screen's greeting appears after the profile loads (brief generic title first).
 
 ## Phase 2 decisions and deviations
 - **`preview_invite` / `join_household` return `{ok:false, error:'invalid_invite:<reason>'}` instead of raising.** PLAN §6 says RPCs raise these. A raised error rolls back the failed-attempt row, so the 10-failures/hour throttle could never trigger. The `src/api` wrapper (Phase 3/4) must turn `ok:false` into the matching client error. Other errors (`already_member`, auth) still raise.
