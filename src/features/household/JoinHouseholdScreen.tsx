@@ -7,7 +7,7 @@ import { copy } from '@/copy';
 import { formatInviteCode, isValidInviteFormat, normalizeInviteCode } from '@/domain';
 import { errorMessage } from '@/lib/errors';
 import { formatDateTime } from '@/lib/format';
-import { AuthLayout, FormError } from '@/features/auth/AuthLayout';
+import { AuthLayout, FormError, HeroLayout } from '@/features/auth/AuthLayout';
 import { Button, Field, useToast } from '@/ui';
 import { useMembership } from './useMembership';
 
@@ -70,8 +70,8 @@ export function JoinHouseholdScreen() {
   if (preview) {
     return (
       <AuthLayout title={copy.join.confirmTitle}>
-        <section className="flex flex-col gap-2 rounded-3xl border-2 border-line bg-surface p-5">
-          <h2 className="text-2xl font-extrabold text-ink">{preview.householdName}</h2>
+        <section className="flex flex-col gap-2 rounded-xl border border-line bg-surface p-5">
+          <h2 className="text-2xl font-bold text-ink">{preview.householdName}</h2>
           <p className="text-base text-ink2">{copy.join.members(preview.memberCount)}</p>
           <p className="text-sm text-ink2">
             {copy.join.expires}: {formatDateTime(preview.expiresAt)}
@@ -97,12 +97,13 @@ export function JoinHouseholdScreen() {
   }
 
   return (
-    <AuthLayout title={copy.join.title} subtitle={copy.join.subtitle}>
-      <form noValidate onSubmit={onCheck} className="flex flex-col gap-4">
+    <HeroLayout art="join" title={copy.join.title} subtitle={copy.join.subtitle}>
+      <form noValidate onSubmit={onCheck} className="flex flex-col gap-3">
         <Field
           id="invite-code"
           label={copy.join.code}
           hint={copy.join.codeHint}
+          shape="pill"
           autoComplete="off"
           autoCapitalize="characters"
           spellCheck={false}
@@ -114,13 +115,13 @@ export function JoinHouseholdScreen() {
           error={codeError}
         />
         <FormError message={formError} />
-        <Button type="submit" fullWidth loading={busy} loadingLabel={copy.join.checking}>
+        <Button type="submit" fullWidth className="rounded-full" loading={busy} loadingLabel={copy.join.checking}>
           {copy.join.check}
         </Button>
-        <Link to="/start" className="inline-flex min-h-11 items-center justify-center font-bold text-primary underline-offset-4 hover:underline">
+        <Link to="/start" className="inline-flex min-h-11 items-center justify-center font-semibold text-coral underline-offset-4 hover:underline">
           {copy.join.back}
         </Link>
       </form>
-    </AuthLayout>
+    </HeroLayout>
   );
 }

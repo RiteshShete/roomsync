@@ -87,7 +87,7 @@ export function Sheet({ open, onClose, title, children, footer, variant = 'botto
       >
         {isBottom ? <div aria-hidden="true" className="mx-auto mt-3 h-1.5 w-12 rounded-full bg-line" /> : null}
         <div className="flex items-start justify-between gap-2 px-5 pt-4">
-          <h2 id={titleId} className="text-xl font-extrabold text-ink">
+          <h2 id={titleId} className="text-xl font-bold text-ink">
             {title}
           </h2>
           {hideClose ? null : (

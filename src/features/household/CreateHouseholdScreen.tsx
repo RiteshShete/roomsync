@@ -82,7 +82,7 @@ export function CreateHouseholdScreen() {
         {invite ? (
           <>
             <InviteCodePanel code={invite.code} expiresAt={invite.expiresAt} />
-            <p role="status" className="rounded-2xl bg-sunken px-4 py-3 text-sm font-semibold text-ink">
+            <p role="status" className="rounded-xl bg-sunken px-4 py-3 text-sm font-semibold text-ink">
               {copy.invites.pendingState}
             </p>
           </>
@@ -119,11 +119,11 @@ export function CreateHouseholdScreen() {
           aria-expanded={more}
           aria-controls="more-options"
           onClick={() => setMore((m) => !m)}
-          className="inline-flex min-h-11 cursor-pointer items-center self-start font-bold text-primary underline-offset-4 hover:underline"
+          className="inline-flex min-h-11 cursor-pointer items-center self-start font-bold text-coral underline-offset-4 hover:underline"
         >
           {more ? copy.create.lessOptions : copy.create.moreOptions}
         </button>
-        <div id="more-options" hidden={!more} className="flex flex-col gap-4 rounded-3xl border-2 border-line bg-surface p-4">
+        <div id="more-options" hidden={!more} className="flex flex-col gap-4 rounded-xl border border-line bg-surface p-4">
           <p className="text-sm text-ink2">{copy.create.optionsHint}</p>
           <SelectField label={copy.create.currency} hint={copy.create.currencyHint} options={CURRENCY_OPTIONS} value={currency} onChange={(e) => setCurrency(e.target.value)} />
           <SelectField label={copy.create.defaultSplit} options={SPLIT_OPTIONS} value={split} onChange={(e) => setSplit(e.target.value as DefaultSplit)} />
@@ -133,7 +133,7 @@ export function CreateHouseholdScreen() {
         <Button type="submit" fullWidth loading={busy} loadingLabel={copy.create.submitting}>
           {copy.create.submit}
         </Button>
-        <Link to="/start" className="inline-flex min-h-11 items-center justify-center font-bold text-primary underline-offset-4 hover:underline">
+        <Link to="/start" className="inline-flex min-h-11 items-center justify-center font-bold text-coral underline-offset-4 hover:underline">
           {copy.join.back}
         </Link>
       </form>

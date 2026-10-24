@@ -43,7 +43,7 @@ export function ForgotPasswordScreen() {
     <AuthLayout title={copy.auth.forgotTitle}>
       {sent ? (
         <Notice title={copy.auth.resetSentTitle} body={copy.auth.resetSentBody}>
-          <Link to="/login" className="inline-flex min-h-11 items-center font-bold text-primary underline-offset-4 hover:underline">
+          <Link to="/login" className="inline-flex min-h-11 items-center font-bold text-coral underline-offset-4 hover:underline">
             {copy.auth.backToLogIn}
           </Link>
         </Notice>
@@ -63,7 +63,7 @@ export function ForgotPasswordScreen() {
           <Button type="submit" fullWidth loading={busy} loadingLabel={copy.auth.sendingReset}>
             {copy.auth.sendReset}
           </Button>
-          <Link to="/login" className="inline-flex min-h-11 items-center justify-center font-bold text-primary underline-offset-4 hover:underline">
+          <Link to="/login" className="inline-flex min-h-11 items-center justify-center font-bold text-coral underline-offset-4 hover:underline">
             {copy.auth.backToLogIn}
           </Link>
         </form>

@@ -43,7 +43,7 @@ export function SelectField({ label, options, hint, error, disabled = false, dis
         // aria-disabled alone doesn't stop a native select opening, so block the interaction too.
         onMouseDown={(e) => disabled && e.preventDefault()}
         onKeyDown={(e) => disabled && e.key !== 'Tab' && e.preventDefault()}
-        className={`min-h-12 w-full rounded-[var(--radius-control)] border-2 bg-surface px-4 py-2.5 text-base text-ink ${error ? 'border-danger' : 'border-line'} ${disabled ? 'cursor-not-allowed opacity-60' : ''} ${className}`}
+        className={`min-h-12 w-full rounded-[var(--radius-control)] border bg-field px-4 py-2.5 text-base text-ink ${error ? 'border-danger' : 'border-field-line'} ${disabled ? 'cursor-not-allowed opacity-60' : ''} ${className}`}
       >
         {options.map((o) => (
           <option key={o.value} value={o.value}>

@@ -54,7 +54,7 @@ function SettingsForm({ household, canEdit, readOnlyReason, currencyLocked }: { 
 
   return (
     <form noValidate onSubmit={onSubmit} className="flex flex-col gap-4">
-      {!canEdit ? <p className="rounded-2xl bg-sunken px-4 py-3 text-sm font-semibold text-ink">{readOnlyReason ?? copy.settings.readOnly}</p> : null}
+      {!canEdit ? <p className="rounded-xl bg-sunken px-4 py-3 text-sm font-semibold text-ink">{readOnlyReason ?? copy.settings.readOnly}</p> : null}
       <Field label={copy.settings.name} value={name} maxLength={90} readOnly={!canEdit} aria-disabled={!canEdit || undefined} onChange={(e) => canEdit && setName(e.target.value)} error={nameError} />
       <SelectField
         label={copy.settings.currency}
@@ -128,7 +128,7 @@ export function HouseholdSettingsScreen() {
       {form}
       <hr className="border-line" />
       <section className="flex flex-col gap-3" aria-labelledby="archive-title">
-        <h2 id="archive-title" className="text-lg font-extrabold text-ink">
+        <h2 id="archive-title" className="text-lg font-bold text-ink">
           {access.archived ? copy.settings.restoreTitle : copy.settings.archiveTitle}
         </h2>
         <p className="text-base text-ink2">{access.archived ? copy.settings.restoreBody : copy.settings.archiveBody}</p>

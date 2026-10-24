@@ -56,7 +56,7 @@ export function AmountInput({ label, currency, valueMinor, onChange, hint, error
         {label} <span className="font-normal text-ink2">({currency})</span>
       </label>
       <div
-        className={`flex min-h-12 items-center gap-2 rounded-[var(--radius-control)] border-2 bg-surface px-4 ${shown ? 'border-danger' : 'border-line'} focus-within:outline-3 focus-within:outline-[var(--focus)]`}
+        className={`flex min-h-12 items-center gap-2 rounded-[var(--radius-control)] border bg-field px-4 ${shown ? 'border-danger' : 'border-field-line'} focus-within:outline-3 focus-within:outline-[var(--focus)]`}
       >
         <span aria-hidden="true" className="text-lg font-bold text-ink2">
           {symbolFor(currency)}

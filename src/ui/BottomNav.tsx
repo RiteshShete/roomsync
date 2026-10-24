@@ -11,9 +11,9 @@ export const NAV_ITEMS: { to: string; label: string; icon: IconName; end?: boole
 ];
 
 /**
- * Five-tab bottom navigation. Fixed to the bottom with safe-area padding; pages reserve matching
- * space so it never covers content. The current tab is exposed with aria-current and a bold label
- * (not colour alone).
+ * Five-tab bottom navigation, as in the mockups: white bar, muted icons, the current tab in coral.
+ * It is fixed to the bottom with safe-area padding; pages reserve matching space so it never covers
+ * content. The current tab is exposed with aria-current and a bold label (not colour alone).
  */
 export function BottomNav() {
   return (
@@ -30,16 +30,14 @@ export function BottomNav() {
               className={({ isActive }) =>
                 [
                   'flex min-h-14 flex-col items-center justify-center gap-0.5 px-1 py-1.5 text-xs',
-                  isActive ? 'font-extrabold text-primary' : 'font-semibold text-ink2',
+                  isActive ? 'font-bold text-coral' : 'font-normal text-ink2',
                 ].join(' ')
               }
             >
               {({ isActive }) => (
                 <>
-                  <span
-                    className={`flex h-7 w-12 items-center justify-center rounded-full ${isActive ? 'bg-brand-soft' : ''}`}
-                  >
-                    <Icon name={item.icon} size={22} />
+                  <span className={`flex h-7 w-12 items-center justify-center ${isActive ? 'text-primary' : 'text-nav-idle'}`}>
+                    <Icon name={item.icon} size={26} strokeWidth={2.2} />
                   </span>
                   <span>{item.label}</span>
                 </>

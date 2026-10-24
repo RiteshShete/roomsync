@@ -46,7 +46,7 @@ function ToastView({ toast, onDismiss }: { toast: ToastItem; onDismiss: () => vo
     // Errors use role="alert" (assertive); the rest sit in the polite live region.
     <div
       role={toast.tone === 'error' ? 'alert' : 'status'}
-      className={`pointer-events-auto flex items-center gap-3 rounded-2xl border-2 px-4 py-3 shadow-lg ${tone.cls}`}
+      className={`pointer-events-auto flex items-center gap-3 rounded-xl border px-4 py-3 shadow-lg ${tone.cls}`}
     >
       <Icon name={tone.icon} size={20} />
       <p className="flex-1 text-sm font-semibold">{toast.message}</p>
@@ -57,7 +57,7 @@ function ToastView({ toast, onDismiss }: { toast: ToastItem; onDismiss: () => vo
             toast.action!.onClick();
             onDismiss();
           }}
-          className="min-h-11 cursor-pointer rounded-xl px-3 text-sm font-extrabold text-primary hover:bg-brand-soft"
+          className="min-h-11 cursor-pointer rounded-xl px-3 text-sm font-bold text-coral hover:bg-brand-soft"
         >
           {toast.action.label}
         </button>

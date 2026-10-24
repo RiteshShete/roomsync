@@ -22,7 +22,7 @@ export function EmptyState({ title, body, action }: { title: string; body?: stri
   return (
     <div className="flex flex-col items-center gap-3 px-6 py-12 text-center">
       <BubbleMark />
-      <h2 className="text-lg font-extrabold text-ink">{title}</h2>
+      <h2 className="text-lg font-bold text-ink">{title}</h2>
       {body ? <p className="max-w-xs text-base text-ink2">{body}</p> : null}
       {action ? <div className="mt-2">{action}</div> : null}
     </div>
@@ -43,7 +43,7 @@ export function ErrorState({
 }) {
   return (
     <div role="alert" className="flex flex-col items-center gap-3 px-6 py-12 text-center">
-      <h2 className="text-lg font-extrabold text-ink">{title}</h2>
+      <h2 className="text-lg font-bold text-ink">{title}</h2>
       <p className="max-w-xs text-base text-ink2">{message}</p>
       {onRetry ? (
         <Button variant="secondary" onClick={onRetry}>

@@ -39,7 +39,7 @@ export function Avatar({
       role="img"
       aria-label={name}
       style={{ backgroundColor: color, color: textOn(color) }}
-      className={`inline-flex shrink-0 items-center justify-center rounded-full font-extrabold ${SIZES[size]} ${ring ? 'ring-2 ring-surface' : ''}`}
+      className={`inline-flex shrink-0 items-center justify-center rounded-full font-bold ${SIZES[size]} ${ring ? 'ring-2 ring-surface' : ''}`}
     >
       <span aria-hidden="true">{initials(name)}</span>
     </span>
@@ -68,7 +68,7 @@ export function AvatarGroup({
         <span
           aria-label={`${extra} more`}
           role="img"
-          className={`-ml-2 inline-flex items-center justify-center rounded-full bg-sunken font-extrabold text-ink ring-2 ring-surface ${SIZES[size]}`}
+          className={`-ml-2 inline-flex items-center justify-center rounded-full bg-sunken font-bold text-ink ring-2 ring-surface ${SIZES[size]}`}
         >
           <span aria-hidden="true">+{extra}</span>
         </span>

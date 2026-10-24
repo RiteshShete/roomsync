@@ -17,10 +17,10 @@ export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement
 
 const VARIANTS: Record<ButtonVariant, string> = {
   primary: 'bg-primary text-on-primary hover:bg-primary-pressed active:bg-primary-pressed border-transparent',
-  secondary: 'bg-surface text-primary border-primary hover:bg-tint active:bg-tint',
-  tertiary: 'bg-transparent text-primary border-transparent hover:bg-brand-soft active:bg-brand-soft',
-  danger: 'bg-danger text-surface border-transparent hover:opacity-90 active:opacity-80',
-  amber: 'bg-amber text-on-amber border-transparent hover:bg-amber-pressed active:bg-amber-pressed',
+  secondary: 'bg-surface text-coral border-line hover:bg-brand-soft active:bg-brand-soft',
+  tertiary: 'bg-transparent text-coral border-transparent hover:bg-brand-soft active:bg-brand-soft',
+  danger: 'bg-danger text-white border-transparent hover:opacity-90 active:opacity-80',
+  amber: 'rounded-full bg-amber text-on-amber border-transparent hover:bg-amber-pressed active:bg-amber-pressed',
 };
 
 /**
@@ -65,16 +65,17 @@ export function Button({
         aria-describedby={reason ? reasonId : rest['aria-describedby']}
         title={reason ?? rest.title}
         className={[
-          'inline-flex min-h-11 items-center justify-center gap-2 rounded-[var(--radius-control)] border-2 px-5 py-2.5',
-          'text-base font-bold transition-colors select-none',
+          'inline-flex min-h-11 items-center justify-center gap-2 border px-5 py-2.5',
+          variant === 'amber' ? '' : 'rounded-[var(--radius-control)]',
+          'text-base font-semibold transition-colors select-none',
           VARIANTS[variant],
           fullWidth ? 'w-full' : '',
-          inactive ? 'cursor-not-allowed opacity-60' : 'cursor-pointer',
+          inactive ? 'cursor-not-allowed opacity-50' : 'cursor-pointer',
           className,
         ].join(' ')}
       >
         {loading ? (
-          <span aria-hidden="true" className="inline-block h-4 w-4 rounded-full border-2 border-current border-t-transparent motion-safe:animate-spin" />
+          <span aria-hidden="true" className="inline-block h-4 w-4 rounded-full border border-current border-t-transparent motion-safe:animate-spin" />
         ) : (
           icon
         )}

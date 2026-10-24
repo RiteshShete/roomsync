@@ -1,88 +1,79 @@
 @import 'tailwindcss';
+@import '@fontsource-variable/nunito/wght.css';
 
 /*
- * Design tokens. Palette and shapes follow the UI mockups (warm peach/coral on cream, rounded cards).
- * Two deliberate accessibility departures from the mockups: action fills use a deeper coral so white
- * text meets 4.5:1, and amber buttons carry dark text. Brand coral (--brand) is for fills/icons/tints.
- * Contrast pairs checked: ink/bg 14:1, ink-2/bg 5.8:1, on-primary/primary 4.9:1, primary/bg 4.6:1.
+ * Design tokens, sampled from the UI mockups (UI/*.png). LIGHT THEME ONLY: the app never follows
+ * the operating system's dark mode. Warm cream page, white cards with hairline borders, coral as the
+ * brand colour, amber for onboarding buttons, green for money and success.
+ *
+ * Known accessibility gap, deliberately kept to match the mockups: white text on coral (#ff9b85) and
+ * on amber (#feb801) is below 4.5:1. Small coral TEXT (links, labels) uses --coral-text, a slightly
+ * deeper coral. Both are one-line token changes if AA is wanted (see PROGRESS.md).
  */
 :root {
-  --bg: #fdf7f1;
+  --bg: #fdf8f2;
   --surface: #ffffff;
-  --surface-tint: #fde8d6;
-  --surface-sunken: #f7ede3;
-  --ink: #2b2622;
-  --ink-2: #6b5f57;
-  --border: #ebddd0;
-  --primary: #c8432b;
-  --primary-pressed: #a93822;
+  --surface-tint: #ffebd5; /* House Feed banner */
+  --surface-tint-border: #ffd7c1;
+  --surface-sunken: #f6efe8;
+  --ink: #3d3d3d;
+  --ink-strong: #272525;
+  --ink-2: #6b7280;
+  --ink-3: #8f8e8e;
+  --border: #eff0f1;
+  --primary: #ff9b85;
+  --primary-pressed: #f5856d;
   --on-primary: #ffffff;
-  --brand: #ff8f77;
-  --brand-soft: #ffe5dc;
-  --amber: #ffb800;
+  --coral-text: #e4573d;
+  --brand: #fe8d76; /* logo tile */
+  --brand-soft: #fff3f0; /* icon tiles, selected rows */
+  --coral-strip: #ffe7e2; /* action strips under cards */
+  --field-bg: #fff8f6;
+  --field-border: #ffe3dc;
+  --amber: #feb801;
   --amber-pressed: #e6a600;
-  --on-amber: #3b2a00;
-  --success: #0f7a52;
-  --success-soft: #e3f5ec;
+  --on-amber: #ffffff;
+  --success: #0da576;
+  --success-text: #0b8a63;
+  --success-soft: #d8f0e9;
   --warning: #8a5a00;
   --warning-soft: #fff3d6;
-  --danger: #b3261e;
+  --danger: #c0341d;
   --danger-soft: #fde7e5;
   --info: #4b3fb0;
   --info-soft: #ece9fb;
+  --nav-idle: #d5cccb;
+  --track: #dcdee0;
   --focus: #3b5bdb;
-  --scrim: rgb(43 38 34 / 0.5);
-  color-scheme: light;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #17120f;
-    --surface: #211a16;
-    --surface-tint: #3a2a22;
-    --surface-sunken: #2b221d;
-    --ink: #f6eee8;
-    --ink-2: #cdbdb1;
-    --border: #3a2e27;
-    --primary: #ff9c82;
-    --primary-pressed: #ffb29d;
-    --on-primary: #2a0f07;
-    --brand: #ff9c82;
-    --brand-soft: #4a2c22;
-    --amber: #ffc83d;
-    --amber-pressed: #ffd466;
-    --on-amber: #2b1f00;
-    --success: #4bd0a0;
-    --success-soft: #16352a;
-    --warning: #ffc857;
-    --warning-soft: #3d2f10;
-    --danger: #ff8a80;
-    --danger-soft: #45201d;
-    --info: #b8b0ff;
-    --info-soft: #2a2550;
-    --focus: #8fa8ff;
-    --scrim: rgb(0 0 0 / 0.6);
-    color-scheme: dark;
-  }
+  --scrim: rgb(61 61 61 / 0.5);
+  color-scheme: light only;
 }
 
 @theme inline {
   --color-bg: var(--bg);
   --color-surface: var(--surface);
   --color-tint: var(--surface-tint);
+  --color-tint-line: var(--surface-tint-border);
   --color-sunken: var(--surface-sunken);
   --color-ink: var(--ink);
+  --color-ink-strong: var(--ink-strong);
   --color-ink2: var(--ink-2);
+  --color-ink3: var(--ink-3);
   --color-line: var(--border);
   --color-primary: var(--primary);
   --color-primary-pressed: var(--primary-pressed);
   --color-on-primary: var(--on-primary);
+  --color-coral: var(--coral-text);
   --color-brand: var(--brand);
   --color-brand-soft: var(--brand-soft);
+  --color-strip: var(--coral-strip);
+  --color-field: var(--field-bg);
+  --color-field-line: var(--field-border);
   --color-amber: var(--amber);
   --color-amber-pressed: var(--amber-pressed);
   --color-on-amber: var(--on-amber);
   --color-success: var(--success);
+  --color-success-text: var(--success-text);
   --color-success-soft: var(--success-soft);
   --color-warning: var(--warning);
   --color-warning-soft: var(--warning-soft);
@@ -90,16 +81,19 @@
   --color-danger-soft: var(--danger-soft);
   --color-info: var(--info);
   --color-info-soft: var(--info-soft);
+  --color-nav-idle: var(--nav-idle);
+  --color-track: var(--track);
   --color-scrim: var(--scrim);
-  /* System/rounded stack only: no external font requests. Nunito is used if installed. */
-  --font-sans: 'Nunito', ui-rounded, 'SF Pro Rounded', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --radius-card: 1.25rem;
-  --radius-control: 1rem;
+  /* Nunito is bundled with the app (self-hosted, no external request); system fonts are the fallback. */
+  --font-sans: 'Nunito Variable', 'Nunito', ui-rounded, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --radius-card: 0.75rem;
+  --radius-control: 0.75rem;
 }
 
 @layer base {
   html {
     background: var(--bg);
+    color-scheme: light only;
     -webkit-text-size-adjust: 100%;
   }
   body {
@@ -133,9 +127,17 @@
   }
 }
 
+/*
+ * Soft coral glow behind onboarding screens, as in the welcome/join mockups.
+ * .hero-glow: both blobs (form screens without an illustration).
+ * .hero-glow-low: only the lower-right blob; the upper-left blob is part of the illustration images.
+ */
 .hero-glow {
   background:
-    radial-gradient(60% 40% at 15% 25%, color-mix(in srgb, var(--brand) 38%, transparent), transparent 70%),
-    radial-gradient(55% 35% at 90% 80%, color-mix(in srgb, var(--brand) 28%, transparent), transparent 70%),
+    radial-gradient(48% 24% at 26% 25%, rgb(255 155 133 / 0.5), transparent 72%),
+    radial-gradient(46% 22% at 86% 66%, rgb(255 155 133 / 0.3), transparent 72%),
     var(--bg);
+}
+.hero-glow-low {
+  background: radial-gradient(46% 22% at 86% 66%, rgb(255 155 133 / 0.3), transparent 72%), var(--bg);
 }

@@ -61,7 +61,7 @@ export function LogInScreen() {
           onChange={set('password')}
           error={errors.password}
         />
-        <Link to="/forgot-password" className="inline-flex min-h-11 items-center self-start font-bold text-primary underline-offset-4 hover:underline">
+        <Link to="/forgot-password" className="inline-flex min-h-11 items-center self-start font-bold text-coral underline-offset-4 hover:underline">
           {copy.auth.forgotLink}
         </Link>
         <FormError message={formError} />
@@ -71,7 +71,7 @@ export function LogInScreen() {
       </form>
       <p className="text-center text-base text-ink2">
         {copy.auth.noAccount}{' '}
-        <Link to="/signup" className="font-bold text-primary underline-offset-4 hover:underline">
+        <Link to="/signup" className="font-bold text-coral underline-offset-4 hover:underline">
           {copy.auth.createAccount}
         </Link>
       </p>

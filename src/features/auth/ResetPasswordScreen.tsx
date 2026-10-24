@@ -31,7 +31,7 @@ export function ResetPasswordScreen() {
     return (
       <AuthLayout title={copy.auth.resetInvalidTitle}>
         <Notice title={copy.auth.resetInvalidTitle} body={copy.auth.resetInvalidBody}>
-          <Link to="/forgot-password" className="inline-flex min-h-11 items-center font-bold text-primary underline-offset-4 hover:underline">
+          <Link to="/forgot-password" className="inline-flex min-h-11 items-center font-bold text-coral underline-offset-4 hover:underline">
             {copy.auth.sendReset}
           </Link>
         </Notice>

@@ -77,9 +77,9 @@ export function InvitesScreen() {
     list = (
       <ul className="flex flex-col gap-3">
         {pending.map((i) => (
-          <li key={i.id} className="flex flex-col gap-2 rounded-3xl border-2 border-line bg-surface p-4">
+          <li key={i.id} className="flex flex-col gap-2 rounded-xl border border-line bg-surface p-4">
             <div className="flex items-center justify-between gap-2">
-              <p className="font-mono text-lg font-extrabold text-ink">••••••{i.codeHint}</p>
+              <p className="font-mono text-lg font-bold text-ink">••••••{i.codeHint}</p>
               <Chip tone={i.useCount === 0 ? 'warning' : 'success'}>{i.useCount === 0 ? 'Pending' : copy.invites.usedState(i.useCount)}</Chip>
             </div>
             <p className="text-sm text-ink2">{copy.invites.hint(i.codeHint)}</p>
@@ -101,7 +101,7 @@ export function InvitesScreen() {
       <Button fullWidth disabled={!!access.writeBlockedReason} disabledReason={access.writeBlockedReason ?? undefined} showReason onClick={openSheet}>
         {pending.length > 0 ? copy.invites.createAnother : copy.invites.create}
       </Button>
-      <h2 className="text-lg font-extrabold text-ink">{copy.invites.pendingTitle}</h2>
+      <h2 className="text-lg font-bold text-ink">{copy.invites.pendingTitle}</h2>
       {list}
 
       <Sheet open={sheetOpen} onClose={() => setSheetOpen(false)} title={copy.invites.sheetTitle} footer={created ? <Button fullWidth onClick={() => setSheetOpen(false)}>{copy.invites.close}</Button> : undefined}>

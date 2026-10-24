@@ -10,10 +10,10 @@ import { useHouseholdAccess, useMembers } from './useMembership';
 
 function MemberRow({ member, isYou, onManage, manageDisabledReason }: { member: Member; isYou: boolean; onManage?: () => void; manageDisabledReason?: string | null }) {
   return (
-    <li className="flex items-center gap-3 rounded-3xl border-2 border-line bg-surface p-3">
+    <li className="flex items-center gap-3 rounded-xl border border-line bg-surface p-3">
       <Avatar name={member.displayName} color={member.avatarColor} size="md" />
       <div className="min-w-0 flex-1">
-        <p className="truncate text-base font-extrabold text-ink">
+        <p className="truncate text-base font-bold text-ink">
           {member.displayName}
           {isYou ? <span className="font-semibold text-ink2"> ({copy.members.you})</span> : null}
         </p>

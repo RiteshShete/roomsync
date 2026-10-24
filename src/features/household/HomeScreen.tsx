@@ -18,8 +18,8 @@ export function HomeScreen() {
   const alone = members.data.length === 1;
   return (
     <div className="flex flex-col gap-4 p-4">
-      <section aria-labelledby="home-members" className="flex flex-col gap-3 rounded-3xl border-2 border-tint bg-tint p-4">
-        <h2 id="home-members" className="text-lg font-extrabold text-ink">
+      <section aria-labelledby="home-members" className="flex flex-col gap-3 rounded-xl border border-tint-line bg-tint p-4">
+        <h2 id="home-members" className="text-lg font-bold text-ink">
           {copy.home.members}
         </h2>
         <div className="flex items-center gap-3">
@@ -30,7 +30,7 @@ export function HomeScreen() {
         {alone && access?.isAdmin ? (
           <Link
             to="/you/invites"
-            className="inline-flex min-h-12 items-center justify-center rounded-[var(--radius-control)] border-2 border-transparent bg-primary px-5 text-base font-bold text-on-primary hover:bg-primary-pressed"
+            className="inline-flex min-h-12 items-center justify-center rounded-[var(--radius-control)] border border-transparent bg-primary px-5 text-base font-bold text-on-primary hover:bg-primary-pressed"
           >
             {copy.home.inviteCta}
           </Link>

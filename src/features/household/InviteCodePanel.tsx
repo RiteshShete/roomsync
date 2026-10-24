@@ -18,11 +18,11 @@ export function InviteCodePanel({ code, expiresAt }: { code: string; expiresAt: 
   }
 
   return (
-    <section aria-labelledby="invite-code-title" className="flex flex-col gap-3 rounded-3xl border-2 border-line bg-surface p-5">
-      <h3 id="invite-code-title" className="text-base font-extrabold text-ink">
+    <section aria-labelledby="invite-code-title" className="flex flex-col gap-3 rounded-xl border border-line bg-surface p-5">
+      <h3 id="invite-code-title" className="text-base font-bold text-ink">
         {copy.invites.codeTitle}
       </h3>
-      <p aria-label={`Invite code ${shown.split('').join(' ')}`} data-testid="invite-code" className="rounded-2xl bg-tint py-4 text-center font-mono text-3xl font-extrabold tracking-widest text-ink select-all">
+      <p aria-label={`Invite code ${shown.split('').join(' ')}`} data-testid="invite-code" className="rounded-xl bg-tint py-4 text-center font-mono text-3xl font-bold tracking-widest text-ink select-all">
         {shown}
       </p>
       <p className="text-sm text-ink2">{copy.invites.codeNote}</p>

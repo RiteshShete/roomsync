@@ -32,11 +32,11 @@ export function Toggle({ label, description, checked, onChange, disabled = false
           aria-describedby={describedBy}
           aria-disabled={disabled || undefined}
           onClick={() => !disabled && onChange(!checked)}
-          className={`relative h-8 w-14 shrink-0 rounded-full border-2 transition-colors ${checked ? 'border-primary bg-primary' : 'border-line bg-sunken'} ${disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
+          className={`relative h-8 w-14 shrink-0 rounded-full border transition-colors ${checked ? 'border-field-line bg-field' : 'border-line bg-sunken'} ${disabled ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'}`}
         >
           <span
             aria-hidden="true"
-            className={`absolute top-0.5 h-6 w-6 rounded-full bg-surface shadow transition-all ${checked ? 'left-[1.625rem]' : 'left-0.5'}`}
+            className={`absolute top-0.5 h-6 w-6 rounded-full shadow transition-all ${checked ? 'bg-primary left-[1.625rem]' : 'bg-nav-idle left-0.5'}`}
           />
         </button>
       </div>

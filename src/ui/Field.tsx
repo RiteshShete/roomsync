@@ -9,14 +9,18 @@ export interface FieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
   error?: string | null;
   optional?: boolean;
   id?: string;
+  /** `pill`: fully rounded, centred, white with a coral outline (the invite-code field in the mockups). */
+  shape?: 'default' | 'pill';
 }
 
-const INPUT =
-  'min-h-12 w-full rounded-[var(--radius-control)] border-2 bg-surface px-4 py-2.5 text-base text-ink ' +
-  'placeholder:text-ink2/70 focus-visible:outline-offset-0';
+const INPUT_BASE = 'min-h-12 w-full border px-4 py-2.5 text-base text-ink placeholder:text-ink3/70 focus-visible:outline-offset-0';
+const SHAPES = {
+  default: 'rounded-[var(--radius-control)] bg-field',
+  pill: 'rounded-full bg-surface text-center',
+} as const;
 
 /** Labelled text input with hint and error. Errors are `role="alert"` so they are announced. */
-export function Field({ label, hint, error, optional, id, className = '', ...input }: FieldProps) {
+export function Field({ label, hint, error, optional, id, shape = 'default', className = '', ...input }: FieldProps) {
   const auto = useId();
   const inputId = id ?? auto;
   const hintId = `${inputId}-hint`;
@@ -34,7 +38,7 @@ export function Field({ label, hint, error, optional, id, className = '', ...inp
         id={inputId}
         aria-invalid={error ? true : undefined}
         aria-describedby={describedBy}
-        className={`${INPUT} ${error ? 'border-danger' : 'border-line'} ${className}`}
+        className={`${INPUT_BASE} ${SHAPES[shape]} ${error ? 'border-danger' : shape === 'pill' ? 'border-primary' : 'border-field-line'} ${className}`}
       />
       {hint ? (
         <p id={hintId} className="text-sm text-ink2">
@@ -72,7 +76,7 @@ export function PasswordField({ label, hint, error, id, className = '', ...input
           type={visible ? 'text' : 'password'}
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy}
-          className={`${INPUT} pr-14 ${error ? 'border-danger' : 'border-line'} ${className}`}
+          className={`${INPUT_BASE} ${SHAPES.default} pr-14 ${error ? 'border-danger' : 'border-field-line'} ${className}`}
         />
         <button
           type="button"

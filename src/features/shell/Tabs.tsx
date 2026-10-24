@@ -16,12 +16,12 @@ export function PlaceholderTab() {
 
 function NavRow({ to, icon, title, body }: { to: string; icon: IconName; title: string; body: string }) {
   return (
-    <Link to={to} className="flex min-h-16 items-center gap-3 rounded-3xl border-2 border-line bg-surface p-3 hover:bg-tint">
-      <span aria-hidden="true" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-brand-soft text-primary">
+    <Link to={to} className="flex min-h-16 items-center gap-3 rounded-xl border border-line bg-surface p-3 hover:bg-tint">
+      <span aria-hidden="true" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-coral">
         <Icon name={icon} size={22} />
       </span>
       <span className="flex min-w-0 flex-col">
-        <span className="text-base font-extrabold text-ink">{title}</span>
+        <span className="text-base font-bold text-ink">{title}</span>
         <span className="text-sm text-ink2">{body}</span>
       </span>
     </Link>
@@ -46,18 +46,18 @@ export function YouTab() {
   const name = profile.data?.displayName ?? '';
   return (
     <div className="flex flex-col gap-5 p-4">
-      <section className="flex items-center gap-4 rounded-3xl border-2 border-line bg-surface p-4">
+      <section className="flex items-center gap-4 rounded-xl border border-line bg-surface p-4">
         <Avatar name={name || '?'} color={profile.data?.avatarColor} size="lg" />
         <div className="min-w-0">
           <p className="text-sm text-ink2">{copy.you.signedInAs}</p>
-          <p className="truncate text-lg font-extrabold text-ink">{name || '…'}</p>
+          <p className="truncate text-lg font-bold text-ink">{name || '…'}</p>
           <p className="truncate text-sm text-ink2">{session.status === 'signedIn' ? session.user.email : ''}</p>
           {membership.data ? <p className="text-sm text-ink2">{membership.data.household.name}</p> : null}
         </div>
       </section>
 
       <section aria-labelledby="you-household" className="flex flex-col gap-3">
-        <h2 id="you-household" className="text-lg font-extrabold text-ink">
+        <h2 id="you-household" className="text-lg font-bold text-ink">
           {copy.you.household}
         </h2>
         <NavRow to="/you/members" icon="user" title={copy.you.members} body={copy.you.membersBody} />

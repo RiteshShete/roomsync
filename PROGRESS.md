@@ -12,6 +12,14 @@ Read this at the start of every session; update it at the end.
 | 4 Households and membership | Done (`phase-4`) — awaiting owner "continue" |
 | 5–13 | Not started |
 
+## Theme (changed after Phase 4, owner request)
+- **Light mode only.** The app never follows the OS dark mode (`color-scheme: light only`, no dark tokens). Verified in a browser forced into dark mode: the page stays `#FDF8F2`.
+- **Tokens are sampled from the UI mockups' pixels**, not approximated: page `#FDF8F2`, surface `#FFFFFF`, card border `#EFF0F1`, coral `#FF9B85` (fills, active tab/nav, FAB, underline), logo tile `#FE8D76`, amber `#FEB801`, peach banner `#FFEBD5`/`#FFD7C1`, ink `#3D3D3D`, secondary `#6B7280`, green `#0DA576`, muted nav icon `#D5CCCB`.
+- **Shapes and type follow the mockups:** 12px radii on cards/inputs/buttons, hairline 1px borders, white header with a rounded bottom edge and soft shadow, regular-weight section titles, pale-pink form fields, pill buttons for onboarding, **Nunito** (bundled via `@fontsource-variable/nunito`, self-hosted: no external font request).
+- **Illustrations** on the welcome, set-up and join screens are cut from the mockup frames (`public/illustrations/*.png`, feathered edges). If you have the original illustration files, drop them in at the same names for crisper output.
+- **Known accessibility gap, kept on purpose to match the design:** white text on coral (`#ff9b85`, about 2.2:1) and on amber (`#feb801`, about 1.9:1) is below WCAG AA 4.5:1. Small coral *text* (links, labels) uses a slightly deeper coral (`--coral-text #e4573d`, about 3.7:1). To reach AA, change `--primary`/`--on-primary` and `--on-amber` in `src/index.css` (one-line each); say the word and I'll do it.
+- Screens that have no mockup (sign up, log in, settings, members) reuse the same components, so they match by construction.
+
 ## Phase 4 decisions and deviations
 - **Where things live:** household pages sit under the **You** tab (`/you/members`, `/you/invites`, `/you/household`), as in the spec's IA (You → household settings, members, invitations). Create and join are full-screen flows at `/start/create` and `/start/join`, outside the tab shell.
 - **Create flow:** step 1 is name only (currency, default split, chore reminders are under "More options"); step 2 invites roommates and is skippable. The invite code is shown once with a copy button; the screen says it's pending and lets the user continue immediately. Household and invite creation are two RPCs, so a user can end up with a household and no invite if step 2 fails; that is fine because invites can be created later from You → Invite roommates.

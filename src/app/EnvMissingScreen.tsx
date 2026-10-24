@@ -4,7 +4,7 @@ import { copy } from '@/copy';
 export function EnvMissingScreen({ missing, secretKey }: { missing: string[]; secretKey: boolean }) {
   return (
     <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center gap-4 px-5 py-10">
-      <h1 className="text-2xl font-extrabold text-ink">{copy.env.title}</h1>
+      <h1 className="text-2xl font-bold text-ink">{copy.env.title}</h1>
       <p role="alert" className="text-base text-ink2">
         {secretKey ? copy.env.secretKey : copy.env.body}
       </p>

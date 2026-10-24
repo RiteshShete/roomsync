@@ -52,7 +52,7 @@ export function SignUpScreen() {
     return (
       <AuthLayout title={copy.auth.signUpTitle}>
         <Notice title={copy.auth.checkEmailTitle} body={copy.auth.checkEmailBody}>
-          <Link to="/login" className="min-h-11 font-bold text-primary underline-offset-4 hover:underline">
+          <Link to="/login" className="min-h-11 font-bold text-coral underline-offset-4 hover:underline">
             {copy.auth.backToLogIn}
           </Link>
         </Notice>
@@ -106,7 +106,7 @@ export function SignUpScreen() {
       </form>
       <p className="text-center text-base text-ink2">
         {copy.auth.haveAccount}{' '}
-        <Link to="/login" className="font-bold text-primary underline-offset-4 hover:underline">
+        <Link to="/login" className="font-bold text-coral underline-offset-4 hover:underline">
           {copy.auth.logIn}
         </Link>
       </p>

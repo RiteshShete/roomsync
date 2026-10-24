@@ -4,11 +4,11 @@ export type ChipTone = 'neutral' | 'success' | 'warning' | 'danger' | 'info' | '
 
 const TONES: Record<ChipTone, string> = {
   neutral: 'bg-sunken text-ink',
-  success: 'bg-success-soft text-success',
+  success: 'bg-success-soft text-success-text',
   warning: 'bg-warning-soft text-warning',
   danger: 'bg-danger-soft text-danger',
   info: 'bg-info-soft text-info',
-  brand: 'bg-brand-soft text-primary',
+  brand: 'bg-brand-soft text-coral',
 };
 
 /**
@@ -16,7 +16,7 @@ const TONES: Record<ChipTone, string> = {
  */
 export function Chip({ tone = 'neutral', icon, children }: { tone?: ChipTone; icon?: ReactNode; children: ReactNode }) {
   return (
-    <span className={`inline-flex min-h-6 items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-extrabold ${TONES[tone]}`}>
+    <span className={`inline-flex min-h-6 items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold ${TONES[tone]}`}>
       {icon}
       {children}
     </span>
