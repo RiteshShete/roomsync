@@ -1,0 +1,2 @@
+-- Reference data only. Dev users and the demo household are created by scripts/seed-dev.mjs
+-- through the real auth API and RPCs (PLAN D2); nothing user-specific belongs here.
