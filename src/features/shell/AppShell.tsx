@@ -6,7 +6,6 @@ import { useMembership } from '@/features/household/useMembership';
 
 /** Top-level tab pages get the shell header; pages below a tab (e.g. /you/members) bring their own. */
 const TAB_TITLES: Record<string, string> = {
-  '/chores': copy.nav.chores,
   '/house': copy.nav.house,
   '/you': copy.nav.you,
 };

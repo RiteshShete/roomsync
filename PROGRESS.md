@@ -10,8 +10,19 @@ Read this at the start of every session; update it at the end.
 | 2 Database functions | Done (`phase-2`) |
 | 3 App foundation and auth | Done (`phase-3`) |
 | 4 Households and membership | Done (`phase-4`) |
-| 5 Expenses and settlements | Done (`phase-5`) — awaiting owner "continue" |
-| 6–13 | Not started |
+| 5 Expenses and settlements | Done (`phase-5`) |
+| 6 Chores and groceries | Done (`phase-6`) — awaiting owner "continue" |
+| 7–13 | Not started |
+
+## Phase 6 decisions and deviations
+- **Chores tab:** Today · Upcoming · Completed (counts in the tab labels). *Today* = due today **or overdue**; *Upcoming* = later or undated (`choreBucket` in `src/domain/chores.ts`). Overdue is neutral by spec §8.6: "This chore is still waiting to be completed." plus the original date, no alarm colour, no points, no ranking. Mark as done shows "Nice work — task completed.", names who is next for a recurring chore, explains anyone skipped by rotation (not active) or that the next one has no assignee (an owner/admin is notified), and offers Undo (reopen). Reopen is refused with a clear message if a later occurrence was already completed.
+- **Create/edit chore:** pure form model (`features/chores/formModel.ts`, 14 tests). Repeating needs a due date; rotation needs ≥ 2 people and keeps the user's order (↑/↓ buttons, not drag, so it works by keyboard). Edit keeps Save disabled until something changes, sends the version loaded, and on conflict keeps the edits and offers "Load the latest version". Cancel chore asks first. Permissions in the UI mirror the database: assignee/creator/admin may complete or edit; anyone may complete an unassigned chore; archived disables everything, each with a stated reason.
+- **Groceries (House → Grocery list):** progress bar, Needed/Purchased tabs, grouped by category. Ticking buys; unticking moves back. Add/edit sheet with a **duplicate check** (Update existing / Add anyway). Delete is soft with an Undo toast. Every change is guarded by the item's `version` (and expected status), so two people buying the same item at once gives one winner and the other sees "Someone else already updated this item. We refreshed the list."
+- **House tab** is now a hub: Grocery list works; Announcements, Inventory, Calendar, Concerns and Emergency contacts are listed as disabled with a stated reason (rule 5), never dead links.
+- **Activity events for direct-write tables** (decision from Phase 1): database triggers now emit them (`chore.created/assigned/edited/cancelled`, `grocery.added/purchased/moved_back/deleted/restored`). To avoid duplicates when an RPC (e.g. `complete_chore`) already emits its own event, `private.ctx()` and `reconcile_household` set a transaction-local flag `roomsync.in_rpc`, and the triggers stay silent while it is on. Metadata carries only title/due date or item name. Mutation-checked in pgTAP (750 assertions).
+- **Bug found by e2e and fixed:** `toAppError` returned `unknown` for an error that had already been mapped, so conflicts thrown by the api wrappers showed no message. It is now idempotent (unit-tested).
+- **Tests:** 527 unit/component tests (24 files), 750 pgTAP assertions, 14 Playwright tests (4 new): recurring chore with rotation across three real accounts (plain member blocked, next goes to the next person, undo, completed history); edit with an offline failed save keeping the typed value, then cancel; grocery add → duplicate → buy → move back → delete → undo; a concurrent-purchase conflict between two browsers. Mutation-checked (conflict mapping, the Today bucket).
+- **Known gaps (unchanged, flagged):** white text on coral/amber buttons is below WCAG AA (a one-line token change, awaiting owner call). Mockup features that are out of spec scope (chat, points, QR, photos, reminders, priority/time) are NOT built.
 
 ## Phase 5 decisions and deviations
 - **Layout:** the Expenses tab has underlined tabs under the header (Expenses · Balances · Settlements), like the mockups' tab strips; sub-pages (all expenses, new/edit, details, record settlement) use a back-button header. A coral floating "+" adds an expense. Expense cards follow the mockup card: icon tile, title, green total, "paid by" avatar and date, plus a strip saying what it means for you. Cards show the **category chip** and a **Deleted** chip.

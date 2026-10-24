@@ -13,11 +13,15 @@ create function public.test_login(uid uuid) returns void language plpgsql as $$
 begin
   perform set_config('request.jwt.claims', json_build_object('sub', uid, 'role', 'authenticated')::text, true);
   perform set_config('role', 'authenticated', true);
+  -- Each real request is its own transaction, so the "inside an RPC" flag never leaks between requests.
+  -- pgTAP runs everything in one transaction, so reset it whenever a new request is simulated.
+  perform set_config('roomsync.in_rpc', '', true);
 end $$;
 create function public.test_logout() returns void language plpgsql as $$
 begin
   reset role;
   perform set_config('request.jwt.claims', '', true);
+  perform set_config('roomsync.in_rpc', '', true);
 end $$;
 create function public.test_rows_affected(q text) returns int language plpgsql as $$ declare n int; begin execute q; get diagnostics n = row_count; return n; end $$;
 grant execute on function public.t(text), public.tt(text), public.test_login(uuid), public.test_logout(), public.test_rows_affected(text) to authenticated;

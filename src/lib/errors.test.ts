@@ -41,6 +41,14 @@ describe('toAppError', () => {
   });
 });
 
+describe('toAppError is idempotent', () => {
+  it('keeps the code of an error that was already mapped (api wrappers throw mapped errors)', () => {
+    expect(toAppError(toAppError({ message: 'conflict' }))).toEqual({ code: 'conflict' });
+    expect(toAppError(toAppError({ message: 'permission_denied' }))).toEqual({ code: 'permission_denied' });
+    expect(toAppError(toAppError({ message: 'later_occurrence_completed' }))).toEqual({ code: 'later_occurrence_completed' });
+  });
+});
+
 describe('errorMessage', () => {
   it.each([
     [{ message: 'permission_denied' }, copy.errors.permission],

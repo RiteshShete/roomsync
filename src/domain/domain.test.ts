@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 import {
   addDays, addMonths, buildShares, computeBalances, equalShares, explainBalance, formatMoney,
   inviteState, isIsoDate, isValidInviteFormat, minorToInput, nextAssignee, nextOccurrence,
+  choreBucket, daysBetween, dueInfo, findDuplicate, normalizeItemName,
   normalizeInviteCode, parseAmount, parsePercentBp, formatPercentBp, percentageShares, pruneRotation, suggestTransfers,
 } from './index';
 import type { ExpenseRecord, SettlementRecord } from './types';
@@ -239,5 +240,49 @@ describe('percentages in basis points', () => {
     expect(formatPercentBp(3330)).toBe('33.3');
     expect(formatPercentBp(1)).toBe('0.01');
     for (const bp of [0, 1, 99, 100, 3333, 3334, 10000]) expect(parsePercentBp(formatPercentBp(bp))).toBe(bp);
+  });
+});
+
+describe('chore buckets and due labels', () => {
+  const today = '2026-03-10';
+  it('today holds due-today and overdue chores; upcoming holds future and undated', () => {
+    expect(choreBucket('2026-03-10', today)).toBe('today');
+    expect(choreBucket('2026-03-01', today)).toBe('today');
+    expect(choreBucket('2026-03-11', today)).toBe('upcoming');
+    expect(choreBucket(null, today)).toBe('upcoming');
+  });
+  it('counts calendar days across month and year ends', () => {
+    expect(daysBetween('2026-03-10', '2026-03-10')).toBe(0);
+    expect(daysBetween('2026-02-27', '2026-03-02')).toBe(3);
+    expect(daysBetween('2026-12-30', '2027-01-02')).toBe(3);
+    expect(daysBetween('2026-03-12', '2026-03-10')).toBe(-2);
+  });
+  it('classifies the due date', () => {
+    expect(dueInfo(null, today)).toEqual({ kind: 'none', days: null });
+    expect(dueInfo('2026-03-08', today)).toEqual({ kind: 'overdue', days: -2 });
+    expect(dueInfo('2026-03-10', today)).toEqual({ kind: 'today', days: 0 });
+    expect(dueInfo('2026-03-11', today)).toEqual({ kind: 'tomorrow', days: 1 });
+    expect(dueInfo('2026-03-17', today)).toEqual({ kind: 'soon', days: 7 });
+    expect(dueInfo('2026-03-18', today)).toEqual({ kind: 'later', days: 8 });
+  });
+});
+
+describe('grocery duplicate detection', () => {
+  const needed = [{ id: 'a', name: 'Whole Milk' }, { id: 'b', name: 'Eggs' }];
+  it('normalises case and spacing', () => {
+    expect(normalizeItemName('  Whole   MILK ')).toBe('whole milk');
+  });
+  it('finds the same item regardless of case/spaces', () => {
+    expect(findDuplicate(needed, ' whole  milk')?.id).toBe('a');
+    expect(findDuplicate(needed, 'EGGS')?.id).toBe('b');
+  });
+  it('does not match different items, partial names, or blanks', () => {
+    expect(findDuplicate(needed, 'Milk')).toBeUndefined();
+    expect(findDuplicate(needed, 'Egg')).toBeUndefined();
+    expect(findDuplicate(needed, '   ')).toBeUndefined();
+  });
+  it('an item being edited ignores itself', () => {
+    expect(findDuplicate(needed, 'Eggs', 'b')).toBeUndefined();
+    expect(findDuplicate(needed, 'Eggs', 'a')?.id).toBe('b');
   });
 });

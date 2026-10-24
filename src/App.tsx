@@ -18,6 +18,10 @@ import { HouseholdSettingsScreen } from '@/features/household/HouseholdSettingsS
 import { InvitesScreen } from '@/features/household/InvitesScreen';
 import { JoinHouseholdScreen } from '@/features/household/JoinHouseholdScreen';
 import { MembersScreen } from '@/features/household/MembersScreen';
+import { ChoreFormScreen } from '@/features/chores/ChoreFormScreen';
+import { ChoresScreen } from '@/features/chores/ChoresScreen';
+import { GroceriesScreen } from '@/features/groceries/GroceriesScreen';
+import { HouseScreen } from '@/features/groceries/HouseScreen';
 import { BalancesScreen } from '@/features/expenses/BalancesScreen';
 import { ExpenseDetailsScreen } from '@/features/expenses/ExpenseDetailsScreen';
 import { ExpenseFormScreen } from '@/features/expenses/ExpenseFormScreen';
@@ -26,7 +30,7 @@ import { ExpensesScreen } from '@/features/expenses/ExpensesScreen';
 import { RecordSettlementScreen } from '@/features/expenses/RecordSettlementScreen';
 import { SettlementsScreen } from '@/features/expenses/SettlementsScreen';
 import { AppShell } from '@/features/shell/AppShell';
-import { PlaceholderTab, YouTab } from '@/features/shell/Tabs';
+import { YouTab } from '@/features/shell/Tabs';
 import { readEnv } from '@/lib/env';
 import { createQueryClient } from '@/lib/queryClient';
 import { ToastProvider } from '@/ui';
@@ -58,8 +62,13 @@ export function AppRoutes() {
             <Route path="expenses/settle" element={<RecordSettlementScreen />} />
             <Route path="expenses/:id" element={<ExpenseDetailsScreen />} />
             <Route path="expenses/:id/edit" element={<ExpenseFormScreen />} />
-            <Route path="chores" element={<PlaceholderTab />} />
-            <Route path="house" element={<PlaceholderTab />} />
+            <Route path="chores" element={<ChoresScreen tab="today" />} />
+            <Route path="chores/upcoming" element={<ChoresScreen tab="upcoming" />} />
+            <Route path="chores/completed" element={<ChoresScreen tab="completed" />} />
+            <Route path="chores/new" element={<ChoreFormScreen />} />
+            <Route path="chores/:id/edit" element={<ChoreFormScreen />} />
+            <Route path="house" element={<HouseScreen />} />
+            <Route path="house/groceries" element={<GroceriesScreen />} />
             <Route path="you" element={<YouTab />} />
             <Route path="you/members" element={<MembersScreen />} />
             <Route path="you/invites" element={<InvitesScreen />} />

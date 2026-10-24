@@ -53,6 +53,7 @@ function field(obj: unknown, key: string): string | undefined {
 }
 
 export function toAppError(e: unknown): AppError {
+  if (isAppError(e)) return e; // already mapped (e.g. thrown by an api/ wrapper): keep its code
   const message = (field(e, 'message') ?? (typeof e === 'string' ? e : '')).trim();
   const code = field(e, 'code');
   const name = field(e, 'name');

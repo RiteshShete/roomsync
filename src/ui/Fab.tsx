@@ -7,7 +7,7 @@ import { Icon } from './Icon';
  * max-width column, so it never covers the nav or drifts off-screen on wide displays. When it can't
  * act (e.g. archived household) it stays focusable, looks inactive, and says why.
  */
-export function Fab({ to, label, disabledReason }: { to: string; label: string; disabledReason?: string }) {
+export function Fab({ to, onClick, label, disabledReason }: { to?: string; onClick?: () => void; label: string; disabledReason?: string }) {
   const reasonId = useId();
   const cls = 'pointer-events-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary text-on-primary shadow-lg';
   return (
@@ -21,10 +21,14 @@ export function Fab({ to, label, disabledReason }: { to: string; label: string; 
             {disabledReason}
           </span>
         </>
-      ) : (
+      ) : to ? (
         <Link to={to} aria-label={label} title={label} className={`${cls} hover:bg-primary-pressed`}>
           <Icon name="plus" size={28} />
         </Link>
+      ) : (
+        <button type="button" aria-label={label} title={label} onClick={onClick} className={`${cls} cursor-pointer hover:bg-primary-pressed`}>
+          <Icon name="plus" size={28} />
+        </button>
       )}
     </div>
   );
