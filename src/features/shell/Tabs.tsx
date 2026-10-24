@@ -1,7 +1,8 @@
+import { Link } from 'react-router-dom';
 import { signOut } from '@/api/auth';
 import { copy } from '@/copy';
 import { errorMessage } from '@/lib/errors';
-import { Avatar, Button, EmptyState, useToast } from '@/ui';
+import { Avatar, Button, EmptyState, Icon, useToast, type IconName } from '@/ui';
 import { useSession } from '@/features/auth/Session';
 import { useMembership, useProfile } from '@/features/household/useMembership';
 
@@ -13,7 +14,21 @@ export function PlaceholderTab() {
   return <EmptyState title={copy.placeholder.title} body={copy.placeholder.body} />;
 }
 
-/** "You" tab: who is signed in, and a working Sign out. Profile editing arrives in a later phase. */
+function NavRow({ to, icon, title, body }: { to: string; icon: IconName; title: string; body: string }) {
+  return (
+    <Link to={to} className="flex min-h-16 items-center gap-3 rounded-3xl border-2 border-line bg-surface p-3 hover:bg-tint">
+      <span aria-hidden="true" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-brand-soft text-primary">
+        <Icon name={icon} size={22} />
+      </span>
+      <span className="flex min-w-0 flex-col">
+        <span className="text-base font-extrabold text-ink">{title}</span>
+        <span className="text-sm text-ink2">{body}</span>
+      </span>
+    </Link>
+  );
+}
+
+/** "You" tab: who is signed in, the household pages, and a working Sign out. */
 export function YouTab() {
   const session = useSession();
   const profile = useProfile();
@@ -40,6 +55,16 @@ export function YouTab() {
           {membership.data ? <p className="text-sm text-ink2">{membership.data.household.name}</p> : null}
         </div>
       </section>
+
+      <section aria-labelledby="you-household" className="flex flex-col gap-3">
+        <h2 id="you-household" className="text-lg font-extrabold text-ink">
+          {copy.you.household}
+        </h2>
+        <NavRow to="/you/members" icon="user" title={copy.you.members} body={copy.you.membersBody} />
+        <NavRow to="/you/invites" icon="mail" title={copy.you.invites} body={copy.you.invitesBody} />
+        <NavRow to="/you/household" icon="house" title={copy.you.settings} body={copy.you.settingsBody} />
+      </section>
+
       <Button variant="secondary" fullWidth onClick={handleSignOut}>
         {copy.auth.signOut}
       </Button>

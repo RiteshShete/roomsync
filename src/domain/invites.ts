@@ -8,6 +8,12 @@ export function normalizeInviteCode(input: string): string {
   return input.toUpperCase().replace(/[\s-]/g, '');
 }
 
+/** Readable grouping for display: "ABCD2345" -> "ABCD-2345". Anything else is returned unchanged. */
+export function formatInviteCode(code: string): string {
+  const c = normalizeInviteCode(code);
+  return c.length === INVITE_LENGTH ? `${c.slice(0, 4)}-${c.slice(4)}` : code;
+}
+
 export function isValidInviteFormat(input: string): boolean {
   const code = normalizeInviteCode(input);
   return code.length === INVITE_LENGTH && [...code].every((c) => INVITE_ALPHABET.includes(c));

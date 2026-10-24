@@ -12,6 +12,12 @@ import { SignUpScreen } from '@/features/auth/SignUpScreen';
 import { WelcomeScreen } from '@/features/auth/WelcomeScreen';
 import { PublicOnly, RequireAuth } from '@/features/auth/guards';
 import { ChooseHouseholdScreen } from '@/features/household/ChooseHouseholdScreen';
+import { CreateHouseholdScreen } from '@/features/household/CreateHouseholdScreen';
+import { HomeScreen } from '@/features/household/HomeScreen';
+import { HouseholdSettingsScreen } from '@/features/household/HouseholdSettingsScreen';
+import { InvitesScreen } from '@/features/household/InvitesScreen';
+import { JoinHouseholdScreen } from '@/features/household/JoinHouseholdScreen';
+import { MembersScreen } from '@/features/household/MembersScreen';
 import { AppShell } from '@/features/shell/AppShell';
 import { PlaceholderTab, YouTab } from '@/features/shell/Tabs';
 import { readEnv } from '@/lib/env';
@@ -33,12 +39,17 @@ export function AppRoutes() {
         <Route path="/reset-password" element={<ResetPasswordScreen />} />
         <Route element={<RequireAuth />}>
           <Route path="/start" element={<ChooseHouseholdScreen />} />
+          <Route path="/start/create" element={<CreateHouseholdScreen />} />
+          <Route path="/start/join" element={<JoinHouseholdScreen />} />
           <Route element={<AppShell />}>
-            <Route index element={<PlaceholderTab />} />
+            <Route index element={<HomeScreen />} />
             <Route path="expenses" element={<PlaceholderTab />} />
             <Route path="chores" element={<PlaceholderTab />} />
             <Route path="house" element={<PlaceholderTab />} />
             <Route path="you" element={<YouTab />} />
+            <Route path="you/members" element={<MembersScreen />} />
+            <Route path="you/invites" element={<InvitesScreen />} />
+            <Route path="you/household" element={<HouseholdSettingsScreen />} />
           </Route>
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />

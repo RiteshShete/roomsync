@@ -8,8 +8,22 @@ Read this at the start of every session; update it at the end.
 | 0 Bootstrap | Done (`phase-0`) |
 | 1 Schema and security | Done (`phase-1`) |
 | 2 Database functions | Done (`phase-2`) |
-| 3 App foundation and auth | Done (`phase-3`) — awaiting owner "continue" |
-| 4–13 | Not started |
+| 3 App foundation and auth | Done (`phase-3`) |
+| 4 Households and membership | Done (`phase-4`) — awaiting owner "continue" |
+| 5–13 | Not started |
+
+## Phase 4 decisions and deviations
+- **Where things live:** household pages sit under the **You** tab (`/you/members`, `/you/invites`, `/you/household`), as in the spec's IA (You → household settings, members, invitations). Create and join are full-screen flows at `/start/create` and `/start/join`, outside the tab shell.
+- **Create flow:** step 1 is name only (currency, default split, chore reminders are under "More options"); step 2 invites roommates and is skippable. The invite code is shown once with a copy button; the screen says it's pending and lets the user continue immediately. Household and invite creation are two RPCs, so a user can end up with a household and no invite if step 2 fails; that is fine because invites can be created later from You → Invite roommates.
+- **Join flow:** code → preview (name, member count, expiry only) → confirm. The UI checks the code format locally first (so typos don't count toward the 10-failures/hour throttle), then maps every `invalid_invite:*` reason to its own message. `preview_invite`/`join_household` `ok:false` results are converted to thrown errors in `src/api/invites.ts`, as planned in Phase 2. A user who already has a household is redirected home from the join and create screens. `?code=` prefills the field. The invite is a code, not a link: a link would be lost across the login redirect.
+- **Roles:** only the owner sees Manage; admin/member get an explanation. Ownership transfer shows the consequences and defaults focus to Cancel. A member who is moving out cannot be made owner (UI) — the server also requires `active`.
+- **Settings:** owner/admin edit; everyone else sees read-only values with one explanation at the top (not repeated per field). The currency select locks (with the reason on screen) once an expense or settlement exists. Edits are kept across a failed save or a version conflict, with a Refresh button.
+- **Archived households:** a banner on every page; invite create/revoke, role changes, settings save are disabled with the reason; only the owner can restore (an admin sees it disabled with "Only the owner can…").
+- **Home:** the spec §8.4 empty state ("Your house is ready") plus the member avatars; the "Add your first item" button is disabled with a visible reason until Phases 5–7 provide the screens. An owner/admin who is alone gets an "Invite roommates" shortcut.
+- **Cache freshness:** found by the browser test — members, invites, household and has-money queries use `staleTime: 0`, so opening a screen always refetches. Without it, Alice would not see Bob after he joined for up to 30 seconds. Realtime (Phase 7) will make this live.
+- **New UI primitives:** `SelectField` and `Toggle` (both keep a disabled control focusable and show the reason).
+- **Tests:** 322 unit/component tests (87 new), plus **5 Playwright e2e tests** against the local stack with two real browser contexts: create → invite → join → both see two members; invalid/revoked/unknown codes; one household per user; promote → transfer ownership → archive → restore with writes disabled; settings edit visible to another member and read-only for a plain member. Run twice with no flakes. Mutation-checked (showing owner controls to all, ignoring archived state, skipping the local code check each failed tests).
+- **e2e prerequisites:** `npx supabase start` and `npx playwright install chromium`. `npm run e2e` starts the dev server itself and creates unique users each run (no reset needed). Never run it against a hosted project.
 
 ## Phase 3 decisions and deviations
 - **Open design questions were not answered, so spec/plan defaults were used** (owner replied "continue"): navigation is Home / Expenses / Chores / House / You (not the mockups' Shopping/Tasks/Finance/Settings); no chat tab, no points/leaderboard, no QR scan, no photo/receipt upload, no reminders. **Visual style comes from the mockups** (warm cream/peach/coral, rounded cards, amber onboarding pills). Any of the skipped features can be added later as its own phase; see `docs/ui-reference-notes.md` for the list.

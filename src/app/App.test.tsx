@@ -63,28 +63,28 @@ describe('routing and guards', () => {
     expect(await screen.findByText(copy.household.chooseBody)).toBeInTheDocument();
   });
 
-  it('a user with no household is sent to the set-up screen with honest, disabled choices', async () => {
+  it('a user with no household is sent to the set-up screen with working create/join choices', async () => {
     vi.mocked(households.getMyMembership).mockResolvedValue(null);
     renderApp('/', signedIn);
     expect(await screen.findByRole('heading', { name: 'Hi, Aarav' })).toBeInTheDocument();
-    const create = screen.getByRole('button', { name: new RegExp(copy.household.create) });
-    expect(create).toHaveAttribute('aria-disabled', 'true');
-    expect(create).toHaveAccessibleDescription(copy.household.notYet);
-    expect(screen.getAllByText(copy.household.notYet)).toHaveLength(2);
+    expect(screen.getByRole('link', { name: new RegExp(copy.household.create) })).toHaveAttribute('href', '/start/create');
+    expect(screen.getByRole('link', { name: new RegExp(copy.household.join) })).toHaveAttribute('href', '/start/join');
   });
 
   it('a user with a household sees the shell with the household name and five tabs', async () => {
     vi.mocked(households.getMyMembership).mockResolvedValue(membership);
+    vi.mocked(households.listMembers).mockResolvedValue([]);
     renderApp('/', signedIn);
     expect(await screen.findByRole('heading', { level: 1, name: 'Flat 4B' })).toBeInTheDocument();
     const nav = screen.getByRole('navigation', { name: 'Main' });
     expect(nav.querySelectorAll('a')).toHaveLength(5);
     expect(screen.getByRole('button', { name: 'Notifications' })).toHaveAttribute('aria-disabled', 'true');
-    expect(screen.getByText(copy.placeholder.body)).toBeInTheDocument();
+    expect(await screen.findByText(copy.home.emptyTitle)).toBeInTheDocument();
   });
 
   it('navigates between tabs and updates the heading', async () => {
     vi.mocked(households.getMyMembership).mockResolvedValue(membership);
+    vi.mocked(households.listMembers).mockResolvedValue([]);
     renderApp('/', signedIn);
     await screen.findByRole('heading', { name: 'Flat 4B' });
     await userEvent.click(screen.getByRole('link', { name: 'Expenses' }));
@@ -94,12 +94,14 @@ describe('routing and guards', () => {
 
   it('a user who already has a household cannot open the set-up screen', async () => {
     vi.mocked(households.getMyMembership).mockResolvedValue(membership);
+    vi.mocked(households.listMembers).mockResolvedValue([]);
     renderApp('/start', signedIn);
     expect(await screen.findByRole('heading', { level: 1, name: 'Flat 4B' })).toBeInTheDocument();
   });
 
   it('a failed membership load shows an error with retry', async () => {
     vi.mocked(households.getMyMembership).mockRejectedValueOnce(new TypeError('Failed to fetch'));
+    vi.mocked(households.listMembers).mockResolvedValue([]);
     renderApp('/', signedIn);
     expect(await screen.findByRole('alert')).toHaveTextContent(copy.errors.network);
     vi.mocked(households.getMyMembership).mockResolvedValue(membership);

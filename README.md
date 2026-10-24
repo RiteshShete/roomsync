@@ -2,7 +2,7 @@
 
 Shared living, simplified. Shared expenses, chores, groceries, announcements and move-out in one mobile-first app.
 
-> Status: Phase 3 of 13 (app foundation and authentication). You can sign up, log in and see an empty app shell. Households, expenses, chores and the rest arrive phase by phase. See `PLAN.md` and `PROGRESS.md`.
+> Status: Phase 4 of 13 (households and membership). You can sign up, create or join a household with an invite code, manage members and settings, and archive it. Expenses, chores, groceries and the rest arrive phase by phase. See `PLAN.md` and `PROGRESS.md`.
 
 ## Prerequisites
 - Node 22+ (`node -v`)
@@ -26,6 +26,7 @@ npx playwright install chromium   # only needed for end-to-end tests (Phase 4+)
 | `npm run typecheck` | `tsc --noEmit` |
 | `npm test` | Vitest unit and component tests |
 | `npm run build` | Typecheck + production build |
+| `npm run e2e` | Playwright end-to-end tests against the local stack (starts the dev server itself) |
 | `npm run db:reset` | Re-apply all migrations from zero |
 | `npm run db:test` | pgTAP tests (`supabase/tests`) |
 | `npm run db:types` | Regenerate `src/lib/database.types.ts` |
@@ -34,7 +35,7 @@ npx playwright install chromium   # only needed for end-to-end tests (Phase 4+)
 
 ## Trying it locally
 1. `npx supabase start`, then `npm run dev`, and open http://localhost:5173.
-2. Sign up with any email. Local email confirmation is off, so you are signed in straight away and land on "Set up your household".
+2. Sign up with any email. Local email confirmation is off, so you are signed in straight away and land on "Set up your household". Choose **Create a household**, or **Join a household** with a code from someone else (You → Invite roommates shows codes once).
 3. Or run `npm run seed:dev` and log in as `aarav@roomsync.test` with password `roomsync-local-1` (also riya, kunal, sneha). These accounts exist on your local stack only.
 4. Password-reset emails are caught by the local mail inbox at http://127.0.0.1:54324.
 

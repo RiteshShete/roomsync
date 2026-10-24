@@ -108,7 +108,7 @@ export function errorMessage(e: unknown): string {
     case 'invalid_invite':
       return copy.errors.invite[err.detail ?? 'not_found'] ?? copy.errors.inviteInvalid;
     case 'already_member':
-      return copy.errors.generic;
+      return copy.errors.alreadyMember;
     case 'household_archived':
       return copy.errors.householdArchived;
     case 'owner_must_transfer':
