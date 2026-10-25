@@ -85,10 +85,11 @@ describe('Expenses tab', () => {
     expect(await screen.findByText(copy.errors.network)).toBeInTheDocument();
   });
 
-  it('has Review balances and Record settlement links, and tabs for the three money pages', async () => {
+  it('shows just the owe/owed card (no duplicate buttons): balances and settlements are reached through the tabs', async () => {
     renderApp('/expenses');
-    expect(await screen.findByRole('link', { name: copy.expenses.reviewBalances })).toHaveAttribute('href', '/expenses/balances');
-    expect(screen.getByRole('link', { name: copy.expenses.recordSettlement })).toHaveAttribute('href', '/expenses/settle');
+    expect(await screen.findByTestId('you-owe')).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: copy.expenses.recordSettlement })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: copy.expenses.recordSettlement })).not.toBeInTheDocument();
     const tabs = screen.getByRole('navigation', { name: copy.expenses.title });
     expect(within(tabs).getAllByRole('link').map((l) => l.textContent)).toEqual(['Expenses', 'Balances', 'Settlements']);
   });
@@ -100,14 +101,12 @@ describe('Expenses tab', () => {
     expect(screen.getByRole('link', { name: copy.expenses.addExpense })).toHaveAttribute('href', '/expenses/new');
   });
 
-  it('archived household: adding and recording are disabled with the reason', async () => {
+  it('archived household: adding is disabled with the reason', async () => {
     mockMoney({ me: membership({ archived: true }) });
     renderApp('/expenses');
     const fab = await screen.findByRole('button', { name: copy.expenses.addExpense });
     expect(fab).toHaveAttribute('aria-disabled', 'true');
     expect(fab).toHaveAccessibleDescription(copy.errors.householdArchived);
-    const record = screen.getByRole('button', { name: copy.expenses.recordSettlement });
-    expect(record).toHaveAttribute('aria-disabled', 'true');
     await userEvent.click(fab);
     expect(screen.getByRole('heading', { level: 1, name: 'Expenses' })).toBeInTheDocument();
   });

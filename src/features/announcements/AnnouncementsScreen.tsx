@@ -8,7 +8,7 @@ import { useSession } from '@/features/auth/Session';
 import { useDirectory } from '@/features/household/useDirectory';
 import { useHouseholdAccess } from '@/features/household/useMembership';
 import { SubPage } from '@/features/shell/SubPage';
-import { Button, Chip, ConfirmDialog, EmptyState, ErrorState, Fab, SkeletonList, useToast } from '@/ui';
+import { Button, Chip, ConfirmDialog, EmptyState, ErrorState, Fab, Icon, IconButton, SkeletonList, useToast } from '@/ui';
 import { AnnouncementSheet } from './AnnouncementSheet';
 import { useAnnouncements, useInvalidateAnnouncements } from './hooks';
 
@@ -90,18 +90,20 @@ export function AnnouncementsScreen() {
                 {a.version > 1 ? ` · ${copy.announcements.edited}` : ''}
               </p>
               <p className="mt-3 text-base whitespace-pre-wrap text-ink">{a.body}</p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <Button variant="secondary" disabled={!!why} disabledReason={why} onClick={() => open(a)}>
-                  {copy.announcements.edit}
-                </Button>
+              <div className="mt-2 -mr-2 -mb-1 flex justify-end gap-1">
+                <IconButton label={copy.announcements.edit} icon={<Icon name="pen" size={20} />} disabled={!!why} disabledReason={why} onClick={() => open(a)} className="text-coral" />
                 {access.isAdmin ? (
-                  <Button variant="secondary" disabled={!!blocked} disabledReason={blocked ?? undefined} loading={pin.isPending && pin.variables?.id === a.id} onClick={() => pin.mutate(a)}>
-                    {a.pinnedAt ? copy.announcements.unpin : copy.announcements.pin}
-                  </Button>
+                  <IconButton
+                    label={a.pinnedAt ? copy.announcements.unpin : copy.announcements.pin}
+                    icon={<Icon name="pin" size={20} />}
+                    aria-pressed={!!a.pinnedAt}
+                    disabled={!!blocked || (pin.isPending && pin.variables?.id === a.id)}
+                    disabledReason={blocked ?? undefined}
+                    onClick={() => pin.mutate(a)}
+                    className="text-coral"
+                  />
                 ) : null}
-                <Button variant="tertiary" disabled={!!why} disabledReason={why} onClick={() => setConfirming(a)}>
-                  {copy.announcements.delete}
-                </Button>
+                <IconButton label={copy.announcements.delete} icon={<Icon name="trash" size={20} />} disabled={!!why} disabledReason={why} onClick={() => setConfirming(a)} className="text-coral" />
               </div>
             </li>
           );

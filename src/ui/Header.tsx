@@ -31,7 +31,7 @@ export function Header({ title, onBack, bell, right, brand = false, children }: 
         ) : brand ? (
           <BrandMark size={40} />
         ) : null}
-        <h1 className={`flex-1 truncate ${brand ? 'text-xl font-bold text-coral' : 'text-2xl font-normal text-ink'}`}>{title}</h1>
+        <h1 className={`min-w-0 flex-1 truncate text-xl font-bold ${brand ? 'text-coral' : 'text-ink-strong'}`}>{title}</h1>
         {right}
         {bell ? (
           <span className="relative">
@@ -61,7 +61,7 @@ export function Header({ title, onBack, bell, right, brand = false, children }: 
 /** Underlined tab strip for use inside <Header>, as in the Expenses/Task mockups (coral underline, counts). */
 export function HeaderTabs({ children, label }: { children: ReactNode; label: string }) {
   return (
-    <nav aria-label={label} className="flex gap-6 overflow-x-auto px-4">
+    <nav aria-label={label} className="flex gap-4 overflow-x-auto px-4 min-[360px]:gap-6">
       {children}
     </nav>
   );

@@ -7,7 +7,7 @@ import { formatDateTime } from '@/lib/format';
 import { useDirectory } from '@/features/household/useDirectory';
 import { SubPage } from '@/features/shell/SubPage';
 import { useHouseholdAccess } from '@/features/household/useMembership';
-import { Button, Chip, EmptyState, ErrorState, Fab, SkeletonList, useToast } from '@/ui';
+import { Button, Chip, EmptyState, ErrorState, Fab, Icon, IconButton, SkeletonList, useToast } from '@/ui';
 import { useGroceries, useInvalidateGroceries } from './hooks';
 import { ItemSheet } from './ItemSheet';
 
@@ -132,9 +132,7 @@ export function GroceriesScreen() {
                       </p>
                       {i.note ? <p className="truncate text-sm text-ink2">{i.note}</p> : null}
                     </div>
-                    <Button variant="tertiary" className="px-3" aria-label={copy.groceries.edit(i.name)} onClick={() => openSheet(i)}>
-                      {copy.chores.edit}
-                    </Button>
+                    <IconButton label={copy.groceries.edit(i.name)} icon={<Icon name="pen" size={20} />} onClick={() => openSheet(i)} className="text-coral" />
                   </li>
                 );
               })}

@@ -55,7 +55,7 @@ describe('members list', () => {
   it('has a back button to the You tab', async () => {
     renderApp('/you/members');
     await userEvent.click(await screen.findByRole('button', { name: copy.header.back }));
-    expect(await screen.findByText(copy.you.signedInAs)).toBeInTheDocument();
+    expect(await screen.findByRole('region', { name: copy.you.signedInAs })).toBeInTheDocument();
   });
 });
 

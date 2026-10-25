@@ -34,7 +34,8 @@ export function ActivityScreen() {
 
   if (!access) return null;
   const shown = filter === 'all' ? feed.mine : feed.mine.filter((e) => categoryOf(e.eventType) === filter);
-  const hasUnread = feed.mine.some((e) => !feed.readIds.has(e.id));
+  const unreadN = feed.mine.filter((e) => !feed.readIds.has(e.id)).length;
+  const hasUnread = unreadN > 0;
   const present = NOTIFICATION_CATEGORIES.filter((c) => feed.mine.some((e) => categoryOf(e.eventType) === c));
 
   let body;
@@ -59,14 +60,14 @@ export function ActivityScreen() {
         </p>
       ) : null}
       {present.length > 1 ? (
-        <div role="group" aria-label={copy.activity.categoriesLabel} className="flex flex-wrap gap-2">
+        <div role="group" aria-label={copy.activity.categoriesLabel} className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {(['all', ...present] as Filter[]).map((c) => (
             <button
               key={c}
               type="button"
               aria-pressed={filter === c}
               onClick={() => setFilter(c)}
-              className={`min-h-11 cursor-pointer rounded-full border px-4 text-sm font-semibold ${filter === c ? 'border-primary bg-brand-soft text-coral' : 'border-line bg-surface text-ink'}`}
+              className={`min-h-11 shrink-0 cursor-pointer rounded-full border px-4 text-sm font-semibold whitespace-nowrap ${filter === c ? 'border-primary bg-brand-soft text-coral' : 'border-line bg-surface text-ink'}`}
             >
               {c === 'all' ? copy.activity.all : copy.activity.categories[c]}
             </button>
@@ -74,9 +75,12 @@ export function ActivityScreen() {
         </div>
       ) : null}
       {feed.mine.length > 0 ? (
-        <Button variant="secondary" fullWidth loading={readAll.isPending} disabled={!hasUnread} disabledReason={copy.activity.nothingToMark} showReason onClick={() => readAll.mutate()}>
-          {copy.activity.markAll}
-        </Button>
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-sm text-ink2">{hasUnread ? copy.activity.unreadCount(unreadN) : copy.activity.caughtUp}</p>
+          <Button variant="tertiary" className="shrink-0 px-3 text-sm" loading={readAll.isPending} disabled={!hasUnread} disabledReason={copy.activity.nothingToMark} onClick={() => readAll.mutate()}>
+            {copy.activity.markAll}
+          </Button>
+        </div>
       ) : null}
       {body}
     </SubPage>

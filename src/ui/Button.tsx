@@ -74,7 +74,7 @@ export function Button({
         aria-describedby={reason ? reasonId : rest['aria-describedby']}
         title={reason ?? rest.title}
         className={[
-          'inline-flex min-h-11 items-center justify-center gap-2 border px-5 py-2.5',
+          'inline-flex min-h-11 max-w-full items-center justify-center gap-2 border px-5 py-2.5 text-center leading-snug break-words',
           variant === 'amber' ? '' : 'rounded-[var(--radius-control)]',
           'text-base font-semibold transition-colors select-none',
           disabled ? DISABLED[variant] : VARIANTS[variant],
@@ -105,6 +105,7 @@ export function IconButton({
   icon,
   disabled = false,
   disabledReason,
+  tone = 'plain',
   className = '',
   onClick,
   ...rest
@@ -113,6 +114,8 @@ export function IconButton({
   icon: ReactNode;
   disabled?: boolean;
   disabledReason?: string;
+  /** `primary` is a filled coral circle (the main action); `plain` is just the icon. */
+  tone?: 'plain' | 'primary';
 }) {
   const reasonId = useId();
   return (
@@ -132,8 +135,14 @@ export function IconButton({
           onClick?.(e);
         }}
         className={[
-          'inline-flex h-11 w-11 items-center justify-center rounded-full text-ink hover:bg-brand-soft',
-          disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer',
+          'inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full',
+          disabled
+            ? tone === 'primary'
+              ? 'cursor-not-allowed bg-sunken text-ink2'
+              : 'cursor-not-allowed text-ink2 opacity-60'
+            : tone === 'primary'
+              ? 'cursor-pointer bg-primary text-on-primary hover:bg-primary-pressed'
+              : 'cursor-pointer text-ink hover:bg-brand-soft',
           className,
         ].join(' ')}
       >

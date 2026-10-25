@@ -58,27 +58,33 @@ export function NotificationPrefsScreen() {
   return (
     <SubPage title={copy.notificationPrefs.title}>
       <form noValidate onSubmit={onSubmit} className="flex flex-col gap-6">
-        <section aria-labelledby="prefs-categories" className="flex flex-col gap-1">
-          <h2 id="prefs-categories" className="text-lg font-bold text-ink">
-            {copy.notificationPrefs.categoriesTitle}
-          </h2>
-          <p className="text-sm text-ink2">{copy.notificationPrefs.categoriesBody}</p>
-          {NOTIFICATION_CATEGORIES.map((c) => (
-            <Toggle key={c} label={copy.activity.categories[c]!} checked={draft.categories[c]} onChange={(on) => set({ categories: { ...draft.categories, [c]: on } })} />
-          ))}
+        <section aria-labelledby="prefs-categories" className="flex flex-col gap-2">
+          <div className="px-1">
+            <h2 id="prefs-categories" className="text-base font-bold text-ink">
+              {copy.notificationPrefs.categoriesTitle}
+            </h2>
+            <p className="text-sm text-ink2">{copy.notificationPrefs.categoriesBody}</p>
+          </div>
+          <div className="divide-y divide-line rounded-xl border border-line bg-surface px-4">
+            {NOTIFICATION_CATEGORIES.map((c) => (
+              <Toggle key={c} label={copy.activity.categories[c]!} checked={draft.categories[c]} onChange={(on) => set({ categories: { ...draft.categories, [c]: on } })} />
+            ))}
+          </div>
         </section>
 
-        <section aria-labelledby="prefs-quiet" className="flex flex-col gap-3">
-          <h2 id="prefs-quiet" className="text-lg font-bold text-ink">
+        <section aria-labelledby="prefs-quiet" className="flex flex-col gap-2">
+          <h2 id="prefs-quiet" className="px-1 text-base font-bold text-ink">
             {copy.notificationPrefs.quietTitle}
           </h2>
-          <Toggle label={copy.notificationPrefs.quietToggle} description={copy.notificationPrefs.quietBody} checked={draft.quietEnabled} onChange={(on) => set({ quietEnabled: on })} />
-          {draft.quietEnabled ? (
-            <div className="grid grid-cols-2 gap-3">
-              <Field label={copy.notificationPrefs.from} type="time" value={draft.quietStart} onChange={(e) => set({ quietStart: e.target.value })} />
-              <Field label={copy.notificationPrefs.to} type="time" value={draft.quietEnd} onChange={(e) => set({ quietEnd: e.target.value })} />
-            </div>
-          ) : null}
+          <div className="flex flex-col gap-3 rounded-xl border border-line bg-surface p-4">
+            <Toggle label={copy.notificationPrefs.quietToggle} description={copy.notificationPrefs.quietBody} checked={draft.quietEnabled} onChange={(on) => set({ quietEnabled: on })} />
+            {draft.quietEnabled ? (
+              <div className="grid grid-cols-2 gap-3">
+                <Field label={copy.notificationPrefs.from} type="time" value={draft.quietStart} onChange={(e) => set({ quietStart: e.target.value })} />
+                <Field label={copy.notificationPrefs.to} type="time" value={draft.quietEnd} onChange={(e) => set({ quietEnd: e.target.value })} />
+              </div>
+            ) : null}
+          </div>
         </section>
 
         <FormError message={formError} />

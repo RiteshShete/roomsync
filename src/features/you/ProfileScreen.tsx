@@ -58,14 +58,22 @@ export function ProfileScreen() {
   return (
     <SubPage title={copy.profileEdit.title}>
       <form noValidate onSubmit={onSubmit} className="flex flex-col gap-5">
-        <div className="flex items-center gap-4">
+        <section aria-label={copy.profileEdit.title} className="flex flex-col items-center gap-1 rounded-xl border border-line bg-surface p-5 text-center">
           <Avatar name={name || '?'} color={color} size="lg" />
-          <p className="text-sm text-ink2">{copy.profileEdit.preview}</p>
-        </div>
-        <Field label={copy.profileEdit.name} autoComplete="name" maxLength={NAME_MAX} value={name} onChange={(e) => setName(e.target.value)} />
-        <fieldset className="flex flex-col gap-2">
-          <legend className="text-sm font-bold text-ink">{copy.profileEdit.color}</legend>
-          <div className="flex flex-wrap gap-3">
+          <p className="mt-2 max-w-full truncate text-lg font-bold text-ink-strong">{name.trim() || '…'}</p>
+          {session.status === 'signedIn' ? <p className="max-w-full truncate text-sm text-ink2">{session.user.email}</p> : null}
+        </section>
+
+        <section aria-labelledby="profile-details" className="flex flex-col gap-3">
+          <h2 id="profile-details" className="px-1 text-sm font-bold text-ink2">
+            {copy.profileEdit.details}
+          </h2>
+          <Field label={copy.profileEdit.name} autoComplete="name" maxLength={NAME_MAX} value={name} onChange={(e) => setName(e.target.value)} />
+        </section>
+
+        <fieldset className="flex flex-col gap-3">
+          <legend className="px-1 text-sm font-bold text-ink2">{copy.profileEdit.color}</legend>
+          <div className="flex flex-wrap gap-3 rounded-xl border border-line bg-surface p-4">
             {AVATAR_COLORS.map((c) => (
               <button
                 key={c.hex}
@@ -79,6 +87,7 @@ export function ProfileScreen() {
             ))}
           </div>
         </fieldset>
+
         <FormError message={formError} />
         <Button type="submit" fullWidth loading={busy} loadingLabel={copy.profileEdit.saving} disabled={!check.ok} disabledReason={check.reason ?? undefined} showReason>
           {copy.profileEdit.save}

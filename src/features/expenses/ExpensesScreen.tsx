@@ -1,15 +1,12 @@
 import { Link } from 'react-router-dom';
 import { copy } from '@/copy';
 import { errorMessage } from '@/lib/errors';
-import { Button, EmptyState, ErrorState, Fab, SkeletonList } from '@/ui';
+import { EmptyState, ErrorState, Fab, SkeletonList } from '@/ui';
 import { useHouseholdAccess } from '@/features/household/useMembership';
 import { ExpenseCard } from './ExpenseCard';
 import { MoneyHeader } from './MoneyHeader';
 import { useDirectory } from '@/features/household/useDirectory';
 import { useBalances, useExpenses, useMoney } from './hooks';
-
-const LINK =
-  'inline-flex min-h-11 flex-1 items-center justify-center rounded-xl border border-line bg-surface px-3 text-base font-semibold text-coral hover:bg-brand-soft';
 
 /**
  * Expenses tab: what you owe and are owed (never a single "house balance"), recent expenses, and a
@@ -84,20 +81,6 @@ export function ExpensesScreen() {
               {owe === 0 && owed === 0 ? <p className="mt-3 text-sm text-ink2">{copy.expenses.allSettled}</p> : null}
             </>
           )}
-          <div className="mt-4 flex gap-3">
-            <Link to="/expenses/balances" className={LINK}>
-              {copy.expenses.reviewBalances}
-            </Link>
-            {access.writeBlockedReason ? (
-              <Button variant="secondary" className="flex-1" disabled disabledReason={access.writeBlockedReason}>
-                {copy.expenses.recordSettlement}
-              </Button>
-            ) : (
-              <Link to="/expenses/settle" className={LINK}>
-                {copy.expenses.recordSettlement}
-              </Link>
-            )}
-          </div>
         </section>
 
         {items.length > 0 ? (

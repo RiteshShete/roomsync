@@ -140,6 +140,34 @@ describe('activity centre', () => {
     expect(button).toHaveAccessibleDescription(copy.activity.nothingToMark);
   });
 
+  it('shows how many are unread, and "all caught up" when none are', async () => {
+    mockActivity({ events, readIds: ['e1'] });
+    renderApp('/activity');
+    expect(await screen.findByText(copy.activity.unreadCount(2))).toBeInTheDocument();
+  });
+
+  it('all caught up when everything is read', async () => {
+    mockActivity({ events, readIds: ['e1', 'e2', 'e3'] });
+    renderApp('/activity');
+    expect(await screen.findByText(copy.activity.caughtUp)).toBeInTheDocument();
+  });
+
+  it('category chips stay on one row and scroll sideways instead of wrapping', async () => {
+    mockActivity({ events });
+    renderApp('/activity');
+    const group = await screen.findByRole('group', { name: copy.activity.categoriesLabel });
+    expect(group.className).toMatch(/overflow-x-auto/);
+    expect(group.className).not.toMatch(/flex-wrap/);
+    for (const chip of within(group).getAllByRole('button')) expect(chip.className).toMatch(/shrink-0/);
+  });
+
+  it('unread and read rows share one left text edge (the dot lives in the padding)', async () => {
+    mockActivity({ events, readIds: ['e3'] });
+    renderApp('/activity');
+    const list = await screen.findByRole('list', { name: copy.activity.title });
+    for (const link of within(list).getAllByRole('link')) expect(link.className).toMatch(/px-4/);
+  });
+
   it('filters by category', async () => {
     mockActivity({ events });
     renderApp('/activity');

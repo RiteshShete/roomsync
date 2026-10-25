@@ -20,7 +20,7 @@ export function TabbedHeader({ title, tabs }: { title: string; tabs: TabSpec[] }
             to={t.to}
             end={t.end}
             className={({ isActive }) =>
-              `inline-flex min-h-11 items-center border-b-2 pb-0.5 text-base whitespace-nowrap ${isActive ? 'border-primary font-bold text-coral' : 'border-transparent font-normal text-ink'}`
+              `inline-flex min-h-11 items-center border-b-2 pb-0.5 text-sm whitespace-nowrap min-[360px]:text-base ${isActive ? 'border-primary font-bold text-coral' : 'border-transparent font-normal text-ink'}`
             }
           >
             {t.label}

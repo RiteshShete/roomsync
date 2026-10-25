@@ -19,15 +19,16 @@ export function ActivityRow({
   onOpen?: (e: ActivityEvent) => void;
 }) {
   return (
-    <li className="border-b border-line last:border-b-0">
-      <Link to={eventLink(event)} onClick={() => onOpen?.(event)} className="flex min-h-16 items-start gap-3 px-4 py-3 hover:bg-brand-soft">
-        <span aria-hidden="true" className={`mt-2 h-2.5 w-2.5 shrink-0 rounded-full ${unread ? 'bg-primary' : 'bg-transparent'}`} />
-        <span className="min-w-0 flex-1">
+    <li className="relative border-b border-line last:border-b-0">
+      <Link to={eventLink(event)} onClick={() => onOpen?.(event)} className="block min-h-16 px-4 py-3 hover:bg-brand-soft">
+        {/* The unread dot sits in the left padding, so read and unread rows share one text edge. */}
+        {unread ? <span aria-hidden="true" className="absolute top-[1.15rem] left-1.5 h-2 w-2 rounded-full bg-primary" /> : null}
+        <span className="block min-w-0">
           <span className={`block text-base text-ink-strong ${unread ? 'font-bold' : ''}`}>
             {unread ? <span className="sr-only">{copy.activity.unreadAria}: </span> : null}
             {describeEvent(event, nameOf)}
           </span>
-          <span className="mt-1 flex flex-wrap items-center gap-2 text-sm text-ink2">
+          <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-ink2">
             <Chip>{copy.activity.categories[categoryOf(event.eventType)]}</Chip>
             <time dateTime={event.createdAt}>{formatDateTime(event.createdAt)}</time>
           </span>

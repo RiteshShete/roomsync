@@ -276,7 +276,6 @@ export const copy = {
     youOwe: 'You owe',
     youAreOwed: 'You are owed',
     allSettled: 'You’re all settled up.',
-    reviewBalances: 'Review balances',
     addExpense: 'Add expense',
     recordSettlement: 'Record settlement',
     recent: 'Recent expenses',
@@ -682,8 +681,10 @@ export const copy = {
     invitesBody: 'Create and cancel invite codes.',
     settings: 'Household settings',
     settingsBody: 'Name, currency, and archiving.',
-    account: 'Your account',
-    profile: 'Edit profile',
+    account: 'Account',
+    about: 'About',
+    editProfile: 'Edit your profile',
+    profile: 'Profile',
     profileBody: 'Your name and avatar colour.',
     notifications: 'Notifications',
     notificationsBody: 'Choose what shows in your activity centre.',
@@ -697,7 +698,7 @@ export const copy = {
   },
 
   profileEdit: {
-    title: 'Edit profile',
+    title: 'Profile',
     name: 'Your name',
     color: 'Avatar colour',
     colorOption: (name: string) => `Use ${name}`,
@@ -707,7 +708,7 @@ export const copy = {
     reasonName: 'Enter a name.',
     reasonNameLong: 'Keep your name to 60 characters.',
     reasonSame: 'Change something to save.',
-    preview: 'Preview',
+    details: 'Your details',
   },
 
   announcements: {
@@ -757,6 +758,8 @@ export const copy = {
     emptyBody: 'Updates from your household show up here.',
     emptyFiltered: 'Nothing in this category.',
     markAll: 'Mark all as read',
+    unreadCount: (n: number) => (n === 1 ? '1 unread' : `${n} unread`),
+    caughtUp: 'You’re all caught up',
     markedAll: 'Everything is marked as read.',
     nothingToMark: 'There’s nothing unread.',
     quietNote: 'Quiet hours are on, so the unread badge is paused. Everything is still listed here.',
