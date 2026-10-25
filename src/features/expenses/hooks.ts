@@ -1,18 +1,8 @@
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getBalanceInputs, getBalances, getExpense, listExpenseHistory, listExpenses, PAGE_SIZE, type ExpenseFilters } from '@/api/expenses';
-import { listAllMembers, type MemberWithLeft } from '@/api/households';
 import { listSettlements } from '@/api/settlements';
 import { formatMoney } from '@/domain';
 import { useHouseholdAccess } from '@/features/household/useMembership';
-
-export function useAllMembers(householdId: string | undefined) {
-  return useQuery({
-    queryKey: ['members-all', householdId],
-    queryFn: () => listAllMembers(householdId!),
-    enabled: !!householdId,
-    staleTime: 0,
-  });
-}
 
 export function useBalances(householdId: string | undefined) {
   return useQuery({
@@ -67,24 +57,6 @@ export function useInvalidateMoney() {
 }
 
 export { PAGE_SIZE };
-
-/** Name lookup by member id or user id, tolerant of people who have left. */
-export function useDirectory(householdId: string | undefined) {
-  const members = useAllMembers(householdId);
-  const list: MemberWithLeft[] = members.data ?? [];
-  const byMember = new Map(list.map((m) => [m.memberId, m]));
-  const byUser = new Map(list.map((m) => [m.userId, m]));
-  return {
-    isPending: members.isPending,
-    isError: members.isError,
-    error: members.error,
-    refetch: members.refetch,
-    members: list,
-    nameOf: (memberId: string | null | undefined) => (memberId ? (byMember.get(memberId)?.displayName ?? 'Former member') : 'Someone'),
-    nameOfUser: (userId: string | null | undefined) => (userId ? (byUser.get(userId)?.displayName ?? 'Former member') : 'Someone'),
-    member: (memberId: string) => byMember.get(memberId),
-  };
-}
 
 /** Currency-aware formatter for the signed-in household. */
 export function useMoney() {

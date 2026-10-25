@@ -5,7 +5,8 @@ import { Button, EmptyState, ErrorState, Fab, SkeletonList } from '@/ui';
 import { useHouseholdAccess } from '@/features/household/useMembership';
 import { ExpenseCard } from './ExpenseCard';
 import { MoneyHeader } from './MoneyHeader';
-import { useBalances, useDirectory, useExpenses, useMoney } from './hooks';
+import { useDirectory } from '@/features/household/useDirectory';
+import { useBalances, useExpenses, useMoney } from './hooks';
 
 const LINK =
   'inline-flex min-h-11 flex-1 items-center justify-center rounded-xl border border-line bg-surface px-3 text-base font-semibold text-coral hover:bg-brand-soft';

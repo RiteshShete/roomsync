@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { expect, type Browser, type BrowserContext, type Page } from '@playwright/test';
 
 export const PASSWORD = 'e2e-password-1';
@@ -90,4 +91,46 @@ export async function joinWithCode(page: Page, code: string): Promise<void> {
   await page.getByRole('link', { name: /Join a household/ }).click();
   await page.getByLabel('Invite code').fill(code);
   await page.getByRole('button', { name: 'Check code' }).click();
+}
+
+// ---- Phase 7: activity centre, announcements ----
+export const bell = (page: Page, unread?: number) =>
+  page.getByRole('button', { name: unread === undefined ? 'Notifications' : `Notifications, ${unread} unread` });
+
+export async function reloadAt(page: Page, hash: string) {
+  await page.goto(`/#${hash}`);
+  await page.reload();
+}
+
+/** Clears the "joined the household" updates so a test can count only what it causes. */
+export async function settle(page: Page) {
+  await page.goto('/#/activity');
+  await page.reload();
+  const markAll = page.getByRole('button', { name: 'Mark all as read' });
+  // Someone with no updates at all sees the empty state instead of the button.
+  await expect(markAll.or(page.getByText('Nothing new'))).toBeVisible();
+  if ((await markAll.count()) === 0) return;
+  if ((await markAll.getAttribute('aria-disabled')) !== 'true') await markAll.click();
+  await expect(markAll).toHaveAttribute('aria-disabled', 'true');
+}
+
+export async function post(page: Page, title: string, message: string) {
+  await page.goto('/#/house/announcements');
+  await page.getByRole('button', { name: 'Post announcement' }).first().click();
+  await page.getByLabel('Title').fill(title);
+  await page.getByLabel('Message').fill(message);
+  await page.getByRole('button', { name: 'Post', exact: true }).click();
+  await expect(page.getByText('Announcement posted.')).toBeVisible();
+}
+
+
+/** The local publishable key, to call the database API directly as a signed-in user. */
+export function localKeys() {
+  const env = Object.fromEntries(
+    readFileSync('.env.local', 'utf8')
+      .split(/\r?\n/)
+      .filter((l) => l.includes('='))
+      .map((l) => [l.slice(0, l.indexOf('=')), l.slice(l.indexOf('=') + 1)]),
+  );
+  return { url: env.VITE_SUPABASE_URL as string, key: env.VITE_SUPABASE_PUBLISHABLE_KEY as string };
 }

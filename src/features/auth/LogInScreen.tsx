@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import { signIn } from '@/api/auth';
 import { copy } from '@/copy';
 import { errorMessage } from '@/lib/errors';
-import { Button, Field, PasswordField } from '@/ui';
-import { AuthLayout, FormError } from './AuthLayout';
+import { Button, Field, FormError, PasswordField } from '@/ui';
+import { AuthLayout } from './AuthLayout';
 import { focusFirstError, logInSchema, validate, type FormErrors } from './validation';
 
 const IDS = { email: 'login-email', password: 'login-password' };

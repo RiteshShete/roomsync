@@ -6,7 +6,8 @@ import { errorMessage } from '@/lib/errors';
 import { useHouseholdAccess } from '@/features/household/useMembership';
 import { Avatar, Button, Chip, EmptyState, ErrorState, SkeletonList } from '@/ui';
 import { MoneyHeader } from './MoneyHeader';
-import { useBalanceInputs, useBalances, useDirectory, useMoney, useSettlements } from './hooks';
+import { useDirectory } from '@/features/household/useDirectory';
+import { useBalanceInputs, useBalances, useMoney, useSettlements } from './hooks';
 
 const signed = (n: number, fmt: (m: number) => string) => `${n < 0 ? '−' : '+'}${fmt(Math.abs(n))}`;
 

@@ -2,6 +2,9 @@ import { render } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import { vi } from 'vitest';
+import * as activity from '@/api/activity';
+import * as chores from '@/api/chores';
+import * as expenses from '@/api/expenses';
 import * as households from '@/api/households';
 import * as invites from '@/api/invites';
 import * as profile from '@/api/profile';
@@ -75,6 +78,12 @@ export function mockApi({ me = membership(), members = [aarav, riya, kunal] }: {
   vi.mocked(households.getHousehold).mockResolvedValue(household());
   vi.mocked(households.householdHasMoney).mockResolvedValue(false);
   vi.mocked(invites.listInvites).mockResolvedValue([]);
+  vi.mocked(activity.listActivity).mockResolvedValue([]);
+  vi.mocked(activity.listReadIds).mockResolvedValue([]);
+  vi.mocked(activity.getNotificationPrefs).mockResolvedValue({ categories: {}, quietEnabled: false, quietStart: null, quietEnd: null });
+  vi.mocked(activity.syncChoreReminders).mockResolvedValue(0);
+  vi.mocked(expenses.getBalances).mockResolvedValue([]);
+  vi.mocked(chores.listChores).mockResolvedValue({ open: [], completed: [] });
 }
 
 /** Renders the whole route table, as a real user would experience it. */

@@ -3,9 +3,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { setHouseholdArchived, updateHousehold, type DefaultSplit, type HouseholdDetails } from '@/api/households';
 import { copy } from '@/copy';
 import { errorMessage, toAppError } from '@/lib/errors';
-import { FormError } from '@/features/auth/AuthLayout';
 import { SubPage } from '@/features/shell/SubPage';
-import { Button, ConfirmDialog, ErrorState, Field, SelectField, SkeletonList, Toggle, useToast } from '@/ui';
+import { Button, ConfirmDialog, ErrorState, Field, FormError, SelectField, SkeletonList, Toggle, useToast } from '@/ui';
 import { currencyOptionsWith, SPLIT_OPTIONS } from './options';
 import { useHousehold, useHouseholdAccess, useHouseholdHasMoney } from './useMembership';
 

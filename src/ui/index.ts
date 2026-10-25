@@ -16,3 +16,5 @@ export { PillLink, type PillVariant } from './PillLink';
 export { HeaderTabs } from './Header';
 export { Fab } from './Fab';
 export { NavRow, DisabledRow } from './NavRow';
+export { TextArea, type TextAreaProps } from './TextArea';
+export { FormError } from './FormError';

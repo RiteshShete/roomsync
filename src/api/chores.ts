@@ -1,5 +1,6 @@
 import type { RecurrenceFrequency } from '@/domain';
 import { toAppError } from '@/lib/errors';
+import { resolveGuardedUpdate } from './guard';
 import type { Database } from '@/lib/database.types';
 import { getSupabase } from '@/lib/supabase';
 
@@ -111,10 +112,11 @@ export async function createChore(householdId: string, createdBy: string, input:
 async function guardedUpdate(id: string, version: number, patch: ChoreUpdate): Promise<number> {
   const { data, error } = await getSupabase().from('chores').update(patch).eq('id', id).eq('version', version).eq('status', 'open').select('version');
   if (error) throw toAppError(error);
-  if (data.length > 0) return data[0]!.version;
-  const current = await getSupabase().from('chores').select('version, status').eq('id', id).maybeSingle();
-  if (current.error) throw toAppError(current.error);
-  throw toAppError({ message: current.data && (current.data.version !== version || current.data.status !== 'open') ? 'conflict' : 'permission_denied' });
+  return resolveGuardedUpdate(data, async () => {
+    const current = await getSupabase().from('chores').select('version, status').eq('id', id).maybeSingle();
+    if (current.error) throw toAppError(current.error);
+    return !!current.data && (current.data.version !== version || current.data.status !== 'open');
+  });
 }
 
 export function updateChore(id: string, version: number, input: ChoreInput): Promise<number> {

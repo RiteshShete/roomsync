@@ -7,7 +7,8 @@ import { useHouseholdAccess } from '@/features/household/useMembership';
 import { Button, EmptyState, ErrorState, Field, Icon, SelectField, Sheet, SkeletonList, Toggle } from '@/ui';
 import { CATEGORY_OPTIONS } from './categories';
 import { ExpenseCard } from './ExpenseCard';
-import { useDirectory, useExpenses, useMoney } from './hooks';
+import { useDirectory } from '@/features/household/useDirectory';
+import { useExpenses, useMoney } from './hooks';
 
 function activeCount(f: ExpenseFilters): number {
   return [f.from, f.to, f.category, f.payerId, f.participantId].filter(Boolean).length + (f.includeDeleted ? 1 : 0);

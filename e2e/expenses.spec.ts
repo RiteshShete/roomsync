@@ -1,19 +1,7 @@
-import { readFileSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
-import { addEqualExpense, threePersonHousehold, youAreOwed, youOwe } from './helpers';
+import { addEqualExpense, localKeys, threePersonHousehold, youAreOwed, youOwe } from './helpers';
 
 test.describe.configure({ timeout: 120_000 });
-
-/** The local publishable key, to call the database API directly as a signed-in user. */
-function localKeys() {
-  const env = Object.fromEntries(
-    readFileSync('.env.local', 'utf8')
-      .split(/\r?\n/)
-      .filter((l) => l.includes('='))
-      .map((l) => [l.slice(0, l.indexOf('=')), l.slice(l.indexOf('=') + 1)]),
-  );
-  return { url: env.VITE_SUPABASE_URL as string, key: env.VITE_SUPABASE_PUBLISHABLE_KEY as string };
-}
 
 test.describe('Journeys C and D: expenses and settlements (three real accounts)', () => {
   test('₹1,000 across three people, balances, a recorded settlement, and an edit after it', async ({ browser }) => {

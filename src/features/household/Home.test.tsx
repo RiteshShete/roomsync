@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as households from '@/api/households';
@@ -26,12 +26,12 @@ describe('Home skeleton (spec §8.4)', () => {
     expect(screen.getByText('3 members')).toBeInTheDocument();
   });
 
-  it('the add-first-item button is disabled and says why (no dead buttons)', async () => {
+  it('quick-add shortcuts go to real screens', async () => {
     renderApp('/');
-    const cta = await screen.findByRole('button', { name: copy.home.emptyCta });
-    expect(cta).toHaveAttribute('aria-disabled', 'true');
-    expect(cta).toHaveAccessibleDescription(copy.home.emptyCtaReason);
-    expect(screen.getByText(copy.home.emptyCtaReason)).toBeVisible();
+    const nav = await screen.findByRole('navigation', { name: copy.home.quickAdd });
+    expect(within(nav).getByRole('link', { name: copy.home.addExpense })).toHaveAttribute('href', '/expenses/new');
+    expect(within(nav).getByRole('link', { name: copy.home.addChore })).toHaveAttribute('href', '/chores/new');
+    expect(within(nav).getByRole('link', { name: copy.home.addGrocery })).toHaveAttribute('href', '/house/groceries');
   });
 
   it('an owner who is alone is nudged to invite roommates, and the link works', async () => {

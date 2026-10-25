@@ -22,14 +22,6 @@ export function AuthLayout({ title, subtitle, children }: { title: string; subti
 }
 
 /** Inline error summary for a failed submit. Announced to assistive tech; inputs are never cleared. */
-export function FormError({ message }: { message: string | null }) {
-  if (!message) return null;
-  return (
-    <p role="alert" className="rounded-xl border border-danger bg-danger-soft px-4 py-3 text-sm font-semibold text-ink">
-      {message}
-    </p>
-  );
-}
 
 /** Confirmation panel (check your email, reset link sent). */
 export function Notice({ title, body, children }: { title: string; body: string; children?: ReactNode }) {

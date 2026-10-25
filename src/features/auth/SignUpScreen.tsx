@@ -3,8 +3,8 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { signUp } from '@/api/auth';
 import { copy } from '@/copy';
 import { errorMessage } from '@/lib/errors';
-import { Button, Field, PasswordField } from '@/ui';
-import { AuthLayout, FormError, Notice } from './AuthLayout';
+import { Button, Field, FormError, PasswordField } from '@/ui';
+import { AuthLayout, Notice } from './AuthLayout';
 import { focusFirstError, signUpSchema, validate, type FormErrors } from './validation';
 
 const IDS = { displayName: 'signup-name', email: 'signup-email', password: 'signup-password', confirm: 'signup-confirm' };

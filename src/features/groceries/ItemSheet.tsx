@@ -3,8 +3,7 @@ import { addGrocery, deleteGrocery, moveBackToNeeded, updateGrocery, type Grocer
 import { copy } from '@/copy';
 import { findDuplicate } from '@/domain';
 import { errorMessage, toAppError } from '@/lib/errors';
-import { FormError } from '@/features/auth/AuthLayout';
-import { Button, Field, SelectField, Sheet, useToast } from '@/ui';
+import { Button, Field, FormError, SelectField, Sheet, useToast } from '@/ui';
 import { useInvalidateGroceries } from './hooks';
 
 const QTY = /^\d+(?:\.\d{1,3})?$/;

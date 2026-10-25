@@ -20,6 +20,7 @@ Product: shared-living app (expenses, chores, groceries, announcements, move-out
 10. Work one phase at a time, stop at the checkpoint, and ask when blocked by credentials or an undecided question. Do not build features from later phases.
 
 ## Conventions
+- Architecture, layering and naming live in `docs/ARCHITECTURE.md`; `src/architecture.test.ts` enforces the layering. Keep logic out of components, delete dead or duplicate code as you go, and record decisions in PROGRESS.md.
 - TypeScript strict; `src/domain` stays pure (no React, no Supabase imports).
 - UI talks to Supabase only through `src/api/*`. Components never call `supabase.from(...)` directly.
 - Conventional commits; tag finished phases `phase-N`.

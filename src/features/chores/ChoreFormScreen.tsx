@@ -5,12 +5,11 @@ import type { MemberWithLeft } from '@/api/households';
 import { copy } from '@/copy';
 import type { RecurrenceFrequency } from '@/domain';
 import { errorMessage, toAppError } from '@/lib/errors';
-import { FormError } from '@/features/auth/AuthLayout';
 import { useSession } from '@/features/auth/Session';
-import { useDirectory } from '@/features/expenses/hooks';
+import { useFreshDirectory } from '@/features/household/useDirectory';
 import { SubPage } from '@/features/shell/SubPage';
 import { useHouseholdAccess, type HouseholdAccess } from '@/features/household/useMembership';
-import { Avatar, Button, ConfirmDialog, EmptyState, ErrorState, Field, SelectField, SkeletonList, Toggle, useToast } from '@/ui';
+import { Avatar, Button, ConfirmDialog, EmptyState, ErrorState, Field, FormError, SelectField, SkeletonList, Toggle, useToast } from '@/ui';
 import { checkChoreForm, emptyChoreState, inputFromChore, moveInOrder, rotationOf, sameChoreInput, stateFromChore, type ChoreFormState } from './formModel';
 import { useChore, useInvalidateChores } from './hooks';
 
@@ -178,7 +177,7 @@ export function ChoreFormScreen() {
   const { id } = useParams();
   const editing = !!id;
   const access = useHouseholdAccess();
-  const dir = useDirectory(access?.householdId);
+  const dir = useFreshDirectory(access?.householdId);
   const chore = useChore(id);
   const session = useSession();
   const userId = session.status === 'signedIn' ? session.user.id : null;

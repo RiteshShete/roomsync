@@ -11,7 +11,8 @@ import { SubPage } from '@/features/shell/SubPage';
 import { useHouseholdAccess } from '@/features/household/useMembership';
 import { Avatar, Button, Chip, ConfirmDialog, EmptyState, ErrorState, Icon, SkeletonList, useToast } from '@/ui';
 import { categoryLabel } from './categories';
-import { useDirectory, useExpense, useExpenseHistory, useInvalidateMoney, useMoney } from './hooks';
+import { useDirectory } from '@/features/household/useDirectory';
+import { useExpense, useExpenseHistory, useInvalidateMoney, useMoney } from './hooks';
 
 function describeChange(h: HistoryEntry, fmt: (m: number) => string): string[] {
   if (h.action !== 'edited' || !h.before || !h.after) return [];

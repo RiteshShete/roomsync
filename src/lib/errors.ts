@@ -62,7 +62,7 @@ export function toAppError(e: unknown): AppError {
   if (
     name === 'AuthRetryableFetchError' ||
     (e instanceof TypeError && /fetch|network|load failed/i.test(message)) ||
-    /^(failed to fetch|networkerror|load failed)/i.test(message)
+    /(failed to fetch|networkerror|load failed|network request failed)/i.test(message)
   ) {
     return { code: 'network' };
   }

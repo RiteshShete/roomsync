@@ -1,5 +1,5 @@
-import { expect, test, type Page } from '@playwright/test';
-import { threePersonHousehold } from './helpers';
+import { expect, test } from '@playwright/test';
+import { reloadAt, threePersonHousehold } from './helpers';
 
 test.describe.configure({ timeout: 120_000 });
 
@@ -8,11 +8,6 @@ const iso = (offsetDays: number) => {
   d.setDate(d.getDate() + offsetDays);
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 };
-
-async function reloadAt(page: Page, hash: string) {
-  await page.goto(`/#${hash}`);
-  await page.reload();
-}
 
 test.describe('Journey E: chores (three real accounts)', () => {
   test('recurring chore with rotation: complete, next goes to the next person, undo, and a plain member cannot complete someone else’s', async ({ browser }) => {

@@ -4,7 +4,7 @@ import { markPurchased, moveBackToNeeded, restoreGrocery, type GroceryItem } fro
 import { copy } from '@/copy';
 import { errorMessage, toAppError } from '@/lib/errors';
 import { formatDateTime } from '@/lib/format';
-import { useDirectory } from '@/features/expenses/hooks';
+import { useDirectory } from '@/features/household/useDirectory';
 import { SubPage } from '@/features/shell/SubPage';
 import { useHouseholdAccess } from '@/features/household/useMembership';
 import { Button, Chip, EmptyState, ErrorState, Fab, SkeletonList, useToast } from '@/ui';

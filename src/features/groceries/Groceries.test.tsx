@@ -22,16 +22,6 @@ const milk = grocery({ id: 'g1', name: 'Milk', quantity: 2, unit: 'l', category:
 const bread = grocery({ id: 'g2', name: 'Bread', quantity: null, unit: null, category: 'Bakery' });
 const eggs = grocery({ id: 'g3', name: 'Eggs', category: 'Dairy', status: 'purchased', purchasedByMemberId: 'm-kunal', purchasedAt: '2026-05-02T10:00:00Z' });
 
-describe('House hub', () => {
-  it('links to the grocery list and shows the rest as disabled with a reason, never as dead links', async () => {
-    renderApp('/house');
-    expect(await screen.findByRole('link', { name: new RegExp(copy.house.groceries) })).toHaveAttribute('href', '/house/groceries');
-    expect(screen.getByText(copy.house.announcements)).toBeInTheDocument();
-    expect(screen.getByText(copy.house.announcementsReason)).toBeInTheDocument();
-    expect(screen.getAllByText(copy.house.notAvailable).length).toBeGreaterThanOrEqual(4);
-  });
-});
-
 describe('grocery list', () => {
   it('groups Needed by category, shows progress, and switches to Purchased', async () => {
     mockHome({ items: [milk, bread, eggs] });

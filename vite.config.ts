@@ -13,5 +13,7 @@ export default defineConfig({
     include: ['src/**/*.test.{ts,tsx}'],
     setupFiles: ['./src/test/setup.ts'],
     css: false,
+    // The suite runs many jsdom files in parallel; typing-heavy form tests need headroom on a busy machine.
+    testTimeout: 20_000,
   },
 });

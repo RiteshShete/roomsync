@@ -5,12 +5,12 @@ import { setSettlementStatus, type Settlement } from '@/api/settlements';
 import { copy } from '@/copy';
 import { errorMessage } from '@/lib/errors';
 import { formatDay } from '@/lib/format';
-import { FormError } from '@/features/auth/AuthLayout';
 import { useSession } from '@/features/auth/Session';
 import { useHouseholdAccess } from '@/features/household/useMembership';
-import { Button, Chip, ConfirmDialog, EmptyState, ErrorState, Field, Fab, Sheet, SkeletonList, useToast } from '@/ui';
+import { Button, Chip, ConfirmDialog, EmptyState, ErrorState, Fab, Field, FormError, Sheet, SkeletonList, useToast } from '@/ui';
 import { MoneyHeader } from './MoneyHeader';
-import { useDirectory, useInvalidateMoney, useMoney, useSettlements } from './hooks';
+import { useDirectory } from '@/features/household/useDirectory';
+import { useInvalidateMoney, useMoney, useSettlements } from './hooks';
 
 /** Settlements grouped by status. Disputed ones get their own section; reversed ones are history. */
 export function SettlementsScreen() {

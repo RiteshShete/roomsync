@@ -4,8 +4,8 @@ import { completeChore, reopenChore, type Chore, type CompleteResult } from '@/a
 import { copy } from '@/copy';
 import { choreBucket } from '@/domain';
 import { errorMessage, toAppError } from '@/lib/errors';
-import { useDirectory } from '@/features/expenses/hooks';
-import { todayIso } from '@/features/expenses/formModel';
+import { useDirectory } from '@/features/household/useDirectory';
+import { todayIso } from '@/domain';
 import { useSession } from '@/features/auth/Session';
 import { TabbedHeader } from '@/features/shell/TabbedHeader';
 import { useHouseholdAccess } from '@/features/household/useMembership';

@@ -509,6 +509,9 @@ isOneToOne: false
 "start_move_out":
 { Args: { "p_acknowledged_balance_minor"?: number,"p_effective_date": string,"p_member_id": string,"p_note"?: string }; Returns: undefined
                            },
+"sync_chore_reminders":
+{ Args: { "p_household_id": string,"p_today"?: string }; Returns: number
+                           },
 "transfer_ownership":
 { Args: { "p_member_id": string }; Returns: undefined
                            },

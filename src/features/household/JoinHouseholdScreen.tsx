@@ -7,8 +7,8 @@ import { copy } from '@/copy';
 import { formatInviteCode, isValidInviteFormat, normalizeInviteCode } from '@/domain';
 import { errorMessage } from '@/lib/errors';
 import { formatDateTime } from '@/lib/format';
-import { AuthLayout, FormError, HeroLayout } from '@/features/auth/AuthLayout';
-import { Button, Field, useToast } from '@/ui';
+import { AuthLayout, HeroLayout } from '@/features/auth/AuthLayout';
+import { Button, Field, FormError, useToast } from '@/ui';
 import { useMembership } from './useMembership';
 
 /**

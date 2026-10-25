@@ -7,7 +7,7 @@ export interface HeaderProps {
   title: string;
   /** When set, shows a back button. */
   onBack?: () => void;
-  /** Show the notifications bell. Disabled (with a stated reason) until the activity centre exists. */
+  /** Show the notifications bell with an unread badge; `onClick` opens the activity centre. */
   bell?: { unread?: number; onClick?: () => void; disabledReason?: string };
   right?: ReactNode;
   /** Home style: brand tile and a bold coral title. Other pages use a plain regular-weight title. */
@@ -36,7 +36,7 @@ export function Header({ title, onBack, bell, right, brand = false, children }: 
         {bell ? (
           <span className="relative">
             <IconButton
-              label={unread > 0 ? `${copy.header.notifications}, ${unread} unread` : copy.header.notifications}
+              label={unread > 0 ? copy.header.notificationsUnread(unread) : copy.header.notifications}
               icon={<Icon name="bell" />}
               disabled={disabled}
               disabledReason={bell.disabledReason}

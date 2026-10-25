@@ -21,7 +21,7 @@ import { MembersScreen } from '@/features/household/MembersScreen';
 import { ChoreFormScreen } from '@/features/chores/ChoreFormScreen';
 import { ChoresScreen } from '@/features/chores/ChoresScreen';
 import { GroceriesScreen } from '@/features/groceries/GroceriesScreen';
-import { HouseScreen } from '@/features/groceries/HouseScreen';
+import { HouseScreen } from '@/features/house/HouseScreen';
 import { BalancesScreen } from '@/features/expenses/BalancesScreen';
 import { ExpenseDetailsScreen } from '@/features/expenses/ExpenseDetailsScreen';
 import { ExpenseFormScreen } from '@/features/expenses/ExpenseFormScreen';
@@ -30,7 +30,12 @@ import { ExpensesScreen } from '@/features/expenses/ExpensesScreen';
 import { RecordSettlementScreen } from '@/features/expenses/RecordSettlementScreen';
 import { SettlementsScreen } from '@/features/expenses/SettlementsScreen';
 import { AppShell } from '@/features/shell/AppShell';
-import { YouTab } from '@/features/shell/Tabs';
+import { YouScreen } from '@/features/you/YouScreen';
+import { ProfileScreen } from '@/features/you/ProfileScreen';
+import { NotificationPrefsScreen } from '@/features/you/NotificationPrefsScreen';
+import { PrivacyScreen } from '@/features/you/PrivacyScreen';
+import { ActivityScreen } from '@/features/activity/ActivityScreen';
+import { AnnouncementsScreen } from '@/features/announcements/AnnouncementsScreen';
 import { readEnv } from '@/lib/env';
 import { createQueryClient } from '@/lib/queryClient';
 import { ToastProvider } from '@/ui';
@@ -69,7 +74,12 @@ export function AppRoutes() {
             <Route path="chores/:id/edit" element={<ChoreFormScreen />} />
             <Route path="house" element={<HouseScreen />} />
             <Route path="house/groceries" element={<GroceriesScreen />} />
-            <Route path="you" element={<YouTab />} />
+            <Route path="house/announcements" element={<AnnouncementsScreen />} />
+            <Route path="activity" element={<ActivityScreen />} />
+            <Route path="you" element={<YouScreen />} />
+            <Route path="you/profile" element={<ProfileScreen />} />
+            <Route path="you/notifications" element={<NotificationPrefsScreen />} />
+            <Route path="you/privacy" element={<PrivacyScreen />} />
             <Route path="you/members" element={<MembersScreen />} />
             <Route path="you/invites" element={<InvitesScreen />} />
             <Route path="you/household" element={<HouseholdSettingsScreen />} />

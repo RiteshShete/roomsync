@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 import type { User } from '@supabase/supabase-js';
-import { getSupabase } from '@/lib/supabase';
+import { watchSession } from '@/api/auth';
 
 export type SessionState =
   | { status: 'loading' }
@@ -17,26 +17,10 @@ export function useSession(): SessionState {
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<SessionState>({ status: 'loading' });
 
-  useEffect(() => {
-    const supabase = getSupabase();
-    let active = true;
-    let recovery = false;
-
-    void supabase.auth.getSession().then(({ data }) => {
-      if (!active) return;
-      setState(data.session ? { status: 'signedIn', user: data.session.user, recovery } : { status: 'signedOut' });
-    });
-    const { data } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'PASSWORD_RECOVERY') recovery = true;
-      if (event === 'SIGNED_OUT') recovery = false;
-      if (!active) return;
-      setState(session ? { status: 'signedIn', user: session.user, recovery } : { status: 'signedOut' });
-    });
-    return () => {
-      active = false;
-      data.subscription.unsubscribe();
-    };
-  }, []);
+  useEffect(
+    () => watchSession(({ user, recovery }) => setState(user ? { status: 'signedIn', user, recovery } : { status: 'signedOut' })),
+    [],
+  );
 
   return <SessionContext.Provider value={state}>{children}</SessionContext.Provider>;
 }

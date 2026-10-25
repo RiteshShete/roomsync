@@ -3,16 +3,16 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { addExpense, editExpense, type Expense } from '@/api/expenses';
 import type { DefaultSplit, MemberWithLeft } from '@/api/households';
 import { copy } from '@/copy';
-import { formatMoney, formatPercentBp, parsePercentBp, type SplitMethod } from '@/domain';
+import { formatMoney, formatPercentBp, parsePercentBp, todayIso, type SplitMethod } from '@/domain';
 import { errorMessage, toAppError } from '@/lib/errors';
-import { FormError } from '@/features/auth/AuthLayout';
 import { useSession } from '@/features/auth/Session';
 import { SubPage } from '@/features/shell/SubPage';
 import { useHousehold, useHouseholdAccess, type HouseholdAccess } from '@/features/household/useMembership';
-import { AmountInput, Avatar, Button, Chip, EmptyState, ErrorState, Field, SelectField, SkeletonList, useToast } from '@/ui';
+import { AmountInput, Avatar, Button, Chip, EmptyState, ErrorState, Field, FormError, SelectField, SkeletonList, useToast } from '@/ui';
 import { CATEGORY_OPTIONS } from './categories';
-import { checkForm, computeSplit, inputFromExpense, sameInput, stateFromExpense, todayIso, type ExpenseFormState } from './formModel';
-import { useDirectory, useExpense, useInvalidateMoney } from './hooks';
+import { checkForm, computeSplit, inputFromExpense, sameInput, stateFromExpense, type ExpenseFormState } from './formModel';
+import { useFreshDirectory } from '@/features/household/useDirectory';
+import { useExpense, useInvalidateMoney } from './hooks';
 
 const METHODS: SplitMethod[] = ['equal', 'custom', 'percentage'];
 const SMALL_INPUT = 'min-h-11 w-28 rounded-xl border border-field-line bg-field px-3 text-right text-base text-ink';
@@ -281,7 +281,7 @@ function ConflictRefresh({ expenseId, onRefreshed }: { expenseId: string; onRefr
 export function ExpenseFormScreen() {
   const { id } = useParams();
   const access = useHouseholdAccess();
-  const dir = useDirectory(access?.householdId);
+  const dir = useFreshDirectory(access?.householdId);
   const household = useHousehold(access?.householdId);
   const expense = useExpense(id);
   const session = useSession();

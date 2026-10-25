@@ -4,6 +4,11 @@
  */
 import { describe, expect, it } from 'vitest';
 import {
+  categoryEnabled,
+  categoryOf,
+  inQuietHours,
+  unreadCount,
+  visibleEvents,
   addDays, addMonths, buildShares, computeBalances, equalShares, explainBalance, formatMoney,
   inviteState, isIsoDate, isValidInviteFormat, minorToInput, nextAssignee, nextOccurrence,
   choreBucket, daysBetween, dueInfo, findDuplicate, normalizeItemName,
@@ -284,5 +289,104 @@ describe('grocery duplicate detection', () => {
   it('an item being edited ignores itself', () => {
     expect(findDuplicate(needed, 'Eggs', 'b')).toBeUndefined();
     expect(findDuplicate(needed, 'Eggs', 'a')?.id).toBe('b');
+  });
+});
+
+describe('notifications', () => {
+  const ev = (id: string, type: string, rec: string[], at: string) => ({ id, eventType: type, actorMemberId: null, recipientMemberIds: rec, createdAt: at });
+  const events = [
+    ev('1', 'expense.added', ['me'], '2026-05-01T10:00:00Z'),
+    ev('2', 'chore.assigned', ['me', 'x'], '2026-05-02T10:00:00Z'),
+    ev('3', 'grocery.added', ['x'], '2026-05-03T10:00:00Z'),
+    ev('4', 'announcement.posted', ['me'], '2026-05-04T10:00:00Z'),
+    ev('5', 'member.joined', ['me'], '2026-05-05T10:00:00Z'),
+  ];
+  const quietOff = { quietEnabled: false, quietStart: null, quietEnd: null };
+
+  it.each([
+    ['expense.added', 'expenses'],
+    ['expense.restored', 'expenses'],
+    ['settlement.recorded', 'settlements'],
+    ['chore.reminder', 'chores'],
+    ['grocery.purchased', 'groceries'],
+    ['announcement.pinned', 'announcements'],
+    ['member.left', 'household'],
+    ['household.archived', 'household'],
+    ['something.new', 'household'],
+  ])('%s is in %s', (type, cat) => expect(categoryOf(type)).toBe(cat));
+
+  it('shows only events addressed to me, newest first', () => {
+    expect(visibleEvents(events, 'me', {}).map((e) => e.id)).toEqual(['5', '4', '2', '1']);
+  });
+
+  it('a switched-off category disappears; a missing key means on', () => {
+    expect(visibleEvents(events, 'me', { chores: false, household: false }).map((e) => e.id)).toEqual(['4', '1']);
+    expect(categoryEnabled({}, 'expenses')).toBe(true);
+    expect(categoryEnabled({ expenses: false }, 'expenses')).toBe(false);
+  });
+
+  it('counts unread, ignoring read and hidden events', () => {
+    expect(unreadCount(events, 'me', new Set(), {}, quietOff, 600)).toBe(4);
+    expect(unreadCount(events, 'me', new Set(['5', '1']), {}, quietOff, 600)).toBe(2);
+    expect(unreadCount(events, 'me', new Set(), { announcements: false }, quietOff, 600)).toBe(3);
+  });
+
+  it.each([
+    [22 * 60, true], [23 * 60 + 59, true], [0, true], [6 * 60 + 59, true],
+    [7 * 60, false], [12 * 60, false], [21 * 60 + 59, false],
+  ])('overnight window 22:00–07:00 at minute %i → %s', (m, expected) => expect(inQuietHours(m, '22:00', '07:00')).toBe(expected));
+
+  it('same-day window, seconds in the stored time, and empty windows', () => {
+    expect(inQuietHours(13 * 60, '13:00:00', '15:00:00')).toBe(true);
+    expect(inQuietHours(15 * 60, '13:00:00', '15:00:00')).toBe(false);
+    expect(inQuietHours(600, '09:00', '09:00')).toBe(false);
+    expect(inQuietHours(600, null, '09:00')).toBe(false);
+  });
+
+  it('quiet hours pause the badge only, and only when enabled', () => {
+    const quiet = { quietEnabled: true, quietStart: '22:00', quietEnd: '07:00' };
+    expect(unreadCount(events, 'me', new Set(), {}, quiet, 23 * 60)).toBe(0);
+    expect(unreadCount(events, 'me', new Set(), {}, quiet, 12 * 60)).toBe(4);
+    expect(unreadCount(events, 'me', new Set(), {}, { ...quiet, quietEnabled: false }, 23 * 60)).toBe(4);
+    expect(visibleEvents(events, 'me', {})).toHaveLength(4); // still listed
+  });
+});
+
+describe('notifications: edge cases', () => {
+  const quietOff = { quietEnabled: false, quietStart: null, quietEnd: null };
+
+  it('no events, or none addressed to me, means zero unread and an empty list', () => {
+    expect(unreadCount([], 'me', new Set(), {}, quietOff, 0)).toBe(0);
+    const other = [{ id: '1', eventType: 'expense.added', actorMemberId: null, recipientMemberIds: ['x'], createdAt: '2026-05-01T10:00:00Z' }];
+    expect(visibleEvents(other, 'me', {})).toEqual([]);
+    expect(visibleEvents(other, '', {})).toEqual([]);
+  });
+
+  it('every category switched off hides everything', () => {
+    const all = { expenses: false, settlements: false, chores: false, groceries: false, announcements: false, household: false };
+    const events = ['expense.added', 'chore.reminder', 'member.joined'].map((t, i) => ({ id: String(i), eventType: t, actorMemberId: null, recipientMemberIds: ['me'], createdAt: '2026-05-01T10:00:00Z' }));
+    expect(visibleEvents(events, 'me', all)).toEqual([]);
+    expect(unreadCount(events, 'me', new Set(), all, quietOff, 0)).toBe(0);
+  });
+
+  it('same-timestamp events keep a stable order', () => {
+    const mk = (id: string) => ({ id, eventType: 'chore.assigned', actorMemberId: null, recipientMemberIds: ['me'], createdAt: '2026-05-01T10:00:00Z' });
+    expect(visibleEvents([mk('a'), mk('b')], 'me', {}).map((e) => e.id)).toEqual(['b', 'a']);
+    expect(visibleEvents([mk('b'), mk('a')], 'me', {}).map((e) => e.id)).toEqual(['b', 'a']);
+  });
+
+  it.each([
+    [23 * 60 + 59, '23:59', '00:01', true],
+    [0, '23:59', '00:01', true],
+    [1, '23:59', '00:01', false],
+    [0, '00:00', '23:59', true],
+    [23 * 60 + 59, '00:00', '23:59', false],
+    [12 * 60, '12:00', '12:01', true],
+    [12 * 60 + 1, '12:00', '12:01', false],
+  ])('quiet window boundaries: minute %i in %s–%s → %s', (m, s, e, expected) => expect(inQuietHours(m, s, e)).toBe(expected));
+
+  it('an unknown or empty event type is still shown under household', () => {
+    expect(categoryOf('')).toBe('household');
+    expect(categoryOf('.')).toBe('household');
   });
 });

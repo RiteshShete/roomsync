@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import { requestPasswordReset } from '@/api/auth';
 import { copy } from '@/copy';
 import { errorMessage } from '@/lib/errors';
-import { Button, Field } from '@/ui';
-import { AuthLayout, FormError, Notice } from './AuthLayout';
+import { Button, Field, FormError } from '@/ui';
+import { AuthLayout, Notice } from './AuthLayout';
 import { forgotSchema, focusFirstError, validate, type FormErrors } from './validation';
 
 const IDS = { email: 'forgot-email' };

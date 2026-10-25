@@ -1,13 +1,17 @@
 import { Link } from 'react-router-dom';
 import { copy } from '@/copy';
 import { errorMessage } from '@/lib/errors';
-import { AvatarGroup, Button, EmptyState, ErrorState, SkeletonList } from '@/ui';
+import { RecentActivity } from '@/features/activity/RecentActivity';
+import { AvatarGroup, ErrorState, SkeletonList } from '@/ui';
 import { useHouseholdAccess, useMembers } from './useMembership';
 
-/**
- * Home skeleton (spec §8.4): who lives here, then the "Your house is ready" empty state. The
- * expense/chore/grocery shortcuts arrive with their own phases, so that button says why it's off.
- */
+const QUICK_ADD = [
+  { to: '/expenses/new', label: copy.home.addExpense },
+  { to: '/chores/new', label: copy.home.addChore },
+  { to: '/house/groceries', label: copy.home.addGrocery },
+];
+
+/** Home (spec §8.4): who lives here, quick shortcuts to add things, and the latest updates. */
 export function HomeScreen() {
   const access = useHouseholdAccess();
   const members = useMembers(access?.householdId);
@@ -17,7 +21,7 @@ export function HomeScreen() {
 
   const alone = members.data.length === 1;
   return (
-    <div className="flex flex-col gap-4 p-4">
+    <div className="flex flex-col gap-5 p-4">
       <section aria-labelledby="home-members" className="flex flex-col gap-3 rounded-xl border border-tint-line bg-tint p-4">
         <h2 id="home-members" className="text-lg font-bold text-ink">
           {copy.home.members}
@@ -37,15 +41,15 @@ export function HomeScreen() {
         ) : null}
       </section>
 
-      <EmptyState
-        title={copy.home.emptyTitle}
-        body={copy.home.emptyBody}
-        action={
-          <Button disabled disabledReason={copy.home.emptyCtaReason} showReason>
-            {copy.home.emptyCta}
-          </Button>
-        }
-      />
+      <nav aria-label={copy.home.quickAdd} className="grid grid-cols-3 gap-2">
+        {QUICK_ADD.map((q) => (
+          <Link key={q.to} to={q.to} className="inline-flex min-h-12 items-center justify-center rounded-[var(--radius-control)] border border-line bg-surface px-2 text-center text-sm font-bold text-coral hover:bg-brand-soft">
+            {q.label}
+          </Link>
+        ))}
+      </nav>
+
+      <RecentActivity />
     </div>
   );
 }

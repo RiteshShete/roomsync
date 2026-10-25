@@ -58,6 +58,15 @@ Transaction note: RPCs that rely on deferred constraints run `set constraints al
 
 Guard triggers `guard_grocery_purchaser`, `guard_announcement_pin`, `bump_version`, `set_updated_at`, `forbid_household_change` run as the invoker on purpose, so they see the real caller.
 
+## Phase 7 additions
+| Object | Who | Notes |
+|---|---|---|
+| `sync_chore_reminders(household, today)` | member of that household | `security definer`, `search_path = ''`, enters through `private.ctx`; only inserts `chore.reminder` events addressed to each chore's own assignee; metadata is title and dates only; `today` must be within one day of the server date; idempotent via a unique index; silent for archived households or when reminders are off |
+| `private.announcement_activity()` trigger | none (trigger only) | emits `announcement.posted` and `announcement.pinned` to the other members; metadata is the title only, never the message |
+
+Realtime was verified end to end (`e2e/realtime-isolation.spec.ts`): a member subscribed to a household receives its changes; a signed-in outsider subscribed to the same household filter receives nothing. `supabase_realtime` publishes exactly the tables the app listens to (pinned in `announcements_reminders.test.sql`).
+
 ## Known limits
 - A chore can only be edited if its assignee is still active/leaving; reassign first (RLS `with check`).
-- Realtime tables inherit RLS; verify in Phase 7 that a non-member subscription receives nothing.
+- Activity events are readable by every member of the household (RLS is per household, not per recipient); addressing is applied in the client. Events hold titles and amounts only, never free text such as announcement messages. A per-recipient policy is an option if that is not acceptable.
+- Reminders are created lazily when someone opens the app; there is no scheduler.

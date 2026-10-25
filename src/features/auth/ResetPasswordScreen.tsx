@@ -3,8 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { updatePassword } from '@/api/auth';
 import { copy } from '@/copy';
 import { errorMessage } from '@/lib/errors';
-import { Button, PasswordField, SkeletonList, useToast } from '@/ui';
-import { AuthLayout, FormError, Notice } from './AuthLayout';
+import { Button, FormError, PasswordField, SkeletonList, useToast } from '@/ui';
+import { AuthLayout, Notice } from './AuthLayout';
 import { useSession } from './Session';
 import { focusFirstError, resetSchema, validate, type FormErrors } from './validation';
 

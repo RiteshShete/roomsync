@@ -1,3 +1,4 @@
+import type { User } from '@supabase/supabase-js';
 import { toAppError } from '@/lib/errors';
 import { getSupabase } from '@/lib/supabase';
 
@@ -35,4 +36,27 @@ export async function requestPasswordReset(email: string): Promise<void> {
 export async function updatePassword(password: string): Promise<void> {
   const { error } = await getSupabase().auth.updateUser({ password });
   if (error) throw toAppError(error);
+}
+
+/**
+ * Reports the current auth session now and whenever it changes. `recovery` is true after the user
+ * followed a password-reset link. Returns an unsubscribe function.
+ */
+export function watchSession(onChange: (state: { user: User | null; recovery: boolean }) => void): () => void {
+  const supabase = getSupabase();
+  let active = true;
+  let recovery = false;
+
+  void supabase.auth.getSession().then(({ data }) => {
+    if (active) onChange({ user: data.session?.user ?? null, recovery });
+  });
+  const { data } = supabase.auth.onAuthStateChange((event, session) => {
+    if (event === 'PASSWORD_RECOVERY') recovery = true;
+    if (event === 'SIGNED_OUT') recovery = false;
+    if (active) onChange({ user: session?.user ?? null, recovery });
+  });
+  return () => {
+    active = false;
+    data.subscription.unsubscribe();
+  };
 }

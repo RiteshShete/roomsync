@@ -1,7 +1,8 @@
+import { todayIso } from '@/domain';
 import { describe, expect, it } from 'vitest';
 import type { Expense } from '@/api/expenses';
 import { copy } from '@/copy';
-import { checkForm, computeSplit, inputFromExpense, parseShareAmount, sameInput, stateFromExpense, todayIso, type ExpenseFormState } from './formModel';
+import { checkForm, computeSplit, inputFromExpense, parseShareAmount, sameInput, stateFromExpense, type ExpenseFormState } from './formModel';
 
 const ORDER = ['a', 'b', 'c', 'd'];
 

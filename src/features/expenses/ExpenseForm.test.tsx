@@ -6,7 +6,7 @@ import * as households from '@/api/households';
 import { copy } from '@/copy';
 import { expense, mockMoney } from '@/test/money';
 import { member, membership, renderApp } from '@/test/render';
-import { todayIso } from './formModel';
+import { todayIso } from '@/domain';
 
 vi.mock('@/api/households');
 vi.mock('@/api/invites');

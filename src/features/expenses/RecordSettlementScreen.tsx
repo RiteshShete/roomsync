@@ -4,12 +4,12 @@ import { recordSettlement } from '@/api/settlements';
 import { copy } from '@/copy';
 import { errorMessage } from '@/lib/errors';
 import { formatDay } from '@/lib/format';
-import { FormError } from '@/features/auth/AuthLayout';
 import { SubPage } from '@/features/shell/SubPage';
 import { useHouseholdAccess } from '@/features/household/useMembership';
-import { AmountInput, Avatar, Button, ErrorState, Field, SelectField, SkeletonList } from '@/ui';
-import { todayIso } from './formModel';
-import { useBalances, useDirectory, useInvalidateMoney, useMoney } from './hooks';
+import { AmountInput, Avatar, Button, ErrorState, Field, FormError, SelectField, SkeletonList } from '@/ui';
+import { todayIso } from '@/domain';
+import { useDirectory } from '@/features/household/useDirectory';
+import { useBalances, useInvalidateMoney, useMoney } from './hooks';
 
 type Step = 'form' | 'review' | 'done';
 

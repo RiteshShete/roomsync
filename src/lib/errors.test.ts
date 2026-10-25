@@ -41,6 +41,18 @@ describe('toAppError', () => {
   });
 });
 
+describe('network failures reported by supabase-js', () => {
+  it.each(['TypeError: Failed to fetch', 'Failed to fetch', 'NetworkError when attempting to fetch resource.', 'Load failed', 'Network request failed'])(
+    'a plain error object saying %j is a network error',
+    (message) => expect(toAppError({ message })).toEqual({ code: 'network' }),
+  );
+
+  it('does not mistake unrelated messages for network errors', () => {
+    expect(toAppError({ message: 'permission_denied' })).toEqual({ code: 'permission_denied' });
+    expect(toAppError({ message: 'duplicate key value' }).code).toBe('unknown');
+  });
+});
+
 describe('toAppError is idempotent', () => {
   it('keeps the code of an error that was already mapped (api wrappers throw mapped errors)', () => {
     expect(toAppError(toAppError({ message: 'conflict' }))).toEqual({ code: 'conflict' });

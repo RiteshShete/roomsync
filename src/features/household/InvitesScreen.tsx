@@ -5,8 +5,7 @@ import { copy } from '@/copy';
 import { errorMessage } from '@/lib/errors';
 import { formatDateTime } from '@/lib/format';
 import { SubPage } from '@/features/shell/SubPage';
-import { FormError } from '@/features/auth/AuthLayout';
-import { Button, Chip, ConfirmDialog, EmptyState, ErrorState, SelectField, Sheet, SkeletonList, useToast } from '@/ui';
+import { Button, Chip, ConfirmDialog, EmptyState, ErrorState, FormError, SelectField, Sheet, SkeletonList, useToast } from '@/ui';
 import { InviteCodePanel } from './InviteCodePanel';
 import { useHouseholdAccess, useInvites } from './useMembership';
 

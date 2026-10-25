@@ -3,6 +3,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import * as activity from '@/api/activity';
+import * as chores from '@/api/chores';
+import * as expenses from '@/api/expenses';
 import * as households from '@/api/households';
 import * as profile from '@/api/profile';
 import * as auth from '@/api/auth';
@@ -44,6 +47,14 @@ const membership = {
 beforeEach(() => {
   vi.resetAllMocks();
   vi.mocked(profile.getMyProfile).mockResolvedValue({ displayName: 'Aarav', avatarColor: '#4F46E5' });
+  vi.mocked(households.listAllMembers).mockResolvedValue([]);
+  vi.mocked(activity.listActivity).mockResolvedValue([]);
+  vi.mocked(activity.listReadIds).mockResolvedValue([]);
+  vi.mocked(activity.getNotificationPrefs).mockResolvedValue({ categories: {}, quietEnabled: false, quietStart: null, quietEnd: null });
+  vi.mocked(activity.syncChoreReminders).mockResolvedValue(0);
+  vi.mocked(expenses.getBalances).mockResolvedValue([]);
+  vi.mocked(expenses.listExpenses).mockResolvedValue({ items: [], hasMore: false });
+  vi.mocked(chores.listChores).mockResolvedValue({ open: [], completed: [] });
 });
 
 describe('routing and guards', () => {
@@ -78,7 +89,7 @@ describe('routing and guards', () => {
     expect(await screen.findByRole('heading', { level: 1, name: 'Flat 4B' })).toBeInTheDocument();
     const nav = screen.getByRole('navigation', { name: 'Main' });
     expect(nav.querySelectorAll('a')).toHaveLength(5);
-    expect(screen.getByRole('button', { name: 'Notifications' })).toHaveAttribute('aria-disabled', 'true');
+    expect(screen.getByRole('button', { name: 'Notifications' })).not.toHaveAttribute('aria-disabled');
     expect(await screen.findByText(copy.home.emptyTitle)).toBeInTheDocument();
   });
 

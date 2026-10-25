@@ -1,4 +1,5 @@
 import { toAppError } from '@/lib/errors';
+import { resolveGuardedUpdate } from './guard';
 import type { Database } from '@/lib/database.types';
 import { getSupabase } from '@/lib/supabase';
 
@@ -87,11 +88,11 @@ async function guarded(id: string, version: number, patch: GroceryUpdate, expect
   if (expectStatus) q = q.eq('status', expectStatus);
   const { data, error } = await q.select('version');
   if (error) throw toAppError(error);
-  if (data.length > 0) return data[0]!.version;
-  const current = await getSupabase().from('grocery_items').select('version, status, deleted_at').eq('id', id).maybeSingle();
-  if (current.error) throw toAppError(current.error);
-  const moved = current.data && (current.data.version !== version || current.data.deleted_at !== null || (expectStatus && current.data.status !== expectStatus));
-  throw toAppError({ message: moved ? 'conflict' : 'permission_denied' });
+  return resolveGuardedUpdate(data, async () => {
+    const current = await getSupabase().from('grocery_items').select('version, status, deleted_at').eq('id', id).maybeSingle();
+    if (current.error) throw toAppError(current.error);
+    return !!current.data && (current.data.version !== version || current.data.deleted_at !== null || (!!expectStatus && current.data.status !== expectStatus));
+  });
 }
 
 export function updateGrocery(id: string, version: number, input: GroceryInput): Promise<number> {

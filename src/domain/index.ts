@@ -7,3 +7,4 @@ export * from './rotation';
 export * from './invites';
 export * from './chores';
 export * from './groceries';
+export * from './notifications';
