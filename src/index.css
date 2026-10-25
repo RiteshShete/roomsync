@@ -6,9 +6,10 @@
  * the operating system's dark mode. Warm cream page, white cards with hairline borders, coral as the
  * brand colour, amber for onboarding buttons, green for money and success.
  *
- * Known accessibility gap, deliberately kept to match the mockups: white text on coral (#ff9b85) and
- * on amber (#feb801) is below 4.5:1. Small coral TEXT (links, labels) uses --coral-text, a slightly
- * deeper coral. Both are one-line token changes if AA is wanted (see PROGRESS.md).
+ * Contrast: text ON coral (#ff9b85) and on amber (#feb801) is dark ink (--on-primary / --on-amber),
+ * about 7:1, instead of the mockups' white (about 2:1). Disabled controls use a neutral grey fill
+ * (never a faded coral), so "can't press yet" and "ready" are clearly different. Small coral TEXT
+ * (links, labels) uses --coral-text, a slightly deeper coral.
  */
 :root {
   --bg: #fdf8f2;
@@ -18,12 +19,12 @@
   --surface-sunken: #f6efe8;
   --ink: #3d3d3d;
   --ink-strong: #272525;
-  --ink-2: #6b7280;
+  --ink-2: #5f6672;
   --ink-3: #8f8e8e;
   --border: #eff0f1;
   --primary: #ff9b85;
   --primary-pressed: #f5856d;
-  --on-primary: #ffffff;
+  --on-primary: #272525; /* dark ink: 7:1 on coral */
   --coral-text: #e4573d;
   --brand: #fe8d76; /* logo tile */
   --brand-soft: #fff3f0; /* icon tiles, selected rows */
@@ -32,7 +33,7 @@
   --field-border: #ffe3dc;
   --amber: #feb801;
   --amber-pressed: #e6a600;
-  --on-amber: #ffffff;
+  --on-amber: #272525;
   --success: #0da576;
   --success-text: #0b8a63;
   --success-soft: #d8f0e9;

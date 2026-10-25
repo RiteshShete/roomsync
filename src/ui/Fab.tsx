@@ -14,7 +14,7 @@ export function Fab({ to, onClick, label, disabledReason }: { to?: string; onCli
     <div className="pointer-events-none fixed inset-x-0 bottom-[calc(5.25rem+env(safe-area-inset-bottom))] z-30 mx-auto flex max-w-md justify-end px-4">
       {disabledReason ? (
         <>
-          <button type="button" aria-label={label} aria-disabled="true" aria-describedby={reasonId} title={disabledReason} onClick={(e) => e.preventDefault()} className={`${cls} cursor-not-allowed opacity-50`}>
+          <button type="button" aria-label={label} aria-disabled="true" aria-describedby={reasonId} title={disabledReason} onClick={(e) => e.preventDefault()} className={`${cls} cursor-not-allowed !bg-sunken !text-ink2 border border-line`}>
             <Icon name="plus" size={28} />
           </button>
           <span id={reasonId} className="sr-only">

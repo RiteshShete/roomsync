@@ -23,6 +23,15 @@ const VARIANTS: Record<ButtonVariant, string> = {
   amber: 'rounded-full bg-amber text-on-amber border-transparent hover:bg-amber-pressed active:bg-amber-pressed',
 };
 
+/** Disabled is a flat neutral grey with readable text, never a faded version of the active colour. */
+const DISABLED: Record<ButtonVariant, string> = {
+  primary: 'bg-sunken text-ink2 border-line',
+  secondary: 'bg-sunken text-ink2 border-line',
+  tertiary: 'bg-transparent text-ink2 border-transparent',
+  danger: 'bg-sunken text-ink2 border-line',
+  amber: 'rounded-full bg-sunken text-ink2 border-line',
+};
+
 /**
  * Uses aria-disabled (not the disabled attribute) so a disabled control stays focusable and its
  * reason can be reached by keyboard and screen reader. Clicks are swallowed while inactive.
@@ -68,9 +77,9 @@ export function Button({
           'inline-flex min-h-11 items-center justify-center gap-2 border px-5 py-2.5',
           variant === 'amber' ? '' : 'rounded-[var(--radius-control)]',
           'text-base font-semibold transition-colors select-none',
-          VARIANTS[variant],
+          disabled ? DISABLED[variant] : VARIANTS[variant],
           fullWidth ? 'w-full' : '',
-          inactive ? 'cursor-not-allowed opacity-50' : 'cursor-pointer',
+          disabled ? 'cursor-not-allowed' : loading ? 'cursor-wait' : 'cursor-pointer',
           className,
         ].join(' ')}
       >
