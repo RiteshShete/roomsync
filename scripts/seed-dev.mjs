@@ -228,7 +228,52 @@ async function main() {
   );
   must(await aarav.client.from('announcements').update({ pinned_at: new Date().toISOString() }).eq('id', visit.id), 'pin announcement');
 
-  console.log('Seeded: household "Flat 4B" with 4 members, 10 expenses (1 edited), 1 settlement, 5 chores, 4 groceries, 2 announcements.');
+  // ---- More states, so every screen has something to look at ----
+  // Expenses: one deleted (soft), so the "Show deleted expenses" filter and Restore have something to show.
+  const mistake = await expense(kunal, 'Entered twice by mistake', 50000, 'other', 'equal', equalShares(50000, all), day(-4));
+  must(await kunal.client.rpc('delete_expense', { p_expense_id: mistake }), 'delete_expense');
+
+  // Settlements: one reversed, one disputed (with a reason), next to the recorded one above.
+  const settle = async (who, from, to, amount, note) =>
+    must(
+      await who.client.rpc('record_settlement', {
+        p_household_id: hid,
+        p_from_member_id: mid[from],
+        p_to_member_id: mid[to],
+        p_amount_minor: amount,
+        p_settlement_date: day(-1),
+        p_note: note,
+      }),
+      `record_settlement ${note}`,
+    );
+  const wrong = await settle(kunal, 'kunal', 'aarav', 10000, 'Recorded the wrong amount');
+  must(await kunal.client.rpc('set_settlement_status', { p_settlement_id: wrong, p_status: 'reversed', p_reason: 'Wrong amount' }), 'reverse settlement');
+  const disputed = await settle(kunal, 'kunal', 'sneha', 50000, 'Cash for the pizza');
+  must(await sneha.client.rpc('set_settlement_status', { p_settlement_id: disputed, p_status: 'disputed', p_reason: 'I did not receive this' }), 'dispute settlement');
+
+  // Chores: due today, overdue, unassigned (above), and a completed one for the history tab.
+  await chore(aarav, { title: 'Sweep the hall', assignee_member_id: mid.aarav, due_date: day(0) });
+  await chore(riya, { title: 'Take the bins to the street', assignee_member_id: mid.aarav, due_date: day(-3) });
+  const filter = await chore(riya, { title: 'Refill the water filter', assignee_member_id: mid.riya, due_date: day(-2) });
+  must(await riya.client.rpc('complete_chore', { p_chore_id: filter }), 'complete filter chore');
+
+  // Groceries: one more bought, one deleted, so both tabs and the Undo path have data.
+  const rice = await grocery(aarav, { name: 'Basmati rice', quantity: 5, unit: 'kg', category: 'Pantry' });
+  must(
+    await riya.client.from('grocery_items').update({ status: 'purchased', purchased_by_member_id: mid.riya, purchased_at: new Date().toISOString() }).eq('id', rice),
+    'purchase rice',
+  );
+  const soap = await grocery(kunal, { name: 'Hand soap', quantity: 3, category: 'Household' });
+  must(await kunal.client.from('grocery_items').update({ deleted_at: new Date().toISOString() }).eq('id', soap), 'delete soap');
+
+  // A notice from a plain member, and Riya (admin) has already read her first updates.
+  await kunal.client.from('announcements').insert({ household_id: hid, created_by: kunal.userId, title: 'Movie night Friday?', body: 'Thinking of a movie night this Friday. Shout if you are in.' });
+  must(await riya.client.rpc('mark_all_activity_read', { p_household_id: hid }), 'Riya reads her updates');
+
+  console.log(
+    'Seeded: household "Flat 4B" with 4 members (Aarav owner, Riya admin, Kunal and Sneha members), 11 expenses (1 edited, 1 deleted), ' +
+      '3 settlements (recorded, reversed, disputed), 8 chores (today, overdue, upcoming, unassigned, completed), 5 groceries (needed, bought, deleted), 3 announcements (1 pinned).',
+  );
   printCredentials();
 }
 
