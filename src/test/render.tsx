@@ -21,6 +21,7 @@ export function membership(overrides: Partial<households.Membership> & { archive
     memberId: 'm-aarav',
     role: 'owner',
     status: 'active',
+    moveOutEffectiveDate: null,
     household: { id: 'h1', name: 'Flat 4B', currencyCode: 'INR', status: archived ? 'archived' : 'active', ...household },
     ...rest,
   };
@@ -77,6 +78,8 @@ export function mockApi({ me = membership(), members = [aarav, riya, kunal] }: {
   vi.mocked(households.listMembers).mockResolvedValue(members);
   vi.mocked(households.getHousehold).mockResolvedValue(household());
   vi.mocked(households.householdHasMoney).mockResolvedValue(false);
+  vi.mocked(households.reconcileHousehold).mockResolvedValue(0);
+  vi.mocked(households.listMyLeftHouseholds).mockResolvedValue([]);
   vi.mocked(invites.listInvites).mockResolvedValue([]);
   vi.mocked(activity.listActivity).mockResolvedValue([]);
   vi.mocked(activity.listReadIds).mockResolvedValue([]);
@@ -87,8 +90,7 @@ export function mockApi({ me = membership(), members = [aarav, riya, kunal] }: {
 }
 
 /** Renders the whole route table, as a real user would experience it. */
-export function renderApp(path: string | { pathname: string; state?: unknown }, session: SessionState = signedIn) {
-  const client = new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: 0 } } });
+export function renderApp(path: string | { pathname: string; state?: unknown }, session: SessionState = signedIn, client = new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: 0 } } })) {
   const utils = render(
     <QueryClientProvider client={client}>
       <ToastProvider>

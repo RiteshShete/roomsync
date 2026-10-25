@@ -26,7 +26,7 @@ How the code is organised and why. `src/architecture.test.ts` enforces the layer
 | `src/copy.ts` | every user-visible sentence (so wording is reviewed in one place, and tests assert on it). | — |
 | `src/test` | test helpers (`renderApp`, `mockApi`, fixtures). | anything |
 
-Shared feature areas other features may import from: `household` (membership, access, member directory), `shell` (layout, realtime), `auth` (session), `activity` (bell and notification hooks). `you` aggregates other areas' hooks for the personal summary.
+Shared feature areas other features may import from: `household` (membership, access, member directory), `shell` (layout, realtime), `auth` (session), `activity` (bell and notification hooks). `you` and `moveout` aggregate other areas' hooks (personal summary; the move-out review).
 
 ## Where logic lives (rule 2)
 
@@ -41,6 +41,10 @@ Shared feature areas other features may import from: `household` (membership, ac
 - **Session and access:** React context (`auth/Session`), and `useHouseholdAccess()` derives role, archived state and the reason writes are blocked.
 - **Form state:** local to the form; a failed save never clears it.
 - No global client store is needed; there is no client-only state that several screens share.
+
+## Storage
+
+No cached or derived data is kept in the database: balances and summaries are computed when asked. Tables that grow on their own are bounded (activity events 90 days, invite attempts one day; see `20261025120001_bounded_storage.sql`), and financial and audit history is never pruned. In the browser, unused query data is dropped after a minute.
 
 ## Errors (rule 5)
 

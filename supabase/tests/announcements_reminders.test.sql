@@ -163,5 +163,26 @@ insert into public.chores (household_id, title, created_by, assignee_member_id, 
 select public.test_login(public.t('uc'));
 select is(public.sync_chore_reminders(public.t('h'), current_date + 1), 0, 'nothing newly due on the beat for the leaving member yet');
 
+-- ===== bounded storage: short-lived rows are pruned, history is not =====
+select public.test_logout();
+insert into public.activity_events (household_id, event_type, entity_type, metadata, recipient_member_ids, created_at) values
+  (public.t('h'), 'old.test', 'x', '{}', array[public.t('m_uc')], now() - interval '100 days'),
+  (public.t('h'), 'recent.test', 'x', '{}', array[public.t('m_uc')], now() - interval '89 days'),
+  (public.t('hb'), 'other.old.test', 'x', '{}', '{}', now() - interval '100 days');
+insert into public.activity_reads (member_id, event_id) select public.t('m_uc'), id from public.activity_events where event_type = 'old.test';
+insert into public.invite_attempts (user_id, attempted_at, succeeded) values (public.t('ue'), now() - interval '2 days', false), (public.t('ue'), now() - interval '10 minutes', false);
+insert into public.audit_events (household_id, entity_type, entity_id, action, created_at) values (public.t('h'), 'expense', gen_random_uuid(), 'old.audit', now() - interval '400 days');
+
+select public.test_login(public.t('uc'));
+select lives_ok($$select public.sync_chore_reminders(public.t('h'))$$, 'the daily sync runs');
+select public.test_logout();
+select is((select count(*)::int from public.activity_events where event_type = 'old.test'), 0, 'activity older than 90 days is pruned');
+select is((select count(*)::int from public.activity_reads where event_id not in (select id from public.activity_events)), 0, 'and its read marks go with it');
+select is((select count(*)::int from public.activity_events where event_type = 'recent.test'), 1, 'activity inside 90 days is kept');
+select is((select count(*)::int from public.activity_events where event_type = 'other.old.test'), 1, 'another household''s events are not touched by this household''s sync');
+select is((select count(*)::int from public.invite_attempts where user_id = public.t('ue') and attempted_at < now() - interval '1 day'), 0, 'invite attempts older than a day are pruned');
+select is((select count(*)::int from public.invite_attempts where user_id = public.t('ue')), 1, 'a recent attempt (still inside the throttle window) is kept');
+select is((select count(*)::int from public.audit_events where action = 'old.audit'), 1, 'audit history is never pruned');
+
 select * from finish();
 rollback;

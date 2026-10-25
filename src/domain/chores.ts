@@ -1,4 +1,4 @@
-import { isOverdue } from './dates';
+import { daysBetween, isOverdue } from './dates';
 
 export type ChoreBucket = 'today' | 'upcoming';
 
@@ -16,13 +16,6 @@ export interface DueInfo {
   kind: DueKind;
   /** Whole days from today to the due date (negative = past). Null when undated. */
   days: number | null;
-}
-
-/** Calendar-day distance between two ISO dates (UTC arithmetic, DST-proof). */
-export function daysBetween(from: string, to: string): number {
-  const a = Date.UTC(+from.slice(0, 4), +from.slice(5, 7) - 1, +from.slice(8, 10));
-  const b = Date.UTC(+to.slice(0, 4), +to.slice(5, 7) - 1, +to.slice(8, 10));
-  return Math.round((b - a) / 86_400_000);
 }
 
 export function dueInfo(due: string | null, today: string): DueInfo {

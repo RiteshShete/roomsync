@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as households from '@/api/households';
 import { copy } from '@/copy';
+import type { SessionState } from '@/features/auth/Session';
 import { aarav, kunal, member, membership, mockApi, renderApp, riya } from '@/test/render';
 
 vi.mock('@/api/households');
@@ -67,12 +68,25 @@ describe('who sees management controls (UX only; the database enforces roles)', 
     expect(screen.queryByRole('button', { name: copy.members.manageFor('Aarav') })).not.toBeInTheDocument();
   });
 
-  it.each(['admin', 'member'] as const)('a %s sees no manage buttons and is told why', async (role) => {
-    mockApi({ me: membership({ role, memberId: 'm-riya' }) });
+  it('a plain member sees no manage buttons and is told why', async () => {
+    mockApi({ me: membership({ role: 'member', memberId: 'm-kunal' }) });
     renderApp('/you/members');
     await screen.findByText('Riya', { selector: 'p' });
     expect(screen.queryByRole('button', { name: /^Manage/ })).not.toBeInTheDocument();
-    expect(screen.getByText(copy.members.onlyOwnerManages)).toBeInTheDocument();
+    expect(screen.getByText(copy.members.onlyAdminsManage)).toBeInTheDocument();
+  });
+
+  it('an admin can manage members other than the owner, but role changes stay owner-only with the reason shown', async () => {
+    mockApi({ me: membership({ role: 'admin', memberId: 'm-riya' }) });
+    renderApp('/you/members', { status: 'signedIn', user: { id: 'u-riya', email: 'riya@example.com' }, recovery: false } as unknown as SessionState);
+    await screen.findByText('Riya', { selector: 'p' });
+    expect(screen.queryByRole('button', { name: copy.members.manageFor('Aarav') })).not.toBeInTheDocument(); // the owner
+    expect(screen.queryByRole('button', { name: copy.members.manageFor('Riya') })).not.toBeInTheDocument(); // themselves: leaving is its own flow
+    await userEvent.click(screen.getByRole('button', { name: copy.members.manageFor('Kunal') }));
+    const dialog = await screen.findByRole('dialog');
+    expect(within(dialog).getByRole('button', { name: copy.members.makeAdmin })).toHaveAttribute('aria-disabled', 'true');
+    expect(within(dialog).getByRole('button', { name: copy.members.makeOwner })).toHaveAttribute('aria-disabled', 'true');
+    expect(within(dialog).getByRole('button', { name: copy.moveOut.forOther.start })).not.toHaveAttribute('aria-disabled');
   });
 
   it('in an archived household management is disabled with a reason', async () => {

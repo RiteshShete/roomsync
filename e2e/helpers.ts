@@ -1,4 +1,6 @@
+import { execSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { expect, type Browser, type BrowserContext, type Page } from '@playwright/test';
 
 export const PASSWORD = 'e2e-password-1';
@@ -133,4 +135,50 @@ export function localKeys() {
       .map((l) => [l.slice(0, l.indexOf('=')), l.slice(l.indexOf('=') + 1)]),
   );
   return { url: env.VITE_SUPABASE_URL as string, key: env.VITE_SUPABASE_PUBLISHABLE_KEY as string };
+}
+
+// ---- Phase 8: move-out ----
+let cachedAdmin: SupabaseClient | null = null;
+
+/**
+ * A service-role client for TEST SETUP ONLY (never the app): it lets a test move a move-out date into the
+ * past to simulate time passing. The key comes from the local stack's `supabase status`, not from any file.
+ */
+export function localAdmin(): SupabaseClient {
+  if (cachedAdmin) return cachedAdmin;
+  const out = execSync('npx supabase status -o env', { encoding: 'utf8' });
+  const env = Object.fromEntries([...out.matchAll(/^(\w+)="?([^"\r\n]*)"?$/gm)].map((m) => [m[1], m[2]]));
+  cachedAdmin = createClient(env.API_URL as string, env.SERVICE_ROLE_KEY as string, { auth: { persistSession: false, autoRefreshToken: false } });
+  return cachedAdmin;
+}
+
+/** Pretends the member's leaving date arrived (yesterday), by changing the row directly as the stack owner. */
+export async function makeMoveOutDue(householdName: string, memberName: string): Promise<void> {
+  const admin = localAdmin();
+  // Names repeat across test runs on the same local database, so take the newest one.
+  const { data: h, error: hErr } = await admin.from('households').select('id').eq('name', householdName).order('created_at', { ascending: false }).limit(1).maybeSingle();
+  if (hErr || !h) throw new Error(`household not found: ${householdName} ${hErr?.message ?? ''}`);
+  const { data: members } = await admin.from('household_members').select('id, user_id, status').eq('household_id', h.id);
+  const { data: profiles } = await admin.from('profiles').select('id, display_name').in('id', members!.map((m) => m.user_id));
+  const userId = profiles!.find((p) => p.display_name === memberName)!.id;
+  const target = members!.find((m) => m.user_id === userId)!;
+  const yesterday = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
+  const { error } = await admin.from('household_members').update({ move_out_effective_date: yesterday }).eq('id', target.id).eq('status', 'leaving');
+  if (error) throw error;
+}
+
+export const isoDay = (offsetDays: number): string => {
+  const d = new Date();
+  d.setDate(d.getDate() + offsetDays);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+
+/** Leaves through the UI: intro, review, date, optional note, explicit confirmation. */
+export async function leaveHousehold(page: Page, date: string, note?: string): Promise<void> {
+  await page.goto('/#/you/household/leave');
+  await page.getByRole('button', { name: /Review what.s outstanding/ }).click();
+  await page.getByLabel('Leaving date').fill(date);
+  if (note) await page.getByLabel('Note for your housemates').fill(note);
+  await page.getByRole('checkbox', { name: 'I understand what happens when I leave.' }).check();
+  await page.getByRole('button', { name: 'Leave household' }).click();
 }

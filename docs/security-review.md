@@ -66,6 +66,14 @@ Guard triggers `guard_grocery_purchaser`, `guard_announcement_pin`, `bump_versio
 
 Realtime was verified end to end (`e2e/realtime-isolation.spec.ts`): a member subscribed to a household receives its changes; a signed-in outsider subscribed to the same household filter receives nothing. `supabase_realtime` publishes exactly the tables the app listens to (pinned in `announcements_reminders.test.sql`).
 
+## Phase 8 additions
+| Object | Who | Notes |
+|---|---|---|
+| `my_left_households()` | any signed-in user | `security definer`, `search_path = ''`, `private.require_uid()`; returns only `household_id`, `name`, `left_at` for the caller's **own** memberships with status `left` (at most 10). A person who left gets no other access; their RLS visibility of the household is unchanged (none). |
+| `private.prune_old_rows(household)` | none (private) | Called from `sync_chore_reminders`. Deletes activity events older than 90 days for that household and invite attempts older than one day, 500 rows per call. Never touches expenses, settlements or `audit_events`. |
+
+The end-to-end tests change a member's `move_out_effective_date` with the local **service-role key obtained from `supabase status`**, only to simulate time passing; the key is never in the app, the repo or `.env` files.
+
 ## Known limits
 - A chore can only be edited if its assignee is still active/leaving; reassign first (RLS `with check`).
 - Activity events are readable by every member of the household (RLS is per household, not per recipient); addressing is applied in the client. Events hold titles and amounts only, never free text such as announcement messages. A per-recipient policy is an option if that is not acceptable.

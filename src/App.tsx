@@ -30,6 +30,8 @@ import { ExpensesScreen } from '@/features/expenses/ExpensesScreen';
 import { RecordSettlementScreen } from '@/features/expenses/RecordSettlementScreen';
 import { SettlementsScreen } from '@/features/expenses/SettlementsScreen';
 import { AppShell } from '@/features/shell/AppShell';
+import { LeftScreen } from '@/features/household/LeftScreen';
+import { MoveOutScreen } from '@/features/moveout/MoveOutScreen';
 import { YouScreen } from '@/features/you/YouScreen';
 import { ProfileScreen } from '@/features/you/ProfileScreen';
 import { NotificationPrefsScreen } from '@/features/you/NotificationPrefsScreen';
@@ -54,6 +56,7 @@ export function AppRoutes() {
         </Route>
         <Route path="/reset-password" element={<ResetPasswordScreen />} />
         <Route element={<RequireAuth />}>
+          <Route path="/left" element={<LeftScreen />} />
           <Route path="/start" element={<ChooseHouseholdScreen />} />
           <Route path="/start/create" element={<CreateHouseholdScreen />} />
           <Route path="/start/join" element={<JoinHouseholdScreen />} />
@@ -83,6 +86,7 @@ export function AppRoutes() {
             <Route path="you/members" element={<MembersScreen />} />
             <Route path="you/invites" element={<InvitesScreen />} />
             <Route path="you/household" element={<HouseholdSettingsScreen />} />
+            <Route path="you/household/leave" element={<MoveOutScreen />} />
           </Route>
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />

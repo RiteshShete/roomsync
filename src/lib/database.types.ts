@@ -479,6 +479,11 @@ isOneToOne: false
 "mark_all_activity_read":
 { Args: { "p_household_id": string }; Returns: number
                            },
+"my_left_households":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "household_id": string,"left_at": string,"name": string
+            }[]
+                           },
 "preview_invite":
 { Args: { "p_code": string }; Returns: Json
                            },

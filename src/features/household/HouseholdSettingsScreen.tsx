@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useState, type FormEvent } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { setHouseholdArchived, updateHousehold, type DefaultSplit, type HouseholdDetails } from '@/api/households';
@@ -140,6 +141,16 @@ export function HouseholdSettingsScreen() {
             {copy.settings.archive}
           </Button>
         )}
+      </section>
+      <hr className="border-line" />
+      <section className="flex flex-col gap-3" aria-labelledby="leave-title">
+        <h2 id="leave-title" className="text-lg font-bold text-ink">
+          {copy.moveOut.title}
+        </h2>
+        <p className="text-base text-ink2">{copy.moveOut.settingsBody}</p>
+        <Link to="/you/household/leave" className="inline-flex min-h-11 w-full items-center justify-center rounded-[var(--radius-control)] border border-line bg-surface px-5 text-base font-semibold text-coral hover:bg-brand-soft">
+          {copy.moveOut.settingsLink}
+        </Link>
       </section>
       <ConfirmDialog
         open={confirmArchive}

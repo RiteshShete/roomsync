@@ -1,8 +1,10 @@
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { Link, Navigate, Outlet, useLocation } from 'react-router-dom';
 import { copy } from '@/copy';
 import { errorMessage } from '@/lib/errors';
+import { formatDay } from '@/lib/format';
 import { BottomNav, ErrorState, Header, SkeletonList } from '@/ui';
 import { useBell, useReminderSync } from '@/features/activity/hooks';
+import { pendingLeftNotice, useLeftHouseholds, useReconcileOnOpen } from '@/features/household/useLeft';
 import { useMembership } from '@/features/household/useMembership';
 import { useRealtime } from './useRealtime';
 
@@ -21,6 +23,9 @@ export function AppShell() {
   const { pathname } = useLocation();
   const bell = useBell();
   const { justUpdated } = useRealtime(membership.data?.household.id);
+  useReconcileOnOpen(membership.data?.household.id);
+  // Someone with no household may just have left one: then they see "You've left ..." first.
+  const left = useLeftHouseholds(membership.isSuccess && membership.data === null);
   useReminderSync(membership.data?.household.id, membership.data?.household.status === 'archived');
 
   if (membership.isPending) {
@@ -37,7 +42,11 @@ export function AppShell() {
       </div>
     );
   }
-  if (!membership.data) return <Navigate to="/start" replace />;
+  if (!membership.data) {
+    // Wait for a fresh answer: a cached "nothing left" from earlier in the session must not decide this.
+    if (left.isPending || left.isFetching) return <SkeletonList rows={4} />;
+    return <Navigate to={pendingLeftNotice(left.data) ? '/left' : '/start'} replace />;
+  }
 
   const isHome = pathname === '/';
   const showHeader = isHome || pathname in TAB_TITLES;
@@ -55,6 +64,14 @@ export function AppShell() {
       {justUpdated ? (
         <p role="status" className="pointer-events-none fixed top-2 left-1/2 z-40 -translate-x-1/2 rounded-full bg-ink-strong px-3 py-1 text-xs font-bold text-surface">
           {copy.activity.updated}
+        </p>
+      ) : null}
+      {membership.data.status === 'leaving' && membership.data.moveOutEffectiveDate ? (
+        <p role="status" className="border-b border-line bg-warning-soft px-4 py-3 text-sm font-bold text-ink">
+          {copy.moveOut.banner(formatDay(membership.data.moveOutEffectiveDate))}{' '}
+          <Link to="/you/household/leave" className="underline">
+            {copy.moveOut.bannerLink}
+          </Link>
         </p>
       ) : null}
       <main className="pb-[calc(5.5rem+env(safe-area-inset-bottom))]">

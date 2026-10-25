@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { setMemberRole, transferOwnership, type Member } from '@/api/households';
+import { cancelMoveOut, setMemberRole, transferOwnership, type Member } from '@/api/households';
 import { copy } from '@/copy';
 import { errorMessage } from '@/lib/errors';
 import { useSession } from '@/features/auth/Session';
 import { SubPage } from '@/features/shell/SubPage';
 import { Avatar, Button, Chip, ConfirmDialog, EmptyState, ErrorState, Sheet, SkeletonList, useToast } from '@/ui';
+import { MemberMoveOutSheet } from './MemberMoveOutSheet';
 import { useHouseholdAccess, useMembers } from './useMembership';
 
 function MemberRow({ member, isYou, onManage, manageDisabledReason }: { member: Member; isYou: boolean; onManage?: () => void; manageDisabledReason?: string | null }) {
@@ -42,6 +43,7 @@ export function MembersScreen() {
 
   const [managing, setManaging] = useState<Member | null>(null);
   const [transferTo, setTransferTo] = useState<Member | null>(null);
+  const [movingOut, setMovingOut] = useState<Member | null>(null);
 
   const refresh = () => Promise.all([queryClient.invalidateQueries({ queryKey: ['members'] }), queryClient.invalidateQueries({ queryKey: ['membership'] })]);
 
@@ -68,6 +70,16 @@ export function MembersScreen() {
     },
   });
 
+  const cancelMutation = useMutation({
+    mutationFn: (m: Member) => cancelMoveOut(m.memberId),
+    onSuccess: async (_d, m) => {
+      await refresh();
+      setManaging(null);
+      toast.show({ message: copy.moveOut.forOther.cancelledFor(m.displayName) });
+    },
+    onError: (err) => toast.show({ tone: 'error', message: errorMessage(err) }),
+  });
+
   let body;
   if (members.isPending) body = <SkeletonList rows={3} />;
   else if (members.isError) body = <ErrorState message={errorMessage(members.error)} onRetry={() => void members.refetch()} />;
@@ -82,12 +94,12 @@ export function MembersScreen() {
               key={m.memberId}
               member={m}
               isYou={m.userId === myUserId}
-              onManage={access?.isOwner && m.role !== 'owner' ? () => setManaging(m) : undefined}
+              onManage={access?.isAdmin && m.role !== 'owner' && m.userId !== myUserId ? () => setManaging(m) : undefined}
               manageDisabledReason={access?.writeBlockedReason}
             />
           ))}
         </ul>
-        {!access?.isOwner ? <p className="text-sm text-ink2">{copy.members.onlyOwnerManages}</p> : null}
+        {!access?.isAdmin ? <p className="text-sm text-ink2">{copy.members.onlyAdminsManage}</p> : null}
       </>
     );
 
@@ -103,6 +115,9 @@ export function MembersScreen() {
               variant="secondary"
               fullWidth
               loading={roleMutation.isPending}
+              disabled={!access?.isOwner}
+              disabledReason={copy.members.onlyOwnerManages}
+              showReason
               onClick={() => roleMutation.mutate({ member: managing, role: managing.role === 'admin' ? 'member' : 'admin' })}
             >
               {managing.role === 'admin' ? copy.members.makeMember : copy.members.makeAdmin}
@@ -110,8 +125,8 @@ export function MembersScreen() {
             <Button
               variant="primary"
               fullWidth
-              disabled={managing.status !== 'active'}
-              disabledReason="Only members who aren’t moving out can become the owner."
+              disabled={!access?.isOwner || managing.status !== 'active'}
+              disabledReason={!access?.isOwner ? copy.members.onlyOwnerManages : copy.members.ownerNeedsActive}
               showReason
               onClick={() => {
                 setTransferTo(managing);
@@ -120,9 +135,42 @@ export function MembersScreen() {
             >
               {copy.members.makeOwner}
             </Button>
+            {managing.status === 'leaving' ? (
+              <Button variant="secondary" fullWidth loading={cancelMutation.isPending} disabled={!!access?.writeBlockedReason} disabledReason={access?.writeBlockedReason ?? undefined} showReason onClick={() => cancelMutation.mutate(managing)}>
+                {copy.moveOut.forOther.cancelFor(managing.displayName)}
+              </Button>
+            ) : (
+              <Button
+                variant="danger"
+                fullWidth
+                disabled={!!access?.writeBlockedReason}
+                disabledReason={access?.writeBlockedReason ?? undefined}
+                showReason
+                onClick={() => {
+                  setMovingOut(managing);
+                  setManaging(null);
+                }}
+              >
+                {copy.moveOut.forOther.start}
+              </Button>
+            )}
           </div>
         ) : null}
       </Sheet>
+
+      {movingOut ? (
+        <MemberMoveOutSheet
+          key={movingOut.memberId}
+          member={movingOut}
+          blockedReason={access?.writeBlockedReason ?? null}
+          onClose={() => setMovingOut(null)}
+          onStarted={() => {
+            toast.show({ message: copy.moveOut.forOther.started(movingOut.displayName) });
+            setMovingOut(null);
+            void refresh();
+          }}
+        />
+      ) : null}
 
       <ConfirmDialog
         open={!!transferTo}

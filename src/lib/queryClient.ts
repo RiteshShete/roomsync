@@ -7,6 +7,8 @@ export function createQueryClient(): QueryClient {
     defaultOptions: {
       queries: {
         staleTime: 30_000,
+        // Don't hold on to unused data: nothing is kept around for long, in the browser or the database.
+        gcTime: 60_000,
         refetchOnWindowFocus: true,
         retry: (failureCount, error) => failureCount < 2 && toAppError(error).code === 'network',
       },

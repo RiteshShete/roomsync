@@ -41,6 +41,7 @@ const membership = {
   memberId: 'm1',
   role: 'owner' as const,
   status: 'active' as const,
+  moveOutEffectiveDate: null,
   household: { id: 'h1', name: 'Flat 4B', currencyCode: 'INR', status: 'active' as const },
 };
 
@@ -48,6 +49,8 @@ beforeEach(() => {
   vi.resetAllMocks();
   vi.mocked(profile.getMyProfile).mockResolvedValue({ displayName: 'Aarav', avatarColor: '#4F46E5' });
   vi.mocked(households.listAllMembers).mockResolvedValue([]);
+  vi.mocked(households.reconcileHousehold).mockResolvedValue(0);
+  vi.mocked(households.listMyLeftHouseholds).mockResolvedValue([]);
   vi.mocked(activity.listActivity).mockResolvedValue([]);
   vi.mocked(activity.listReadIds).mockResolvedValue([]);
   vi.mocked(activity.getNotificationPrefs).mockResolvedValue({ categories: {}, quietEnabled: false, quietStart: null, quietEnd: null });

@@ -2,7 +2,7 @@
 
 Shared living, simplified. Shared expenses, chores, groceries, announcements and move-out in one mobile-first app.
 
-> Status: Phase 7 of 13 (house, activity, settings). You can create or join a household, split expenses and record settlements, run recurring and rotating chores, keep a shared grocery list, post announcements, follow an activity centre with in-app reminders, set notification preferences, edit your profile and download your data. Move-out and release hardening arrive phase by phase. See `docs/ARCHITECTURE.md`, `PLAN.md` and `PROGRESS.md`.
+> Status: Phase 8 of 13 (move-out). You can create or join a household, split expenses and record settlements, run recurring and rotating chores, keep a shared grocery list, post announcements, follow an activity centre with in-app reminders, set notification preferences, edit your profile, download your data, and leave a household with a clear review of what is outstanding. Quality, accessibility and release hardening arrive next. See `docs/ARCHITECTURE.md`, `PLAN.md` and `PROGRESS.md`.
 
 ## Prerequisites
 - Node 22+ (`node -v`)

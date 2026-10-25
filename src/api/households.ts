@@ -8,6 +8,8 @@ export interface Membership {
   memberId: string;
   role: Role;
   status: 'active' | 'leaving';
+  /** Set while status is `leaving`: the day the move-out takes effect. */
+  moveOutEffectiveDate: string | null;
   household: { id: string; name: string; currencyCode: string; status: 'active' | 'archived' };
 }
 
@@ -15,7 +17,7 @@ export interface Membership {
 export async function getMyMembership(userId: string): Promise<Membership | null> {
   const { data, error } = await getSupabase()
     .from('household_members')
-    .select('id, role, status, households(id, name, currency_code, status)')
+    .select('id, role, status, move_out_effective_date, households(id, name, currency_code, status)')
     .eq('user_id', userId)
     .neq('status', 'left')
     .maybeSingle();
@@ -27,6 +29,7 @@ export async function getMyMembership(userId: string): Promise<Membership | null
     memberId: data.id,
     role: data.role as Role,
     status: data.status as Membership['status'],
+    moveOutEffectiveDate: data.move_out_effective_date,
     household: { id: h.id, name: h.name, currencyCode: h.currency_code, status: h.status as 'active' | 'archived' },
   };
 }
@@ -189,4 +192,83 @@ export async function setMemberRole(memberId: string, role: 'admin' | 'member'):
 export async function transferOwnership(memberId: string): Promise<void> {
   const { error } = await getSupabase().rpc('transfer_ownership', { p_member_id: memberId });
   if (error) throw toAppError(error);
+}
+
+/** Moves to the "leaving" state. The caller is the member themselves, an owner, or (for non-owners) an admin. */
+export async function startMoveOut(input: { memberId: string; effectiveDate: string; note: string | null; acknowledgedBalanceMinor: number | null }): Promise<void> {
+  const { error } = await getSupabase().rpc('start_move_out', {
+    p_member_id: input.memberId,
+    p_effective_date: input.effectiveDate,
+    p_note: input.note ?? undefined,
+    p_acknowledged_balance_minor: input.acknowledgedBalanceMinor ?? undefined,
+  });
+  if (error) throw toAppError(error);
+}
+
+export async function cancelMoveOut(memberId: string): Promise<void> {
+  const { error } = await getSupabase().rpc('cancel_move_out', { p_member_id: memberId });
+  if (error) throw toAppError(error);
+}
+
+/** A note or dispute from the person moving out. Never resolved automatically. */
+export async function addMoveOutNote(memberId: string, note: string): Promise<void> {
+  const { error } = await getSupabase().rpc('add_move_out_dispute', { p_member_id: memberId, p_note: note });
+  if (error) throw toAppError(error);
+}
+
+export interface MoveOutNote {
+  id: string;
+  note: string;
+  createdAt: string;
+}
+
+export async function listMoveOutNotes(memberId: string): Promise<MoveOutNote[]> {
+  const { data, error } = await getSupabase().from('member_move_out_disputes').select('id, note, created_at').eq('member_id', memberId).order('created_at', { ascending: true }).limit(100);
+  if (error) throw toAppError(error);
+  return data.map((r) => ({ id: r.id, note: r.note, createdAt: r.created_at }));
+}
+
+export interface MyMoveOut {
+  effectiveDate: string | null;
+  requestedAt: string | null;
+  requestedByMemberId: string | null;
+  note: string | null;
+  acknowledgedBalanceMinor: number | null;
+}
+
+/** What was recorded when this member's move-out was started. */
+export async function getMoveOut(memberId: string): Promise<MyMoveOut> {
+  const { data, error } = await getSupabase()
+    .from('household_members')
+    .select('move_out_effective_date, move_out_requested_at, move_out_requested_by, move_out_note, move_out_acknowledged_balance_minor')
+    .eq('id', memberId)
+    .single();
+  if (error) throw toAppError(error);
+  return {
+    effectiveDate: data.move_out_effective_date,
+    requestedAt: data.move_out_requested_at,
+    requestedByMemberId: data.move_out_requested_by,
+    note: data.move_out_note,
+    acknowledgedBalanceMinor: data.move_out_acknowledged_balance_minor === null ? null : Number(data.move_out_acknowledged_balance_minor),
+  };
+}
+
+/** Applies any move-outs whose date has passed. Returns how many people flipped to "left". */
+export async function reconcileHousehold(householdId: string): Promise<number> {
+  const { data, error } = await getSupabase().rpc('reconcile_household', { p_household_id: householdId });
+  if (error) throw toAppError(error);
+  return data;
+}
+
+export interface LeftHousehold {
+  householdId: string;
+  name: string;
+  leftAt: string;
+}
+
+/** Households the caller has left, newest first: just a name and a date (they have no other access). */
+export async function listMyLeftHouseholds(): Promise<LeftHousehold[]> {
+  const { data, error } = await getSupabase().rpc('my_left_households');
+  if (error) throw toAppError(error);
+  return data.map((r) => ({ householdId: r.household_id, name: r.name, leftAt: r.left_at }));
 }

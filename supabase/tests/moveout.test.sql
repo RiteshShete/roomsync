@@ -151,8 +151,18 @@ select is((select count(*)::int from public.expenses), 0, 'nor its expenses');
 select throws_ok($$select public.add_expense(public.t('h'), 'x', 1000, 'x', public.t('m_ua'), current_date, 'equal', public.tt('s2x')::jsonb)$$, 'P0001', 'not_found', 'nor can they write to it');
 select is(public.reconcile_household(public.t('h')), 0, 'ud may still ask whether they have left');
 select lives_ok($$select public.create_household('Ud House')$$, 'a user who left can create another household');
+select is((select count(*)::int from public.my_left_households() where household_id = public.t('h') and name = 'House A' and left_at is not null), 1, 'my_left_households tells ud which household they left');
+select is((select count(*)::int from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' and p.proname = 'my_left_households' and pg_get_function_result(p.oid) = 'TABLE(household_id uuid, name text, left_at timestamp with time zone)'), 1, 'it returns exactly household_id, name and left_at');
+select public.test_login(public.t('ue'));
+select is((select count(*)::int from public.my_left_households()), 0, 'someone who never left anything sees none');
+select public.test_login(public.t('ua'));
+select is((select count(*)::int from public.my_left_households()), 0, 'a current member (owner) sees none');
 select public.test_login(public.t('ue'));
 select throws_ok($$select public.reconcile_household(public.t('h'))$$, 'P0001', 'not_found', 'someone who never belonged cannot');
+select public.test_logout();
+set role anon;
+select throws_ok($$select * from public.my_left_households()$$, '42501', null, 'anon cannot call my_left_households');
+reset role;
 
 -- ===== effective today flips immediately; rotation prune cascades =====
 select public.test_login(public.t('uc'));
