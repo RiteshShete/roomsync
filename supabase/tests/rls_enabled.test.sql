@@ -72,12 +72,12 @@ select is(
 select ok(has_function_privilege('authenticated', p.oid, 'execute'), 'authenticated can call public.' || p.proname)
 from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public' order by p.proname;
 
--- Every security definer function in our schemas pins search_path to empty.
+-- Every function in our schemas (security definer or not, triggers included) pins search_path to empty.
 select is(
   (select count(*)::int from pg_proc p join pg_namespace n on n.oid = p.pronamespace
-    where n.nspname in ('public', 'private') and p.prosecdef
+    where n.nspname in ('public', 'private')
       and not coalesce(p.proconfig, '{}') @> array['search_path=""']),
-  0, 'every security definer function sets search_path to empty');
+  0, 'every function in public and private sets search_path to empty');
 
 select * from finish();
 rollback;
