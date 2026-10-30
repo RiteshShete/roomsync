@@ -26,7 +26,7 @@ How the code is organised and why. `src/architecture.test.ts` enforces the layer
 | `src/copy.ts` | every user-visible sentence (so wording is reviewed in one place, and tests assert on it). | — |
 | `src/test` | test helpers (`renderApp`, `mockApi`, fixtures). | anything |
 
-Shared feature areas other features may import from: `household` (membership, access, member directory), `shell` (layout, realtime), `auth` (session), `activity` (bell and notification hooks). `you` and `moveout` aggregate other areas' hooks (personal summary; the move-out review).
+Shared feature areas other features may import from: `household` (membership, access, member directory), `shell` (layout, realtime), `auth` (session), `activity` (bell and notification hooks). `you`, `moveout` and `home` aggregate other areas' hooks (personal summary; the move-out review; the House Feed).
 
 ## Where logic lives (rule 2)
 

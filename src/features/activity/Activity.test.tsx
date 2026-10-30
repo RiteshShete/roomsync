@@ -5,7 +5,8 @@ import * as api from '@/api/activity';
 import { copy } from '@/copy';
 import { todayIso } from '@/domain';
 import { activityEvent, mockActivity, mockHome, quietAroundNow } from '@/test/home';
-import { membership, renderApp } from '@/test/render';
+import { QueryClient } from '@tanstack/react-query';
+import { membership, renderApp, signedIn } from '@/test/render';
 import { describeEvent, eventLink } from './describe';
 
 vi.mock('@/api/households');
@@ -221,10 +222,12 @@ describe('chore reminders (in-app only)', () => {
   it('asks for today’s reminders once when the household opens, using the device’s date', async () => {
     mockActivity();
     vi.mocked(api.syncChoreReminders).mockResolvedValue(1);
-    renderApp('/');
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: 0 } } });
+    const invalidate = vi.spyOn(client, 'invalidateQueries');
+    renderApp('/', signedIn, client);
     await vi.waitFor(() => expect(api.syncChoreReminders).toHaveBeenCalledWith('h1', todayIso()));
-    // new reminders refresh the list
-    await vi.waitFor(() => expect(vi.mocked(api.listActivity).mock.calls.length).toBeGreaterThan(1));
+    // new reminders mark the activity data stale so the list and the bell refresh
+    await vi.waitFor(() => expect(invalidate).toHaveBeenCalledWith({ queryKey: ['activity'] }), { timeout: 4000 });
   });
 
   it('does nothing for an archived household', async () => {

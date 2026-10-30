@@ -10,8 +10,8 @@ import { useRealtime } from './useRealtime';
 
 /** Top-level tab pages get the shell header; pages below a tab (e.g. /you/members) bring their own. */
 const TAB_TITLES: Record<string, string> = {
-  '/house': copy.nav.house,
-  '/you': copy.nav.you,
+  '/house/groceries': copy.nav.shopping,
+  '/you': copy.nav.settings,
 };
 
 /**
@@ -49,13 +49,13 @@ export function AppShell() {
   }
 
   const isHome = pathname === '/';
-  const showHeader = isHome || pathname in TAB_TITLES;
-  const title = isHome ? membership.data.household.name : (TAB_TITLES[pathname] ?? copy.brand.name);
+  const showHeader = !isHome && pathname in TAB_TITLES; // Home draws its own panel (logo + House Feed)
+  const title = TAB_TITLES[pathname] ?? copy.brand.name;
   const archived = membership.data.household.status === 'archived';
 
   return (
     <div className="mx-auto min-h-dvh w-full max-w-md bg-bg">
-      {showHeader ? <Header title={title} brand={isHome} bell={bell} /> : null}
+      {showHeader ? <Header title={title} bell={bell} /> : null}
       {archived ? (
         <p role="status" className="border-b border-line bg-warning-soft px-4 py-3 text-sm font-bold text-ink">
           {copy.settings.banner}

@@ -1,5 +1,5 @@
 @import 'tailwindcss';
-@import '@fontsource-variable/nunito/wght.css';
+@import '@fontsource-variable/nunito-sans/wght.css';
 
 /*
  * Design tokens, sampled from the UI mockups (UI/*.png). LIGHT THEME ONLY: the app never follows
@@ -16,6 +16,8 @@
   --surface: #ffffff;
   --surface-tint: #ffebd5; /* House Feed banner */
   --surface-tint-border: #ffd7c1;
+  --feed-row: #fffaf5; /* rows inside the House Feed card */
+  --feed-chip: #fff6ed; /* the collapse button in the feed header */
   --surface-sunken: #f6efe8;
   --ink: #3d3d3d;
   --ink-strong: #272525;
@@ -55,6 +57,8 @@
   --color-surface: var(--surface);
   --color-tint: var(--surface-tint);
   --color-tint-line: var(--surface-tint-border);
+  --color-feed-row: var(--feed-row);
+  --color-feed-chip: var(--feed-chip);
   --color-sunken: var(--surface-sunken);
   --color-ink: var(--ink);
   --color-ink-strong: var(--ink-strong);
@@ -85,8 +89,8 @@
   --color-nav-idle: var(--nav-idle);
   --color-track: var(--track);
   --color-scrim: var(--scrim);
-  /* Nunito is bundled with the app (self-hosted, no external request); system fonts are the fallback. */
-  --font-sans: 'Nunito Variable', 'Nunito', ui-rounded, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  /* Nunito Sans is bundled with the app (self-hosted, no external request); system fonts are the fallback. */
+  --font-sans: 'Nunito Sans Variable', 'Nunito Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --radius-card: 0.75rem;
   --radius-control: 0.75rem;
 }

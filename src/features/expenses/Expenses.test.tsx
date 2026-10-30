@@ -108,7 +108,7 @@ describe('Expenses tab', () => {
     expect(fab).toHaveAttribute('aria-disabled', 'true');
     expect(fab).toHaveAccessibleDescription(copy.errors.householdArchived);
     await userEvent.click(fab);
-    expect(screen.getByRole('heading', { level: 1, name: 'Expenses' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 1, name: copy.expenses.title })).toBeInTheDocument();
   });
 });
 

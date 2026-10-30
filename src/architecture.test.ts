@@ -40,7 +40,7 @@ describe('architecture', () => {
 
   it('features do not import each other’s internals (shared pieces live in ui, lib, domain or household)', () => {
     const allowed = new Set(['household', 'shell', 'auth', 'activity']); // shared building blocks: access, shell, session, notifications
-    const aggregators = new Set(['you', 'moveout']); // these summarise money, chores and groceries, so they read those features' hooks
+    const aggregators = new Set(['you', 'moveout', 'home']); // these summarise money, chores and groceries, so they read those features' hooks
     for (const file of source('src/features')) {
       const own = file.split(path.sep)[2];
       for (const spec of importsOf(file)) {

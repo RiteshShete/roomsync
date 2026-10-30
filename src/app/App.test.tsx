@@ -4,6 +4,7 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import * as activity from '@/api/activity';
+import * as announcements from '@/api/announcements';
 import * as chores from '@/api/chores';
 import * as expenses from '@/api/expenses';
 import * as households from '@/api/households';
@@ -58,6 +59,7 @@ beforeEach(() => {
   vi.mocked(expenses.getBalances).mockResolvedValue([]);
   vi.mocked(expenses.listExpenses).mockResolvedValue({ items: [], hasMore: false });
   vi.mocked(chores.listChores).mockResolvedValue({ open: [], completed: [] });
+  vi.mocked(announcements.listAnnouncements).mockResolvedValue([]);
 });
 
 describe('routing and guards', () => {
@@ -102,9 +104,9 @@ describe('routing and guards', () => {
     renderApp('/', signedIn);
     await screen.findByRole('heading', { name: 'Flat 4B' });
     const nav = within(screen.getByRole('navigation', { name: 'Main' }));
-    await userEvent.click(nav.getByRole('link', { name: 'Expenses' }));
-    expect(await screen.findByRole('heading', { level: 1, name: 'Expenses' })).toBeInTheDocument();
-    expect(nav.getByRole('link', { name: 'Expenses' })).toHaveAttribute('aria-current', 'page');
+    await userEvent.click(nav.getByRole('link', { name: 'Finance' }));
+    expect(await screen.findByRole('heading', { level: 1, name: 'Finance' })).toBeInTheDocument();
+    expect(nav.getByRole('link', { name: 'Finance' })).toHaveAttribute('aria-current', 'page');
   });
 
   it('a user who already has a household cannot open the set-up screen', async () => {

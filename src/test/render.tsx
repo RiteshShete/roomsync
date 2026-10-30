@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import { vi } from 'vitest';
 import * as activity from '@/api/activity';
+import * as announcements from '@/api/announcements';
 import * as chores from '@/api/chores';
 import * as expenses from '@/api/expenses';
 import * as households from '@/api/households';
@@ -76,6 +77,7 @@ export function mockApi({ me = membership(), members = [aarav, riya, kunal] }: {
   vi.mocked(profile.getMyProfile).mockResolvedValue({ displayName: 'Aarav', avatarColor: '#4F46E5' });
   vi.mocked(households.getMyMembership).mockResolvedValue(me);
   vi.mocked(households.listMembers).mockResolvedValue(members);
+  vi.mocked(households.listAllMembers).mockResolvedValue(members as households.MemberWithLeft[]);
   vi.mocked(households.getHousehold).mockResolvedValue(household());
   vi.mocked(households.householdHasMoney).mockResolvedValue(false);
   vi.mocked(households.reconcileHousehold).mockResolvedValue(0);
@@ -87,6 +89,7 @@ export function mockApi({ me = membership(), members = [aarav, riya, kunal] }: {
   vi.mocked(activity.syncChoreReminders).mockResolvedValue(0);
   vi.mocked(expenses.getBalances).mockResolvedValue([]);
   vi.mocked(chores.listChores).mockResolvedValue({ open: [], completed: [] });
+  vi.mocked(announcements.listAnnouncements).mockResolvedValue([]);
 }
 
 /** Renders the whole route table, as a real user would experience it. */

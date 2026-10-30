@@ -93,7 +93,7 @@ describe('Skeleton', () => {
 });
 
 describe('BottomNav', () => {
-  it('has the five tabs from the spec as links', () => {
+  it('has the five tabs from the design as links, in order', () => {
     render(
       <MemoryRouter>
         <BottomNav />
@@ -101,7 +101,7 @@ describe('BottomNav', () => {
     );
     const nav = screen.getByRole('navigation', { name: 'Main' });
     const names = Array.from(nav.querySelectorAll('a')).map((a) => a.textContent);
-    expect(names).toEqual(['Home', 'Expenses', 'Chores', 'House', 'You']);
+    expect(names).toEqual(['Home', 'Shopping', 'Tasks', 'Finance', 'Settings']);
   });
 
   it('marks the current tab with aria-current', () => {
@@ -110,7 +110,7 @@ describe('BottomNav', () => {
         <BottomNav />
       </MemoryRouter>,
     );
-    expect(screen.getByRole('link', { name: 'Chores' })).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('link', { name: 'Tasks' })).toHaveAttribute('aria-current', 'page');
     expect(screen.getByRole('link', { name: 'Home' })).not.toHaveAttribute('aria-current');
   });
 
@@ -121,6 +121,38 @@ describe('BottomNav', () => {
       </MemoryRouter>,
     );
     expect(screen.getByRole('link', { name: 'Home' })).toHaveAttribute('aria-current', 'page');
+  });
+
+  it('Shopping is the current tab on the grocery list, Finance on any money page, Settings on its sub-pages', () => {
+    const current = (path: string) => {
+      const { unmount } = render(
+        <MemoryRouter initialEntries={[path]}>
+          <BottomNav />
+        </MemoryRouter>,
+      );
+      const name = screen.getAllByRole('link').find((l) => l.getAttribute('aria-current') === 'page')?.textContent;
+      unmount();
+      return name;
+    };
+    expect(current('/house/groceries')).toBe('Shopping');
+    expect(current('/expenses/balances')).toBe('Finance');
+    expect(current('/chores/upcoming')).toBe('Tasks');
+    expect(current('/you/members')).toBe('Settings');
+  });
+
+  it('draws the design icons through a mask: the current tab coral, the others muted', () => {
+    render(
+      <MemoryRouter initialEntries={['/chores']}>
+        <BottomNav />
+      </MemoryRouter>,
+    );
+    const iconOf = (name: string) => screen.getByRole('link', { name }).querySelector('span[aria-hidden="true"]') as HTMLElement;
+    expect(iconOf('Tasks').style.color).toBe('var(--primary)');
+    expect(iconOf('Home').style.color).toBe('var(--nav-idle)');
+    for (const name of ['Home', 'Shopping', 'Tasks', 'Finance', 'Settings']) {
+      expect(iconOf(name).getAttribute('style'), name).toMatch(/mask-image/);
+      expect(iconOf(name).getAttribute('style'), name).toMatch(/.svg/);
+    }
   });
 
   it('tabs are at least 44px tall', () => {
@@ -144,15 +176,6 @@ describe('Header', () => {
     render(<Header title="Details" onBack={onBack} />);
     await userEvent.click(screen.getByRole('button', { name: 'Back' }));
     expect(onBack).toHaveBeenCalledOnce();
-  });
-
-  it('bell disabled: says why and does nothing', async () => {
-    const onClick = vi.fn();
-    render(<Header title="Home" bell={{ disabledReason: 'The activity centre arrives in a later update.', onClick }} />);
-    const bell = screen.getByRole('button', { name: 'Notifications' });
-    expect(bell).toHaveAccessibleDescription('The activity centre arrives in a later update.');
-    await userEvent.click(bell);
-    expect(onClick).not.toHaveBeenCalled();
   });
 
   it('bell enabled: includes the unread count in its name', async () => {

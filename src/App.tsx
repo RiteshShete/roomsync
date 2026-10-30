@@ -13,7 +13,7 @@ import { WelcomeScreen } from '@/features/auth/WelcomeScreen';
 import { PublicOnly, RequireAuth } from '@/features/auth/guards';
 import { ChooseHouseholdScreen } from '@/features/household/ChooseHouseholdScreen';
 import { CreateHouseholdScreen } from '@/features/household/CreateHouseholdScreen';
-import { HomeScreen } from '@/features/household/HomeScreen';
+import { HomeScreen } from '@/features/home/HomeScreen';
 import { HouseholdSettingsScreen } from '@/features/household/HouseholdSettingsScreen';
 import { InvitesScreen } from '@/features/household/InvitesScreen';
 import { JoinHouseholdScreen } from '@/features/household/JoinHouseholdScreen';
@@ -21,7 +21,6 @@ import { MembersScreen } from '@/features/household/MembersScreen';
 import { ChoreFormScreen } from '@/features/chores/ChoreFormScreen';
 import { ChoresScreen } from '@/features/chores/ChoresScreen';
 import { GroceriesScreen } from '@/features/groceries/GroceriesScreen';
-import { HouseScreen } from '@/features/house/HouseScreen';
 import { BalancesScreen } from '@/features/expenses/BalancesScreen';
 import { ExpenseDetailsScreen } from '@/features/expenses/ExpenseDetailsScreen';
 import { ExpenseFormScreen } from '@/features/expenses/ExpenseFormScreen';
@@ -75,7 +74,6 @@ export function AppRoutes() {
             <Route path="chores/completed" element={<ChoresScreen tab="completed" />} />
             <Route path="chores/new" element={<ChoreFormScreen />} />
             <Route path="chores/:id/edit" element={<ChoreFormScreen />} />
-            <Route path="house" element={<HouseScreen />} />
             <Route path="house/groceries" element={<GroceriesScreen />} />
             <Route path="house/announcements" element={<AnnouncementsScreen />} />
             <Route path="activity" element={<ActivityScreen />} />

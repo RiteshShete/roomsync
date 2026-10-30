@@ -5,7 +5,6 @@ import { copy } from '@/copy';
 import { errorMessage, toAppError } from '@/lib/errors';
 import { formatDateTime } from '@/lib/format';
 import { useDirectory } from '@/features/household/useDirectory';
-import { SubPage } from '@/features/shell/SubPage';
 import { useHouseholdAccess } from '@/features/household/useMembership';
 import { Button, Chip, EmptyState, ErrorState, Fab, Icon, IconButton, SkeletonList, useToast } from '@/ui';
 import { useGroceries, useInvalidateGroceries } from './hooks';
@@ -143,7 +142,7 @@ export function GroceriesScreen() {
     );
 
   return (
-    <SubPage title={copy.groceries.title} backTo="/house">
+    <div className="flex flex-col gap-4 p-4">
       {items.length > 0 ? (
         <section aria-label={copy.groceries.progress} className="rounded-xl border border-line bg-surface p-4">
           <div className="flex items-center justify-between gap-3">
@@ -189,6 +188,6 @@ export function GroceriesScreen() {
           onDeleted={(i) => toast.show({ message: copy.groceries.deleted(i.name), action: { label: copy.groceries.undo, onClick: () => restore.mutate(i) } })}
         />
       ) : null}
-    </SubPage>
+    </div>
   );
 }

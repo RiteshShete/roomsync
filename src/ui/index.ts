@@ -7,7 +7,8 @@ export { ToastProvider, useToast, type ToastInput, type ToastTone } from './Toas
 export { Avatar, AvatarGroup } from './Avatar';
 export { Chip, type ChipTone } from './Chip';
 export { EmptyState, ErrorState, Skeleton, SkeletonList } from './States';
-export { BottomNav, NAV_ITEMS } from './BottomNav';
+export { BottomNav } from './BottomNav';
+export { BellButton } from './BellButton';
 export { Header, type HeaderProps } from './Header';
 export { Icon, BrandMark, type IconName } from './Icon';
 export { SelectField, type SelectFieldProps } from './SelectField';
@@ -15,7 +16,6 @@ export { Toggle, type ToggleProps } from './Toggle';
 export { PillLink, type PillVariant } from './PillLink';
 export { HeaderTabs } from './Header';
 export { Fab } from './Fab';
-export { NavRow, DisabledRow } from './NavRow';
 export { TextArea, type TextAreaProps } from './TextArea';
 export { FormError } from './FormError';
 export { ListGroup, ListRow } from './ListGroup';

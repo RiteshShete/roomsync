@@ -143,7 +143,7 @@ describe('delete and undo', () => {
     await userEvent.click(within(dialog).getByRole('button', { name: copy.expenseDetails.deleteConfirm }));
     expect(expensesApi.deleteExpense).toHaveBeenCalledWith('e1', 4);
     expect(await screen.findByText(copy.expenseDetails.deletedToast)).toBeInTheDocument();
-    expect(await screen.findByRole('heading', { level: 1, name: 'Expenses' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { level: 1, name: copy.expenses.title })).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: copy.expenseDetails.undo }));
     expect(expensesApi.restoreExpense).toHaveBeenCalledWith('e1');
     expect(await screen.findByText(copy.expenseDetails.restored)).toBeInTheDocument();

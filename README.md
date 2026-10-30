@@ -43,7 +43,7 @@ npm run dev        # http://localhost:5173
 
 1. Open http://localhost:5173.
 2. **With demo data:** after `npm run seed:dev`, log in as `aarav@roomsync.test` with password `roomsync-local-1` (also `riya@`, `kunal@`, `sneha@roomsync.test`, same password). Aarav is the owner, Riya an admin, Kunal and Sneha members. These accounts exist on your local stack only. Use separate browser profiles to be two people at once.
-3. **From scratch:** sign up with any email. Local email confirmation is off, so you are signed in straight away. Choose **Create a household**, or **Join a household** with a code (You → Invite roommates shows a code once).
+3. **From scratch:** sign up with any email. Local email confirmation is off, so you are signed in straight away. Choose **Create a household**, or **Join a household** with a code (Settings → Invite roommates shows a code once).
 4. Password-reset and confirmation emails are caught by the local inbox at http://127.0.0.1:54324.
 5. `docs/MANUAL_TEST_GUIDE.md` is a step-by-step script covering every feature.
 

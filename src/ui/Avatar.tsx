@@ -20,7 +20,10 @@ function textOn(hex: string): string {
   return lum > 0.4 ? '#1b1b1b' : '#ffffff';
 }
 
-const SIZES = { sm: 'h-8 w-8 text-xs', md: 'h-11 w-11 text-sm', lg: 'h-14 w-14 text-lg' } as const;
+const SIZES = { sm: 'h-8 w-8 text-xs', feed: 'h-10 w-10 text-sm', md: 'h-11 w-11 text-sm', lg: 'h-14 w-14 text-lg' } as const;
+
+/** How far each avatar tucks under the previous one in a group. */
+const OVERLAP: Record<keyof typeof SIZES, string> = { sm: '-ml-2', feed: '-ml-3.5', md: '-ml-2', lg: '-ml-3' };
 
 export function Avatar({
   name,
@@ -60,7 +63,7 @@ export function AvatarGroup({
   return (
     <span role="group" aria-label={`${members.length} members`} className="inline-flex items-center">
       {shown.map((m, i) => (
-        <span key={`${m.name}-${i}`} className={i === 0 ? '' : '-ml-2'}>
+        <span key={`${m.name}-${i}`} className={i === 0 ? '' : OVERLAP[size]}>
           <Avatar name={m.name} color={m.color} size={size} ring />
         </span>
       ))}
@@ -68,7 +71,7 @@ export function AvatarGroup({
         <span
           aria-label={`${extra} more`}
           role="img"
-          className={`-ml-2 inline-flex items-center justify-center rounded-full bg-sunken font-bold text-ink ring-2 ring-surface ${SIZES[size]}`}
+          className={`${OVERLAP[size]} inline-flex items-center justify-center rounded-full bg-sunken font-bold text-ink ring-2 ring-surface ${SIZES[size]}`}
         >
           <span aria-hidden="true">+{extra}</span>
         </span>

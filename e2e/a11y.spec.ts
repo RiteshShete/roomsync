@@ -7,7 +7,7 @@ test.describe.configure({ timeout: 240_000 });
 /** Every screen a person can reach, with a hash route. */
 const ROUTES = [
   '/', '/activity', '/expenses', '/expenses/all', '/expenses/balances', '/expenses/settlements', '/expenses/new', '/expenses/settle',
-  '/chores', '/chores/upcoming', '/chores/completed', '/chores/new', '/house', '/house/groceries', '/house/announcements',
+  '/chores', '/chores/upcoming', '/chores/completed', '/chores/new', '/house/groceries', '/house/announcements',
   '/you', '/you/profile', '/you/notifications', '/you/privacy', '/you/members', '/you/invites', '/you/household', '/you/household/leave',
 ];
 
@@ -35,7 +35,8 @@ async function sideways(page: Page): Promise<string> {
 }
 
 async function scan(page: Page, label: string) {
-  const results = await new AxeBuilder({ page }).withTags(WCAG).analyze();
+  // [data-logotype] is the brand wordmark: WCAG 1.4.3 exempts logo text from the contrast minimum.
+  const results = await new AxeBuilder({ page }).withTags(WCAG).exclude('[data-logotype]').analyze();
   const summary = results.violations.map((v) => `${v.id} (${v.impact}): ${v.nodes.slice(0, 3).map((n) => n.target.join(' ')).join(' | ')}`);
   expect(summary, `${label}: accessibility violations`).toEqual([]);
 }
@@ -336,7 +337,7 @@ test.describe('Accessibility: announcements to assistive tech', () => {
   test('the page has one main landmark, one h1, labelled navigation, and a language', async ({ browser }) => {
     const users = await populated(browser);
     const page = users.a.page;
-    for (const route of ['/', '/expenses', '/chores', '/house', '/you', '/activity']) {
+    for (const route of ['/', '/expenses', '/chores', '/house/groceries', '/you', '/activity']) {
       await page.goto(`/#${route}`);
       await page.reload();
       await page.waitForLoadState('networkidle');

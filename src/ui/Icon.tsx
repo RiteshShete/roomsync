@@ -1,4 +1,5 @@
 import type { SVGProps } from 'react';
+import logo from '@/assets/brand/logo.png';
 
 /** Small stroke icon set (24px grid). Decorative by default: pair with a visible or aria-label text. */
 const PATHS = {
@@ -49,20 +50,14 @@ export function Icon({ name, size = 24, ...rest }: { name: IconName; size?: numb
   );
 }
 
-/** RoomSync mark: coral rounded square with a house. Decorative unless given a title by the caller. */
+/**
+ * The RoomSync logo from the design: the square artwork cropped inside a rounded box, exactly as the
+ * design crops it (40 × 41 px at size 40). Decorative: the product name is always written next to it.
+ */
 export function BrandMark({ size = 40 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 40 40" aria-hidden="true" focusable="false">
-      <rect width="40" height="40" rx="11" fill="var(--brand)" />
-      <path
-        d="M10 19.5L20 11l10 8.5V30H10z"
-        fill="none"
-        stroke="#fff"
-        strokeWidth="2.4"
-        strokeLinejoin="round"
-        strokeLinecap="round"
-      />
-      <path d="M17 30v-6h6v6" fill="none" stroke="#fff" strokeWidth="2.4" strokeLinejoin="round" />
-    </svg>
+    <span aria-hidden="true" className="relative inline-block shrink-0 overflow-hidden" style={{ width: size, height: Math.round(size * 1.025), borderRadius: size * 0.225 }}>
+      <img src={logo} alt="" className="absolute max-w-none" style={{ height: '155.56%', width: '159.09%', left: '-29.55%', top: '-23.33%' }} />
+    </span>
   );
 }

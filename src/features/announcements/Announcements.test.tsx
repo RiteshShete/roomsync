@@ -19,15 +19,6 @@ beforeEach(() => {
 
 const card = (title: string) => screen.getByRole('heading', { name: title }).closest('li')!;
 
-describe('House hub', () => {
-  it('links to announcements and groceries, and lists the rest as unavailable instead of dead links', async () => {
-    renderApp('/house');
-    expect(await screen.findByRole('link', { name: new RegExp(copy.house.announcements) })).toHaveAttribute('href', '/house/announcements');
-    expect(screen.getByRole('link', { name: new RegExp(copy.house.groceries) })).toHaveAttribute('href', '/house/groceries');
-    expect(screen.getAllByText(copy.house.notAvailable).length).toBeGreaterThanOrEqual(4);
-  });
-});
-
 describe('announcement list', () => {
   const list = [
     announcement({ id: 'a', title: 'Pinned notice', pinnedAt: '2026-05-02T10:00:00Z', createdBy: 'u-riya' }),

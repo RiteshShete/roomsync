@@ -73,8 +73,10 @@ describe('Profile page', () => {
 
 describe('top bar titles', () => {
   it.each([
-    ['/you', 'You'],
-    ['/house', 'House'],
+    ['/you', 'Settings'],
+    ['/house/groceries', 'Shopping'],
+    ['/chores', 'Tasks'],
+    ['/expenses', 'Finance'],
     ['/activity', copy.activity.title],
     ['/you/notifications', copy.notificationPrefs.title],
   ])('%s: the page name is bold', async (path, title) => {

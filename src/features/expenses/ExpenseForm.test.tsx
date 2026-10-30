@@ -165,7 +165,7 @@ describe('saving a new expense', () => {
       ],
     });
     expect(await screen.findByText(copy.expenseForm.saved)).toBeInTheDocument();
-    expect(await screen.findByRole('heading', { level: 1, name: 'Expenses' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { level: 1, name: copy.expenses.title })).toBeInTheDocument();
   });
 
   it('percentage payloads carry basis points', async () => {

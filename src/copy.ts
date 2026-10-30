@@ -113,20 +113,27 @@ export const copy = {
     back: 'Back',
   },
 
+  feed: {
+    title: 'House Feed',
+    collapse: 'Hide House Feed',
+    expand: 'Show House Feed',
+    youOwe: 'You owe',
+    youAreOwed: 'You are owed',
+    settled: 'You’re all settled up',
+    by: (name: string) => `· ${name}`,
+    noAnnouncements: 'No announcements yet',
+    alone: 'Just you so far.',
+    invite: 'Invite your roommates',
+    members: (n: number) => (n === 1 ? '1 member' : `${n} members`),
+  },
+
   home: {
     emptyTitle: 'Your house is ready', // [spec §8.4]
     emptyBody: 'Add your first expense, chore, or grocery item to get everyone organised.', // [spec §8.4]
-    quickAdd: 'Quick add',
-    addExpense: 'Add expense',
-    addChore: 'Add chore',
-    addGrocery: 'Grocery list',
-    members: 'Your household',
-    alone: 'Just you so far. Invite your roommates to get started.',
-    inviteCta: 'Invite roommates',
   },
 
   chores: {
-    title: 'Chores',
+    title: 'Tasks',
     today: 'Today',
     upcoming: 'Upcoming',
     completed: 'Completed',
@@ -199,20 +206,8 @@ export const copy = {
     conflictDone: 'Someone just changed this chore. We refreshed the list.',
   },
 
-  house: {
-    groceries: 'Grocery list',
-    groceriesBody: 'What the house needs from the shop.',
-    announcements: 'Announcements',
-    announcementsBody: 'Notices for everyone in the house.',
-    inventory: 'Inventory',
-    calendar: 'Calendar',
-    concerns: 'Household concerns',
-    contacts: 'Emergency contacts',
-    notAvailable: 'Not available in this version',
-  },
-
   groceries: {
-    title: 'Grocery list',
+    title: 'Shopping',
     needed: 'Needed',
     purchased: 'Purchased',
     progress: 'Shopping progress',
@@ -272,7 +267,8 @@ export const copy = {
   } as Record<string, string>,
 
   expenses: {
-    title: 'Expenses',
+    title: 'Finance',
+    tabExpenses: 'Expenses',
     youOwe: 'You owe',
     youAreOwed: 'You are owed',
     allSettled: 'You’re all settled up.',
@@ -585,7 +581,6 @@ export const copy = {
     balanceOwed: (amt: string) => `You are owed ${amt}.`,
     balanceZero: 'You’re settled up.',
     balanceNote: 'An estimate from the expenses and settlements recorded so far. Reversed or disputed payments aren’t counted, and anything recorded later can change it.',
-    balanceError: 'We couldn’t load your balance.',
     choresTitle: 'Open chores',
     choresNone: 'No open chores are assigned to you.',
     choresSome: (n: number) => (n === 1 ? '1 open chore assigned to you will be passed on:' : `${n} open chores assigned to you will be passed on:`),
@@ -632,7 +627,6 @@ export const copy = {
     notesTitle: 'Notes and disputes',
     notesBody: 'Your housemates can see these. They are never resolved automatically.',
     notesEmpty: 'You haven’t added any notes.',
-    addNote: 'Add a note or dispute',
     noteLabel: 'Note or dispute',
     noteSave: 'Add note',
     noteSaving: 'Adding…',
@@ -763,7 +757,7 @@ export const copy = {
     markedAll: 'Everything is marked as read.',
     nothingToMark: 'There’s nothing unread.',
     quietNote: 'Quiet hours are on, so the unread badge is paused. Everything is still listed here.',
-    recent: 'Recent activity',
+    recent: 'Activity',
     seeAll: 'See all activity',
     updated: 'Updated',
     categories: {
@@ -859,10 +853,10 @@ export const copy = {
   nav: {
     label: 'Main',
     home: 'Home',
-    expenses: 'Expenses',
-    chores: 'Chores',
-    house: 'House',
-    you: 'You',
+    shopping: 'Shopping',
+    tasks: 'Tasks',
+    finance: 'Finance',
+    settings: 'Settings',
   },
 
   header: {
