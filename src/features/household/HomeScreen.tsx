@@ -26,7 +26,7 @@ export function HomeScreen() {
         <h2 id="home-members" className="text-lg font-bold text-ink">
           {copy.home.members}
         </h2>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <AvatarGroup members={members.data.map((m) => ({ name: m.displayName, color: m.avatarColor }))} size="md" />
           <p className="text-sm font-semibold text-ink">{members.data.length === 1 ? '1 member' : `${members.data.length} members`}</p>
         </div>

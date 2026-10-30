@@ -4,11 +4,11 @@ import { addExpense, editExpense, type Expense } from '@/api/expenses';
 import type { DefaultSplit, MemberWithLeft } from '@/api/households';
 import { copy } from '@/copy';
 import { formatMoney, formatPercentBp, parsePercentBp, todayIso, type SplitMethod } from '@/domain';
-import { errorMessage, toAppError } from '@/lib/errors';
+import { errorMessage, toAppError, saveErrorMessage } from '@/lib/errors';
 import { useSession } from '@/features/auth/Session';
 import { SubPage } from '@/features/shell/SubPage';
 import { useHousehold, useHouseholdAccess, type HouseholdAccess } from '@/features/household/useMembership';
-import { AmountInput, Avatar, Button, Chip, EmptyState, ErrorState, Field, FormError, SelectField, SkeletonList, useToast } from '@/ui';
+import { AmountInput, Avatar, Button, ButtonRow, Chip, EmptyState, ErrorState, Field, FormError, SelectField, SkeletonList, useToast } from '@/ui';
 import { CATEGORY_OPTIONS } from './categories';
 import { checkForm, computeSplit, inputFromExpense, sameInput, stateFromExpense, type ExpenseFormState } from './formModel';
 import { useFreshDirectory } from '@/features/household/useDirectory';
@@ -72,7 +72,7 @@ function Form({ access, members, expense, defaultSplit }: { access: HouseholdAcc
       }
     } catch (err) {
       setConflict(toAppError(err).code === 'conflict');
-      setFormError(errorMessage(err)); // every field stays exactly as typed
+      setFormError(saveErrorMessage(err)); // every field stays exactly as typed
     } finally {
       setBusy(false);
     }
@@ -126,7 +126,7 @@ function Form({ access, members, expense, defaultSplit }: { access: HouseholdAcc
           </button>
         </div>
 
-        <div role="radiogroup" aria-label={copy.expenseForm.method} className="mb-4 grid grid-cols-3 gap-2">
+        <div role="radiogroup" aria-label={copy.expenseForm.method} className="mb-4 grid grid-cols-[repeat(auto-fit,minmax(6.5rem,1fr))] gap-2">
           {METHODS.map((m) => (
             <button
               key={m}
@@ -134,7 +134,7 @@ function Form({ access, members, expense, defaultSplit }: { access: HouseholdAcc
               role="radio"
               aria-checked={state.method === m}
               onClick={() => patch({ method: m })}
-              className={`min-h-11 cursor-pointer rounded-xl border px-2 text-sm ${state.method === m ? 'border-primary bg-brand-soft font-bold text-coral' : 'border-line bg-surface font-normal text-ink'}`}
+              className={`min-h-11 cursor-pointer rounded-xl border px-2 py-1 text-sm break-words ${state.method === m ? 'border-primary bg-brand-soft font-bold text-coral' : 'border-line bg-surface font-normal text-ink'}`}
             >
               {methodLabel(m)}
             </button>
@@ -191,7 +191,7 @@ function Form({ access, members, expense, defaultSplit }: { access: HouseholdAcc
                     <span aria-hidden="true">%</span>
                   </span>
                 ) : null}
-                {on && state.method === 'equal' && shareOf.has(m.memberId) ? <span className="text-base font-bold text-success">{money(shareOf.get(m.memberId)!)}</span> : null}
+                {on && state.method === 'equal' && shareOf.has(m.memberId) ? <span className="text-base font-bold text-success-text">{money(shareOf.get(m.memberId)!)}</span> : null}
               </li>
             );
           })}
@@ -250,14 +250,14 @@ function Form({ access, members, expense, defaultSplit }: { access: HouseholdAcc
 
       <FormError message={formError} />
       {conflict && expense ? <ConflictRefresh expenseId={expense.id} onRefreshed={(v) => { setBaseVersion(v); setConflict(false); setFormError(copy.expenseForm.refreshed); }} /> : null}
-      <div className="flex gap-3 rounded-xl bg-strip p-3">
-        <Button variant="secondary" className="flex-1" onClick={() => navigate(expense ? `/expenses/${expense.id}` : '/expenses')}>
+      <ButtonRow className="rounded-xl bg-strip p-3">
+        <Button variant="secondary" onClick={() => navigate(expense ? `/expenses/${expense.id}` : '/expenses')}>
           Cancel
         </Button>
-        <Button type="submit" className="flex-1" loading={busy} loadingLabel={copy.expenseForm.saving} disabled={!!blockedReason} disabledReason={blockedReason ?? undefined}>
+        <Button type="submit" loading={busy} loadingLabel={copy.expenseForm.saving} disabled={!!blockedReason} disabledReason={blockedReason ?? undefined}>
           {copy.expenseForm.save}
         </Button>
-      </div>
+      </ButtonRow>
       {blockedReason ? <p className="text-center text-sm text-ink2">{blockedReason}</p> : null}
     </form>
   );

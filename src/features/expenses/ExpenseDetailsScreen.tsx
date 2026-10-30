@@ -9,7 +9,7 @@ import { formatDateTime, formatDay } from '@/lib/format';
 import { useSession } from '@/features/auth/Session';
 import { SubPage } from '@/features/shell/SubPage';
 import { useHouseholdAccess } from '@/features/household/useMembership';
-import { Avatar, Button, Chip, ConfirmDialog, EmptyState, ErrorState, Icon, SkeletonList, useToast } from '@/ui';
+import { Avatar, Button, ButtonRow, Chip, ConfirmDialog, EmptyState, ErrorState, Icon, SkeletonList, useToast } from '@/ui';
 import { categoryLabel } from './categories';
 import { useDirectory } from '@/features/household/useDirectory';
 import { useExpense, useExpenseHistory, useInvalidateMoney, useMoney } from './hooks';
@@ -180,20 +180,20 @@ export function ExpenseDetailsScreen() {
           {copy.expenseDetails.restore}
         </Button>
       ) : (
-        <div className="flex gap-3">
+        <ButtonRow>
           {canChange && !access.writeBlockedReason ? (
-            <Link to={`/expenses/${e.id}/edit`} className="inline-flex min-h-11 flex-1 items-center justify-center rounded-xl border border-line bg-surface px-5 text-base font-semibold text-coral hover:bg-brand-soft">
+            <Link to={`/expenses/${e.id}/edit`} className="inline-flex min-h-11 items-center justify-center rounded-xl border border-line bg-surface px-5 text-base font-semibold text-coral hover:bg-brand-soft">
               {copy.expenseDetails.edit}
             </Link>
           ) : (
-            <Button variant="secondary" className="flex-1" disabled disabledReason={access.writeBlockedReason ?? copy.expenseDetails.noPermission}>
+            <Button variant="secondary" disabled disabledReason={access.writeBlockedReason ?? copy.expenseDetails.noPermission}>
               {copy.expenseDetails.edit}
             </Button>
           )}
-          <Button variant="danger" className="flex-1" disabled={!canChange || !!access.writeBlockedReason} disabledReason={access.writeBlockedReason ?? copy.expenseDetails.noPermission} onClick={() => setConfirmDelete(true)}>
+          <Button variant="danger" disabled={!canChange || !!access.writeBlockedReason} disabledReason={access.writeBlockedReason ?? copy.expenseDetails.noPermission} onClick={() => setConfirmDelete(true)}>
             {copy.expenseDetails.delete}
           </Button>
-        </div>
+        </ButtonRow>
       )}
       {!canChange ? <p className="text-sm text-ink2">{copy.expenseDetails.noPermission}</p> : null}
 

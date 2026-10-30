@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { addGrocery, deleteGrocery, moveBackToNeeded, updateGrocery, type GroceryInput, type GroceryItem } from '@/api/groceries';
 import { copy } from '@/copy';
 import { findDuplicate } from '@/domain';
-import { errorMessage, toAppError } from '@/lib/errors';
+import { toAppError, saveErrorMessage } from '@/lib/errors';
 import { Button, Field, FormError, SelectField, Sheet, useToast } from '@/ui';
 import { useInvalidateGroceries } from './hooks';
 
@@ -92,7 +92,7 @@ export function ItemSheet({
         await invalidate();
         onConflict();
         onClose();
-      } else setFormError(errorMessage(err)); // the sheet and every field stay as they were
+      } else setFormError(saveErrorMessage(err)); // the sheet and every field stay as they were
     } finally {
       setBusy(false);
     }

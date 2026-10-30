@@ -75,9 +75,9 @@ export function ActivityScreen() {
         </div>
       ) : null}
       {feed.mine.length > 0 ? (
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
           <p className="text-sm text-ink2">{hasUnread ? copy.activity.unreadCount(unreadN) : copy.activity.caughtUp}</p>
-          <Button variant="tertiary" className="shrink-0 px-3 text-sm" loading={readAll.isPending} disabled={!hasUnread} disabledReason={copy.activity.nothingToMark} onClick={() => readAll.mutate()}>
+          <Button variant="tertiary" className="ml-auto px-3 text-sm" loading={readAll.isPending} disabled={!hasUnread} disabledReason={copy.activity.nothingToMark} onClick={() => readAll.mutate()}>
             {copy.activity.markAll}
           </Button>
         </div>

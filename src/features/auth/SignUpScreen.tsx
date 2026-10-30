@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { signUp } from '@/api/auth';
 import { copy } from '@/copy';
-import { errorMessage } from '@/lib/errors';
+import { saveErrorMessage } from '@/lib/errors';
 import { Button, Field, FormError, PasswordField } from '@/ui';
 import { AuthLayout, Notice } from './AuthLayout';
 import { focusFirstError, signUpSchema, validate, type FormErrors } from './validation';
@@ -42,7 +42,7 @@ export function SignUpScreen() {
       // With a session, the router redirects away; otherwise the user must confirm their email first.
       if (needsEmailConfirmation) setNeedsConfirmation(true);
     } catch (err) {
-      setFormError(errorMessage(err)); // values stay exactly as typed
+      setFormError(saveErrorMessage(err)); // values stay exactly as typed
     } finally {
       setBusy(false);
     }

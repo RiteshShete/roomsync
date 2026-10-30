@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { saveNotificationPrefs } from '@/api/activity';
 import { copy } from '@/copy';
 import { NOTIFICATION_CATEGORIES } from '@/domain';
-import { errorMessage } from '@/lib/errors';
+import { errorMessage, saveErrorMessage } from '@/lib/errors';
 import { useInvalidateActivity, useNotificationPrefs } from '@/features/activity/hooks';
 import { useHouseholdAccess } from '@/features/household/useMembership';
 import { SubPage } from '@/features/shell/SubPage';
@@ -49,7 +49,7 @@ export function NotificationPrefsScreen() {
       await invalidate();
       toast.show({ message: copy.notificationPrefs.saved });
     } catch (err) {
-      setFormError(errorMessage(err));
+      setFormError(saveErrorMessage(err));
     } finally {
       setBusy(false);
     }

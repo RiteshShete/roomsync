@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { copy } from '@/copy';
-import { errorMessage, toAppError } from './errors';
+import { errorMessage, toAppError, saveErrorMessage } from './errors';
 
 describe('toAppError', () => {
   it.each([
@@ -50,6 +50,22 @@ describe('network failures reported by supabase-js', () => {
   it('does not mistake unrelated messages for network errors', () => {
     expect(toAppError({ message: 'permission_denied' })).toEqual({ code: 'permission_denied' });
     expect(toAppError({ message: 'duplicate key value' }).code).toBe('unknown');
+  });
+});
+
+describe('saveErrorMessage (failed saves)', () => {
+  it('keeps specific wording for known problems', () => {
+    expect(saveErrorMessage({ message: 'conflict' })).toBe(copy.errors.conflict);
+    expect(saveErrorMessage({ message: 'permission_denied' })).toBe(copy.errors.permission);
+    expect(saveErrorMessage(new TypeError('Failed to fetch'))).toBe(copy.errors.network);
+    expect(saveErrorMessage({ message: 'household_archived' })).toBe(copy.errors.householdArchived);
+  });
+
+  it('says the input is still there for anything unexpected (server error, odd shapes)', () => {
+    for (const e of [{ message: 'internal error', code: 'XX000' }, new Error('boom'), 'weird', null, undefined, 42, {}]) {
+      expect(saveErrorMessage(e)).toBe(copy.errors.save);
+    }
+    expect(copy.errors.save).toMatch(/Your information is still here/);
   });
 });
 

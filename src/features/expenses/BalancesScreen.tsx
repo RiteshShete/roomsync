@@ -68,7 +68,7 @@ export function BalancesScreen() {
                   </p>
                   {r.member!.status === 'left' ? <Chip tone="warning">{copy.expenseForm.leftChip}</Chip> : null}
                 </div>
-                <p className={`text-right text-base font-bold ${r.netMinor > 0 ? 'text-success' : r.netMinor < 0 ? 'text-danger' : 'text-ink2'}`}>
+                <p className={`text-right text-base font-bold ${r.netMinor > 0 ? 'text-success-text' : r.netMinor < 0 ? 'text-danger' : 'text-ink2'}`}>
                   {r.netMinor === 0 ? copy.balances.settled : r.netMinor > 0 ? copy.balances.isOwed(fmt(r.netMinor)) : copy.balances.owes(fmt(-r.netMinor))}
                 </p>
               </li>
@@ -133,7 +133,7 @@ export function BalancesScreen() {
                   {lines.map((l, i) => (
                     <li key={`${l.refId}-${l.kind}-${i}`} className="flex justify-between gap-3 text-base">
                       <span className="text-ink">{lineText(l)}</span>
-                      <span className={`shrink-0 font-bold ${l.amountMinor < 0 ? 'text-danger' : 'text-success'}`}>{signed(l.amountMinor, fmt)}</span>
+                      <span className={`shrink-0 font-bold ${l.amountMinor < 0 ? 'text-danger' : 'text-success-text'}`}>{signed(l.amountMinor, fmt)}</span>
                     </li>
                   ))}
                 </ul>

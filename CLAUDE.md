@@ -5,7 +5,7 @@ Product: shared-living app (expenses, chores, groceries, announcements, move-out
 ## Commands
 - `npm run typecheck` · `npm test` · `npm run build` · `npm run dev`
 - `supabase start` / `supabase stop` / `supabase status` · `npm run db:reset` · `npm run db:test` · `npm run db:types`
-- Gate before calling any phase done: typecheck + unit tests + `supabase test db` + build (+ e2e when it exists).
+- Gate before calling any phase done: `npm run verify` (typecheck + unit tests + build + `supabase test db` + query plans + e2e). `npm run verify -- --reset` rebuilds the local database first.
 
 ## Rules that must never be broken
 1. Money is integer minor units. No floats. Use `src/domain/money.ts` for parsing and formatting.

@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { recordSettlement } from '@/api/settlements';
 import { copy } from '@/copy';
-import { errorMessage } from '@/lib/errors';
+import { errorMessage, saveErrorMessage } from '@/lib/errors';
 import { formatDay } from '@/lib/format';
 import { SubPage } from '@/features/shell/SubPage';
 import { useHouseholdAccess } from '@/features/household/useMembership';
@@ -95,7 +95,7 @@ export function RecordSettlementScreen() {
       await invalidate();
       setStep('done');
     } catch (err) {
-      setError(errorMessage(err)); // the details stay exactly as entered
+      setError(saveErrorMessage(err)); // the details stay exactly as entered
     } finally {
       setBusy(false);
     }

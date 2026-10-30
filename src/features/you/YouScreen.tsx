@@ -47,7 +47,7 @@ export function YouScreen() {
           <span aria-hidden="true" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary text-on-primary">
             <Icon name="mail" size={22} />
           </span>
-          <span className="flex min-w-0 flex-1 flex-col">
+          <span className="flex min-w-0 flex-1 flex-col break-words">
             <span className="text-base font-bold text-ink-strong">{copy.you.invites}</span>
             <span className="text-sm text-ink">{copy.you.invitesBody}</span>
           </span>

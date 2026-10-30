@@ -3,7 +3,7 @@ import { useState, type FormEvent } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { setHouseholdArchived, updateHousehold, type DefaultSplit, type HouseholdDetails } from '@/api/households';
 import { copy } from '@/copy';
-import { errorMessage, toAppError } from '@/lib/errors';
+import { errorMessage, toAppError, saveErrorMessage } from '@/lib/errors';
 import { SubPage } from '@/features/shell/SubPage';
 import { Button, ConfirmDialog, ErrorState, Field, FormError, SelectField, SkeletonList, Toggle, useToast } from '@/ui';
 import { currencyOptionsWith, SPLIT_OPTIONS } from './options';
@@ -39,7 +39,7 @@ function SettingsForm({ household, canEdit, readOnlyReason, currencyLocked }: { 
     },
     onError: (err) => {
       setConflict(toAppError(err).code === 'conflict');
-      setFormError(errorMessage(err));
+      setFormError(saveErrorMessage(err));
     },
   });
 

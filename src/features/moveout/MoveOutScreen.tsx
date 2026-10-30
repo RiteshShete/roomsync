@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { addMoveOutNote, cancelMoveOut, startMoveOut } from '@/api/households';
 import { copy } from '@/copy';
 import { addDays, latestMoveOutDate, moveOutTiming, todayIso } from '@/domain';
-import { errorMessage } from '@/lib/errors';
+import { errorMessage, saveErrorMessage } from '@/lib/errors';
 import { formatDateTime, formatDay } from '@/lib/format';
 import { useBalances, useMoney } from '@/features/expenses/hooks';
 import { useHouseholdAccess, useMembers, useMembership, type HouseholdAccess } from '@/features/household/useMembership';
@@ -45,7 +45,7 @@ function Wizard({ access }: { access: HouseholdAccess }) {
       toast.show({ message: check.input.effectiveDate === today ? copy.moveOut.startedToday : copy.moveOut.started });
       await refresh();
     } catch (err) {
-      setFormError(errorMessage(err)); // the date, note and tick stay as they were
+      setFormError(saveErrorMessage(err)); // the date, note and tick stay as they were
     } finally {
       setBusy(false);
     }
@@ -137,7 +137,7 @@ function LeavingStatus({ access, effectiveDate }: { access: HouseholdAccess; eff
       await notes.refetch();
       toast.show({ message: copy.moveOut.noteAdded });
     } catch (err) {
-      setNoteError(errorMessage(err)); // the text stays
+      setNoteError(saveErrorMessage(err)); // the text stays
     } finally {
       setAdding(false);
     }

@@ -10,9 +10,13 @@ export function createQueryClient(): QueryClient {
         // Don't hold on to unused data: nothing is kept around for long, in the browser or the database.
         gcTime: 60_000,
         refetchOnWindowFocus: true,
+        // Offline, still try: the request fails at once and the screen shows a retryable error. The library's
+        // default would pause it silently and leave a spinner (and run it later, unasked, when back online).
+        networkMode: 'always',
         retry: (failureCount, error) => failureCount < 2 && toAppError(error).code === 'network',
       },
-      mutations: { retry: 0 },
+      // Same for saves: an action taken offline must fail visibly now, never fire by itself later.
+      mutations: { retry: 0, networkMode: 'always' },
     },
   });
 }

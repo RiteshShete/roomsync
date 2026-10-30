@@ -25,7 +25,7 @@
   --primary: #ff9b85;
   --primary-pressed: #f5856d;
   --on-primary: #272525; /* dark ink: 7:1 on coral */
-  --coral-text: #e4573d;
+  --coral-text: #bf3b25;
   --brand: #fe8d76; /* logo tile */
   --brand-soft: #fff3f0; /* icon tiles, selected rows */
   --coral-strip: #ffe7e2; /* action strips under cards */
@@ -35,7 +35,7 @@
   --amber-pressed: #e6a600;
   --on-amber: #272525;
   --success: #0da576;
-  --success-text: #0b8a63;
+  --success-text: #08775a;
   --success-soft: #d8f0e9;
   --warning: #8a5a00;
   --warning-soft: #fff3d6;

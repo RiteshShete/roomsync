@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createInvite, revokeInvite, type CreatedInvite, type Invite } from '@/api/invites';
 import { copy } from '@/copy';
-import { errorMessage } from '@/lib/errors';
+import { errorMessage, saveErrorMessage } from '@/lib/errors';
 import { formatDateTime } from '@/lib/format';
 import { SubPage } from '@/features/shell/SubPage';
 import { Button, Chip, ConfirmDialog, EmptyState, ErrorState, FormError, SelectField, Sheet, SkeletonList, useToast } from '@/ui';
@@ -34,7 +34,7 @@ export function InvitesScreen() {
       setCreateError(null);
       await queryClient.invalidateQueries({ queryKey: ['invites'] });
     },
-    onError: (err) => setCreateError(errorMessage(err)),
+    onError: (err) => setCreateError(saveErrorMessage(err)),
   });
 
   const revokeMutation = useMutation({

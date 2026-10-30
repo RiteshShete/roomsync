@@ -58,6 +58,10 @@ Only `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` reach the browser, 
 
 Components and screens `PascalCase.tsx`; hooks `useThing`; modules and helpers `camelCase.ts`; tests next to the code as `Thing.test.ts(x)`; SQL migrations `YYYYMMDDHHMMSS_topic.sql`; database objects `snake_case`; copy keys `camelCase`.
 
+## Quality gates
+
+`npm run verify` runs everything: typecheck, unit tests (including `architecture.test.ts` and `contrast.test.ts`), build, pgTAP, the query-plan check (`scripts/explain-lists.sql`) and the end-to-end suite (which includes an automated WCAG scan, keyboard-only flows, narrow and zoomed layouts, and failure injection on every save form). CI runs it on every push.
+
 ## Adding a feature
 
 1. Table + RLS + isolation test + (if members write directly) guards; or an RPC. Regenerate types (`npm run db:types`).
@@ -66,3 +70,4 @@ Components and screens `PascalCase.tsx`; hooks `useThing`; modules and helpers `
 4. `src/features/<area>`: `hooks.ts`, a `formModel.ts` if there is a form, screens, copy in `copy.ts`.
 5. Route in `App.tsx`; loading, empty, error and success states; disabled-with-reason for anything not allowed.
 6. Component tests with `mockApi`, a Playwright journey with real accounts, and a mutation check on the rule that matters.
+7. Add the new screens to `ROUTES` in `e2e/a11y.spec.ts`, any new save form to `e2e/failures.spec.ts`, and any new list query to `scripts/explain-lists.sql`.

@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { updateMyProfile } from '@/api/profile';
 import { copy } from '@/copy';
-import { errorMessage } from '@/lib/errors';
+import { errorMessage, saveErrorMessage } from '@/lib/errors';
 import { useSession } from '@/features/auth/Session';
 import { useProfile } from '@/features/household/useMembership';
 import { SubPage } from '@/features/shell/SubPage';
@@ -49,7 +49,7 @@ export function ProfileScreen() {
       await Promise.all(['profile', 'members', 'members-all'].map((k) => client.invalidateQueries({ queryKey: [k] })));
       toast.show({ message: copy.profileEdit.saved });
     } catch (err) {
-      setFormError(errorMessage(err)); // the form keeps what was typed
+      setFormError(saveErrorMessage(err)); // the form keeps what was typed
     } finally {
       setBusy(false);
     }

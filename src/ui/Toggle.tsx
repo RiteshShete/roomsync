@@ -21,7 +21,7 @@ export function Toggle({ label, description, checked, onChange, disabled = false
   return (
     <div className="flex flex-col gap-1">
       <div className="flex min-h-12 items-center justify-between gap-4">
-        <span id={id} className="text-base font-bold text-ink">
+        <span id={id} className="min-w-0 text-base font-bold break-words text-ink">
           {label}
         </span>
         <button

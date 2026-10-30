@@ -4,12 +4,12 @@ import { cancelChore, createChore, updateChore, type Chore } from '@/api/chores'
 import type { MemberWithLeft } from '@/api/households';
 import { copy } from '@/copy';
 import type { RecurrenceFrequency } from '@/domain';
-import { errorMessage, toAppError } from '@/lib/errors';
+import { errorMessage, toAppError, saveErrorMessage } from '@/lib/errors';
 import { useSession } from '@/features/auth/Session';
 import { useFreshDirectory } from '@/features/household/useDirectory';
 import { SubPage } from '@/features/shell/SubPage';
 import { useHouseholdAccess, type HouseholdAccess } from '@/features/household/useMembership';
-import { Avatar, Button, ConfirmDialog, EmptyState, ErrorState, Field, FormError, SelectField, SkeletonList, Toggle, useToast } from '@/ui';
+import { Avatar, Button, ButtonRow, ConfirmDialog, EmptyState, ErrorState, Field, FormError, SelectField, SkeletonList, Toggle, useToast } from '@/ui';
 import { checkChoreForm, emptyChoreState, inputFromChore, moveInOrder, rotationOf, sameChoreInput, stateFromChore, type ChoreFormState } from './formModel';
 import { useChore, useInvalidateChores } from './hooks';
 
@@ -61,7 +61,7 @@ function Form({ access, members, chore, userId }: { access: HouseholdAccess; mem
       navigate('/chores', { replace: true });
     } catch (err) {
       setConflict(toAppError(err).code === 'conflict');
-      setFormError(errorMessage(err)); // everything typed stays
+      setFormError(saveErrorMessage(err)); // everything typed stays
     } finally {
       setBusy(false);
     }
@@ -140,14 +140,14 @@ function Form({ access, members, chore, userId }: { access: HouseholdAccess; mem
 
       <FormError message={formError} />
       {conflict && chore ? <ConflictRefresh id={chore.id} onRefreshed={(v) => { setBaseVersion(v); setConflict(false); setFormError(copy.chores.refreshed); }} /> : null}
-      <div className="flex gap-3 rounded-xl bg-strip p-3">
-        <Button variant="secondary" className="flex-1" onClick={() => navigate('/chores')}>
+      <ButtonRow className="rounded-xl bg-strip p-3">
+        <Button variant="secondary" onClick={() => navigate('/chores')}>
           Cancel
         </Button>
-        <Button type="submit" className="flex-1" loading={busy} loadingLabel={copy.chores.saving} disabled={!!blocked} disabledReason={blocked ?? undefined}>
+        <Button type="submit" loading={busy} loadingLabel={copy.chores.saving} disabled={!!blocked} disabledReason={blocked ?? undefined}>
           {copy.chores.save}
         </Button>
-      </div>
+      </ButtonRow>
       {blocked ? <p className="text-center text-sm text-ink2">{blocked}</p> : null}
 
       {chore ? (

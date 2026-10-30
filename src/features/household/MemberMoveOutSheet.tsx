@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { startMoveOut, type Member } from '@/api/households';
 import { copy } from '@/copy';
 import { addDays, checkMoveOutDate, latestMoveOutDate, todayIso } from '@/domain';
-import { errorMessage } from '@/lib/errors';
+import { saveErrorMessage } from '@/lib/errors';
 import { Button, Field, FormError, Sheet, TextArea } from '@/ui';
 
 const NOTE_MAX = 1000;
@@ -27,7 +27,7 @@ export function MemberMoveOutSheet({ member, blockedReason, onClose, onStarted }
       await startMoveOut({ memberId: member.memberId, effectiveDate: date, note: note.trim() === '' ? null : note.trim(), acknowledgedBalanceMinor: null });
       onStarted();
     } catch (err) {
-      setFormError(errorMessage(err)); // the sheet and its fields stay as they were
+      setFormError(saveErrorMessage(err)); // the sheet and its fields stay as they were
     } finally {
       setBusy(false);
     }

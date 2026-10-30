@@ -57,21 +57,22 @@ export function ExpensesScreen() {
     <>
       <MoneyHeader />
       <div className="flex flex-col gap-4 p-4 pb-24">
-        <section aria-label={copy.expenses.title} className="rounded-xl border border-line bg-surface p-4">
+        <section aria-label={copy.expenses.title} className="@container rounded-xl border border-line bg-surface p-4">
           {balances.isPending ? (
             <SkeletonList rows={1} />
           ) : balances.isError ? (
             <ErrorState message={errorMessage(balances.error)} onRetry={() => void balances.refetch()} />
           ) : (
             <>
-              <div className="grid grid-cols-2 divide-x divide-line">
-                <div className="pr-3">
+              {/* Two columns when there is room; stacked when large text makes the amounts too wide for half a card. */}
+              <div className="grid grid-cols-1 gap-3 @[18rem]:grid-cols-2 @[18rem]:gap-0 @[18rem]:divide-x @[18rem]:divide-line">
+                <div className="min-w-0 @[18rem]:pr-3">
                   <p className="text-sm text-ink2">{copy.expenses.youOwe}</p>
                   <p data-testid="you-owe" className={`text-2xl font-bold ${owe > 0 ? 'text-danger' : 'text-ink'}`}>
                     {fmt(owe)}
                   </p>
                 </div>
-                <div className="pl-3">
+                <div className="min-w-0 @[18rem]:pl-3">
                   <p className="text-sm text-ink2">{copy.expenses.youAreOwed}</p>
                   <p data-testid="you-are-owed" className={`text-2xl font-bold ${owed > 0 ? 'text-success' : 'text-ink'}`}>
                     {fmt(owed)}

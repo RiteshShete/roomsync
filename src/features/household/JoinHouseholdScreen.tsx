@@ -5,7 +5,7 @@ import { joinHousehold, previewInvite } from '@/api/invites';
 import type { InvitePreview } from '@/api/invites';
 import { copy } from '@/copy';
 import { formatInviteCode, isValidInviteFormat, normalizeInviteCode } from '@/domain';
-import { errorMessage } from '@/lib/errors';
+import { saveErrorMessage } from '@/lib/errors';
 import { formatDateTime } from '@/lib/format';
 import { AuthLayout, HeroLayout } from '@/features/auth/AuthLayout';
 import { Button, Field, FormError, useToast } from '@/ui';
@@ -44,7 +44,7 @@ export function JoinHouseholdScreen() {
     try {
       setPreview(await previewInvite(normalizeInviteCode(code)));
     } catch (err) {
-      setFormError(errorMessage(err));
+      setFormError(saveErrorMessage(err));
     } finally {
       setBusy(false);
     }
@@ -61,7 +61,7 @@ export function JoinHouseholdScreen() {
       toast.show({ message: copy.join.joinedToast });
       navigate('/', { replace: true });
     } catch (err) {
-      setFormError(errorMessage(err));
+      setFormError(saveErrorMessage(err));
     } finally {
       setBusy(false);
     }

@@ -8,7 +8,7 @@ export function NavRow({ to, icon, title, body }: { to: string; icon: IconName; 
       <span aria-hidden="true" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-primary">
         <Icon name={icon} size={22} />
       </span>
-      <span className="flex min-w-0 flex-col">
+      <span className="flex min-w-0 flex-col break-words">
         <span className="text-base font-bold text-ink">{title}</span>
         <span className="text-sm text-ink2">{body}</span>
       </span>
@@ -23,7 +23,7 @@ export function DisabledRow({ icon, title, reason }: { icon: IconName; title: st
       <span aria-hidden="true" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-sunken text-ink2">
         <Icon name={icon} size={22} />
       </span>
-      <span className="flex min-w-0 flex-col">
+      <span className="flex min-w-0 flex-col break-words">
         <span className="text-base font-bold text-ink">{title}</span>
         <span className="text-sm text-ink2">{reason}</span>
       </span>

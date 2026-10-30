@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import { requestPasswordReset } from '@/api/auth';
 import { copy } from '@/copy';
-import { errorMessage } from '@/lib/errors';
+import { saveErrorMessage } from '@/lib/errors';
 import { Button, Field, FormError } from '@/ui';
 import { AuthLayout, Notice } from './AuthLayout';
 import { forgotSchema, focusFirstError, validate, type FormErrors } from './validation';
@@ -33,7 +33,7 @@ export function ForgotPasswordScreen() {
       await requestPasswordReset(result.data.email);
       setSent(true); // same message whether or not the account exists
     } catch (err) {
-      setFormError(errorMessage(err));
+      setFormError(saveErrorMessage(err));
     } finally {
       setBusy(false);
     }

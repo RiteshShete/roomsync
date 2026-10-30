@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { setSettlementStatus, type Settlement } from '@/api/settlements';
 import { copy } from '@/copy';
-import { errorMessage } from '@/lib/errors';
+import { errorMessage, saveErrorMessage } from '@/lib/errors';
 import { formatDay } from '@/lib/format';
 import { useSession } from '@/features/auth/Session';
 import { useHouseholdAccess } from '@/features/household/useMembership';
@@ -39,7 +39,7 @@ export function SettlementsScreen() {
       toast.show({ message: v.status === 'reversed' ? copy.settlements.reversedToast : v.status === 'disputed' ? copy.settlements.disputedToast : copy.settlements.resolvedToast });
     },
     onError: (err, v) => {
-      if (v.status === 'disputed') setDisputeError(errorMessage(err)); // keep the sheet and the typed reason
+      if (v.status === 'disputed') setDisputeError(saveErrorMessage(err)); // keep the sheet and the typed reason
       else {
         setReversing(null);
         toast.show({ tone: 'error', message: errorMessage(err) });

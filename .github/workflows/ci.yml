@@ -1,0 +1,53 @@
+name: CI
+
+# Runs everything `npm run verify` runs, on a clean machine with a fresh local Supabase stack:
+# typecheck, unit tests, production build, database tests (pgTAP), query-plan check, end-to-end tests.
+# No secrets are used or needed: the stack is local to the runner and its keys are the public local ones.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install the browser for the end-to-end tests
+        run: npx playwright install --with-deps chromium
+
+      # The Supabase CLI is a dev dependency (npx supabase), so there is nothing else to install.
+      # --reset rebuilds the database from the migrations, so CI never depends on leftover state.
+      - name: Verify (typecheck, unit, build, pgTAP, query plans, e2e)
+        run: npm run verify -- --reset
+
+      - name: Keep the end-to-end traces when something fails
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces
+          path: test-results/
+          retention-days: 7
+          if-no-files-found: ignore
+
+      - name: Stop the local stack
+        if: always()
+        run: npx supabase stop --no-backup

@@ -21,9 +21,10 @@ export function BottomNav() {
       aria-label={copy.nav.label}
       className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface pb-[env(safe-area-inset-bottom)]"
     >
-      <ul className="mx-auto flex max-w-md">
+      {/* At very large text sizes the tabs keep their full labels and the bar scrolls sideways, instead of widening the page. */}
+      <ul className="mx-auto flex max-w-md overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {NAV_ITEMS.map((item) => (
-          <li key={item.to} className="flex-1">
+          <li key={item.to} className="min-w-fit flex-1">
             <NavLink
               to={item.to}
               end={item.end}

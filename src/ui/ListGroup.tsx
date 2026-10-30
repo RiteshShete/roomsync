@@ -23,7 +23,7 @@ export function ListRow({ to, icon, title, body }: { to: string; icon: IconName;
         <span aria-hidden="true" className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-primary">
           <Icon name={icon} size={20} />
         </span>
-        <span className="flex min-w-0 flex-1 flex-col">
+        <span className="flex min-w-0 flex-1 flex-col break-words">
           <span className="text-base font-bold text-ink">{title}</span>
           <span className="text-sm text-ink2">{body}</span>
         </span>

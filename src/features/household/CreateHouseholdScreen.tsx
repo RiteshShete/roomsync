@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { createHousehold, type DefaultSplit } from '@/api/households';
 import { createInvite, type CreatedInvite } from '@/api/invites';
 import { copy } from '@/copy';
-import { errorMessage } from '@/lib/errors';
+import { saveErrorMessage } from '@/lib/errors';
 import { AuthLayout } from '@/features/auth/AuthLayout';
 import { Button, Field, FormError, SelectField, Toggle, useToast } from '@/ui';
 import { InviteCodePanel } from './InviteCodePanel';
@@ -52,7 +52,7 @@ export function CreateHouseholdScreen() {
       setHouseholdId(id);
       toast.show({ message: copy.create.createdToast });
     } catch (err) {
-      setFormError(errorMessage(err)); // everything typed stays as is
+      setFormError(saveErrorMessage(err)); // everything typed stays as is
     } finally {
       setBusy(false);
     }
@@ -65,7 +65,7 @@ export function CreateHouseholdScreen() {
     try {
       setInvite(await createInvite(householdId));
     } catch (err) {
-      setInviteError(errorMessage(err));
+      setInviteError(saveErrorMessage(err));
     } finally {
       setInviteBusy(false);
     }

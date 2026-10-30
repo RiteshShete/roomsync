@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { createAnnouncement, updateAnnouncement, type Announcement } from '@/api/announcements';
 import { copy } from '@/copy';
-import { errorMessage, toAppError } from '@/lib/errors';
+import { toAppError, saveErrorMessage } from '@/lib/errors';
 import { Button, Field, FormError, Sheet, TextArea, useToast } from '@/ui';
 import { useInvalidateAnnouncements } from './hooks';
 import { BODY_MAX, checkAnnouncement, TITLE_MAX } from './formModel';
@@ -49,7 +49,7 @@ export function AnnouncementSheet({
         await invalidate();
         onConflict();
         onClose();
-      } else setFormError(errorMessage(err));
+      } else setFormError(saveErrorMessage(err));
     } finally {
       setBusy(false);
     }

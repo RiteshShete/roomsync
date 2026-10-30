@@ -13,8 +13,45 @@ Read this at the start of every session; update it at the end.
 | 5 Expenses and settlements | Done (`phase-5`) |
 | 6 Chores and groceries | Done (`phase-6`) |
 | 7 House, activity, settings | Done (`phase-7`) |
-| 8 Move-out | Done (`phase-8`) — awaiting owner "continue" |
-| 9–13 | Not started |
+| 8 Move-out | Done (`phase-8`) |
+| 9 Quality, accessibility, documentation | Done (`phase-9`) — **MVP complete locally**; awaiting owner "continue" |
+| 10–13 | Not started |
+
+## Phase 9: evidence for the MVP checklist (spec §20)
+Gate on a single command, `npm run verify`: typecheck, **779 unit tests**, build, **808 pgTAP assertions**, query-plan check, **46 Playwright tests**, all green.
+
+| # | Checklist item | Evidence |
+|---|---|---|
+| 1 | Real auth (there is no demo mode) | `e2e/households.spec.ts` sign-up and log-in journeys; `AuthScreens.test.tsx`; `supabase/tests/permissions.test.sql` |
+| 2 | Create a household | `e2e/households.spec.ts` "user A creates a household and invites…"; `CreateJoin.test.tsx` |
+| 3 | Join with a valid invitation | same journey; "invalid codes explain themselves: unknown, malformed, and revoked"; `invites.test.sql` |
+| 4 | Add, edit and view expenses | `e2e/expenses.spec.ts` "₹1,000 across three people…" (includes edit after a settlement); `ExpenseForm.test.tsx`, `ExpenseDetails.test.tsx` |
+| 5 | Splits accurate to the smallest unit | shared vectors in `src/domain/domain.test.ts` and `supabase/tests/expenses.test.sql`; e2e shows ₹333.34 / ₹333.33 / ₹333.33 with the rounding note |
+| 6 | Balances and settlements without fake payment claims | `e2e/expenses.spec.ts` (settlement, dispute, reverse); `Settlements.test.tsx` asserts the sentence "RoomSync does not move money"; `balances.test.sql`, `settlements.test.sql` |
+| 7 | Chores: create, assign, complete, reopen | `e2e/chores.spec.ts` (rotation, undo, plain member blocked, edit, cancel); `Chores.test.tsx`; `chores.test.sql` |
+| 8 | Groceries: add, edit, purchase, restore | `e2e/groceries.spec.ts` (duplicate check, buy, move back, delete and undo, concurrent buy conflict); `Groceries.test.tsx` |
+| 9 | Home updates after changes | `e2e/house.spec.ts` "realtime: Home updates without a reload…"; `useRealtime.test.tsx` |
+| 10 | Activity feed reflects important actions | `activity_triggers.test.sql`; `Activity.test.tsx` (a sentence exists for every event type); `e2e/house.spec.ts` |
+| 11 | Notification preferences work | `e2e/house.spec.ts` "turning a category off hides those updates; quiet hours hide only the number"; `You.test.tsx`; notification rules in `domain.test.ts` |
+| 12 | Move-out shows outstanding records and consequences | `e2e/moveout.spec.ts` (5 journeys, including the date passing); `MoveOut.test.tsx` |
+| 13 | Household data is isolated | `isolation.test.sql`, `rls_enabled.test.sql`; `e2e/realtime-isolation.spec.ts` (an outsider receives nothing over Realtime); `expenses.spec.ts` "permission denied… at the database" |
+| 14 | Errors do not silently discard input | `e2e/failures.spec.ts`: server errors and dropped connections on all 9 save forms, values kept, message shown; per-form unit tests |
+| 15 | Tests and setup documentation | `README.md` (rewritten), `docs/ARCHITECTURE.md`, `docs/MANUAL_TEST_GUIDE.md`, `docs/security-review.md`; `.github/workflows/ci.yml` |
+
+Definition of Done (spec §20): primary journeys (above); data persists across refresh (every e2e reloads); validation (form-model tests); loading/empty/error/success states (screen tests); permissions (pgTAP); calculations tested (shared vectors); mobile viewports (320, 390 and 402 px in `e2e/a11y.spec.ts`); accessibility basics (below); no inert button (disabled-with-reason tests); README accurate.
+
+## Phase 9 decisions and deviations
+- **Contrast (found by a new test, fixed):** `src/ui/contrast.test.ts` reads the real colour tokens and checks 28 text/background pairs against WCAG AA. Two failed: coral text (3.1 to 3.7:1) and green text (4.3:1). Tokens deepened to `#bf3b25` and `#08775a`; small green text now uses the deeper token. The earlier white-on-coral gap was fixed in Phase 7. **Light theme only**, so the plan's "both themes" does not apply (owner decision).
+- **Automated accessibility scan:** `@axe-core/playwright` runs WCAG 2.0/2.1 A and AA rules over **all 23 screens with real data**, and over the add sheet, a confirmation, the manage-member sheet and a visible toast: zero violations. Mutation-checked: putting the old coral colour back makes it fail with `color-contrast`.
+- **Keyboard only:** a sheet traps Tab and Shift+Tab, Escape closes it and focus returns to the control that opened it; a confirmation starts on the safe choice; a whole task (add, buy, move back a grocery) works without a mouse; every control on the main screens shows a visible focus ring; tab order is header, content, then bottom navigation.
+- **Motion, size, width:** reduced motion switches animations and transitions off (global rule, tested); **no sideways scroll at 320 and 390 px on all 23 screens, and at 200% text size on all 23**; the bottom navigation never hides content; a focused field stays clear of the navigation with the on-screen keyboard open (short viewport).
+- **Real problems the new tests found, all fixed:** (1) offline, the data library silently **paused** any action (a tick stayed "working" forever and would have fired later, unasked) → queries and saves now run offline and fail visibly (`networkMode: 'always'`, unit-tested and mutation-checked); (2) at 200% text, Home's members row, the bottom navigation, the Expenses owe/owed card, the Save/Cancel rows, the split selector, the Activity toolbar, the House rows, toggle labels and the member rows all overflowed → each now wraps or scrolls inside itself (new `ButtonRow` component; the nav keeps full labels and scrolls); (3) unexpected server errors showed a generic message → every save form now says "We couldn't save that change. Your information is still here—please try again." (`saveErrorMessage`, 15+5 sites).
+- **Failure injection:** `e2e/failures.spec.ts` breaks the real requests (HTTP 500 and a dropped connection) for add expense, record settlement, create chore, add grocery, post announcement, profile, notification preferences, household settings and start move-out. Each keeps every typed value, shows the right message, and the same click succeeds once the fault is removed. Non-form actions (ticking a grocery) are covered too.
+- **Performance:** every list is limited or paged (an audit of `src/api` found only the two member lists unbounded; both now capped at 200). `scripts/explain-lists.sql` loads 30,000 expenses, 60,000 activity events and thousands of other rows into a throwaway transaction and runs `EXPLAIN ANALYZE` as a signed-in member with row security on. All lists use an index and run in 0.4 to 6 ms. Two lists sorted on an unindexed column (latest completed chores 25 ms, announcements 11 ms) got partial indexes (`20261026100001_list_indexes.sql`): now 0.4 ms and 1.2 ms. `npm run db:explain` fails on a table scan or a plan over 50 ms; mutation-checked by dropping two indexes (172 and 387 ms, plus a table scan, all flagged).
+- **One command:** `npm run verify` (`scripts/verify.mjs`) starts the local stack if needed, creates `.env.local` from the stack's own local keys if missing, and runs all six steps, stopping at the first failure. `-- --reset` rebuilds the database first (what CI does).
+- **CI:** `.github/workflows/ci.yml` runs `npm run verify -- --reset` on every push and pull request on a clean runner (checkout, Node 24, `npm ci`, Chromium, verify, upload traces on failure, stop the stack). No secrets. The YAML is parsed and structurally valid, but **it has not run on GitHub yet**: it needs a repository (Phase 11). Action versions are major-pinned (`checkout@v4`, `setup-node@v4`, `upload-artifact@v4`); re-check for newer majors when the repo exists.
+- **README** rewritten: prerequisites, setup, daily commands, how the test layers fit together, environment variables, the permissions table, accessibility notes, known limitations, troubleshooting, and the same-Wi-Fi steps.
+- **Known gaps (honest):** the CI workflow is unproven on GitHub; the automated accessibility scan cannot judge everything (a person using a screen reader should still try the main journeys before release); text-size testing used 200% root font size, not every operating-system setting.
 
 ## Phase 8 decisions and deviations
 - **Leave household** (You → Household settings → Leave household): step 1 explains the consequences (access until the date, history stays, open chores are passed on, **RoomSync does not move money, work out deposits or mark anything paid**, cancel any time before the date). Step 2 shows what is outstanding, read-only: your balance **labelled an estimate** (disputed or reversed payments aren't counted), open chores that will be passed on, recorded payments **in dispute** that involve you, and grocery items you added. Then the leaving date (today to +90 days; defaults to a week ahead so nobody leaves today by accident), an optional note, and an explicit tick before "Leave household". The balance you reviewed is stored with the move-out as `move_out_acknowledged_balance_minor`. A failed start keeps everything typed.

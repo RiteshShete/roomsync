@@ -136,7 +136,7 @@ export async function listMembers(householdId: string): Promise<Member[]> {
     .select('id, user_id, role, status, joined_at, move_out_effective_date')
     .eq('household_id', householdId)
     .neq('status', 'left')
-    .order('joined_at', { ascending: true });
+    .order('joined_at', { ascending: true }).limit(200); // households are small; the cap just makes that explicit
   if (error) throw toAppError(error);
   const ids = rows.map((r) => r.user_id);
   const { data: profiles, error: pErr } = await supabase.from('profiles').select('id, display_name, avatar_color').in('id', ids);
@@ -166,7 +166,7 @@ export async function listAllMembers(householdId: string): Promise<MemberWithLef
     .from('household_members')
     .select('id, user_id, role, status, joined_at, move_out_effective_date')
     .eq('household_id', householdId)
-    .order('joined_at', { ascending: true });
+    .order('joined_at', { ascending: true }).limit(200); // households are small; the cap just makes that explicit
   if (error) throw toAppError(error);
   const ids = [...new Set(rows.map((r) => r.user_id))];
   const { data: profiles, error: pErr } = await supabase.from('profiles').select('id, display_name, avatar_color').in('id', ids);

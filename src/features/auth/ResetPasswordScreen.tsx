@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { updatePassword } from '@/api/auth';
 import { copy } from '@/copy';
-import { errorMessage } from '@/lib/errors';
+import { saveErrorMessage } from '@/lib/errors';
 import { Button, FormError, PasswordField, SkeletonList, useToast } from '@/ui';
 import { AuthLayout, Notice } from './AuthLayout';
 import { useSession } from './Session';
@@ -57,7 +57,7 @@ export function ResetPasswordScreen() {
       toast.show({ message: copy.auth.passwordUpdated });
       navigate('/', { replace: true });
     } catch (err) {
-      setFormError(errorMessage(err));
+      setFormError(saveErrorMessage(err));
     } finally {
       setBusy(false);
     }

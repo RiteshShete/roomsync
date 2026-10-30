@@ -96,6 +96,15 @@ export function toAppError(e: unknown): AppError {
   return { code: 'unknown' };
 }
 
+/**
+ * The message for a FAILED SAVE. Known problems keep their specific wording (conflict, permission,
+ * offline…); anything unexpected says what the person most needs to know: nothing was lost.
+ */
+export function saveErrorMessage(e: unknown): string {
+  const err = isAppError(e) ? e : toAppError(e);
+  return err.code === 'unknown' ? copy.errors.save : errorMessage(err);
+}
+
 /** User-facing copy for any caught value (an AppError, or a raw error that is mapped first). */
 export function errorMessage(e: unknown): string {
   const err = isAppError(e) ? e : toAppError(e);
