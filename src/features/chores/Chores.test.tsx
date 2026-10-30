@@ -29,26 +29,51 @@ describe('chore lists', () => {
     chore({ id: 'e', title: 'Far chore', dueDate: inDays(10) }),
   ];
 
-  it('Today holds due-today and overdue chores; Upcoming holds the rest; tab counts match', async () => {
-    mockHome({ open });
+  it('All lists every open task; Your task only mine; the tab counts match', async () => {
+    mockHome({ open: open.map((c, i) => (i === 0 ? { ...c, assigneeMemberId: 'm-aarav' } : c)) });
     renderApp('/chores');
     expect(await screen.findByText('Due today', { selector: 'p' })).toBeInTheDocument();
-    expect(screen.getByText('Overdue chore', { selector: 'p' })).toBeInTheDocument();
-    expect(screen.queryByText('Tomorrow chore', { selector: 'p' })).not.toBeInTheDocument();
+    for (const t of ['Overdue chore', 'Tomorrow chore', 'No date chore', 'Far chore']) expect(screen.getByText(t, { selector: 'p' })).toBeInTheDocument();
     const tabs = screen.getByRole('navigation', { name: copy.chores.title });
-    expect(within(tabs).getAllByRole('link').map((l) => l.textContent)).toEqual(['Today (2)', 'Upcoming (3)', 'Completed (0)']);
-    await userEvent.click(within(tabs).getByRole('link', { name: /Upcoming/ }));
-    expect(await screen.findByText('Tomorrow chore', { selector: 'p' })).toBeInTheDocument();
-    expect(screen.getByText('No date chore', { selector: 'p' })).toBeInTheDocument();
-    expect(screen.getByText('Far chore', { selector: 'p' })).toBeInTheDocument();
-    expect(screen.queryByText('Due today', { selector: 'p' })).not.toBeInTheDocument();
+    expect(within(tabs).getAllByRole('link').map((l) => l.textContent)).toEqual(['All (05)', 'Your task (01)', 'Completed (00)']);
+    await userEvent.click(within(tabs).getByRole('link', { name: /Your task/ }));
+    expect(await screen.findByText('Due today', { selector: 'p' })).toBeInTheDocument();
+    expect(screen.queryByText('Far chore', { selector: 'p' })).not.toBeInTheDocument();
   });
 
-  it('a chore due soon says how long is left; tomorrow and today are plain words', async () => {
+  it('a task due in a few days says how long is left; tomorrow and today are plain words', async () => {
     mockHome({ open: [chore({ id: 'x', title: 'Soon', dueDate: inDays(3) }), chore({ id: 'y', title: 'Tom', dueDate: inDays(1) })] });
-    renderApp('/chores/upcoming');
+    renderApp('/chores');
     expect(within(await screen.findByText('Soon', { selector: 'p' }).then((e) => e.closest('li')!)).getByText('3 days')).toBeInTheDocument();
     expect(within(card('Tom')).getByText(copy.chores.due.tomorrow)).toBeInTheDocument();
+  });
+
+  it('shows the category, a high-priority chip, and "You" for my own tasks', async () => {
+    mockHome({ open: [chore({ id: 'm', title: 'Mop', assigneeMemberId: 'm-aarav', category: 'cleaning', priority: 'high' })] });
+    renderApp('/chores');
+    const li = (await screen.findByText('Mop', { selector: 'p' })).closest('li')!;
+    expect(within(li).getByText('Cleaning')).toBeInTheDocument();
+    expect(within(li).getByText(copy.chores.highPriority)).toBeInTheDocument();
+    expect(within(li).getByText(copy.balances.you)).toBeInTheDocument();
+  });
+
+  it('Edit and Done sit in the strip; Done keeps its full accessible name', async () => {
+    mockHome({ open: [chore({ id: 'm', title: 'Mop', assigneeMemberId: 'm-aarav' })] });
+    renderApp('/chores');
+    const li = (await screen.findByText('Mop', { selector: 'p' })).closest('li')!;
+    expect(within(li).getByRole('link', { name: copy.chores.edit })).toHaveAttribute('href', '/chores/m/edit');
+    const done = within(li).getByRole('button', { name: copy.chores.markDone });
+    expect(done).toHaveTextContent(copy.chores.done);
+  });
+
+  it('shares the current list', async () => {
+    mockHome({ open: [chore({ title: 'Dishes' })] });
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+    renderApp('/chores');
+    await screen.findByText('Dishes', { selector: 'p' });
+    await userEvent.click(screen.getByRole('button', { name: copy.chores.shareLabel }));
+    expect(writeText).toHaveBeenCalledWith(expect.stringContaining('- Dishes (Riya'));
   });
 
   it('overdue is shown neutrally: a calm sentence, the original date, and no alarm colour', async () => {
@@ -82,10 +107,10 @@ describe('chore lists', () => {
     expect(screen.getAllByRole('link', { name: copy.chores.create }).every((l) => l.getAttribute('href') === '/chores/new')).toBe(true);
   });
 
-  it('empty Today when other chores exist', async () => {
+  it('an empty Your task tab explains itself when other tasks exist', async () => {
     mockHome({ open: [chore({ dueDate: inDays(5) })] });
-    renderApp('/chores');
-    expect(await screen.findByText(copy.chores.emptyToday)).toBeInTheDocument();
+    renderApp('/chores/mine');
+    expect(await screen.findByText(copy.chores.emptyMine)).toBeInTheDocument();
   });
 
   it('Completed is a history with who finished it, and each can be reopened', async () => {
@@ -93,7 +118,7 @@ describe('chore lists', () => {
     vi.mocked(choresApi.reopenChore).mockResolvedValue();
     renderApp('/chores/completed');
     const li = (await screen.findByText('Old job', { selector: 'p' })).closest('li')!;
-    expect(within(li).getByText(/Completed by Riya/)).toBeInTheDocument();
+    expect(within(li).getByText(copy.chores.completedByLabel, { exact: false })).toHaveTextContent('Completed by Riya');
     await userEvent.click(within(li).getByRole('button', { name: copy.chores.undo }));
     expect(choresApi.reopenChore).toHaveBeenCalledWith('k');
     expect(await screen.findByText(copy.chores.reopened)).toBeInTheDocument();
@@ -117,14 +142,14 @@ describe('marking a chore done', () => {
     renderApp('/chores');
     await userEvent.click(await screen.findByRole('button', { name: copy.chores.markDone }));
     expect(choresApi.completeChore).toHaveBeenCalledWith('a', 3);
-    expect(await screen.findByText(copy.chores.done)).toBeInTheDocument();
+    expect(await screen.findByText(copy.chores.doneToast)).toBeInTheDocument();
   });
 
   it('names who is next when the chore repeats with rotation', async () => {
     vi.mocked(choresApi.completeChore).mockResolvedValue({ nextChoreId: 'n', nextAssigneeMemberId: 'm-kunal', skippedMemberIds: [] });
     renderApp('/chores');
     await userEvent.click(await screen.findByRole('button', { name: copy.chores.markDone }));
-    expect(await screen.findByText(`${copy.chores.done} ${copy.chores.nextUp('Kunal')}`)).toBeInTheDocument();
+    expect(await screen.findByText(`${copy.chores.doneToast} ${copy.chores.nextUp('Kunal')}`)).toBeInTheDocument();
   });
 
   it('explains when rotation skipped someone who is not active', async () => {

@@ -29,6 +29,11 @@ function prepare() {
     console.error('Could not reset the local database.');
     process.exit(2);
   }
+  // The query-plan check borrows an existing household, and a reset leaves none, so seed the demo one.
+  if (reset && run('npm run seed:dev').status !== 0) {
+    console.error('Could not seed the demo household after the reset.');
+    process.exit(2);
+  }
   if (!existsSync('.env.local')) {
     const status = run('npx supabase status -o env', true).stdout ?? '';
     const get = (k) => new RegExp(`^${k}="?([^"\\r\\n]*)"?$`, 'm').exec(status)?.[1];

@@ -20,29 +20,31 @@ function textOn(hex: string): string {
   return lum > 0.4 ? '#1b1b1b' : '#ffffff';
 }
 
-const SIZES = { sm: 'h-8 w-8 text-xs', feed: 'h-10 w-10 text-sm', md: 'h-11 w-11 text-sm', lg: 'h-14 w-14 text-lg' } as const;
+const SIZES = { xs: 'h-6 w-6 text-[10px]', sm: 'h-8 w-8 text-xs', feed: 'h-10 w-10 text-sm', md: 'h-11 w-11 text-sm', lg: 'h-14 w-14 text-lg' } as const;
 
 /** How far each avatar tucks under the previous one in a group. */
-const OVERLAP: Record<keyof typeof SIZES, string> = { sm: '-ml-2', feed: '-ml-3.5', md: '-ml-2', lg: '-ml-3' };
+const OVERLAP: Record<keyof typeof SIZES, string> = { xs: '-ml-2', sm: '-ml-2', feed: '-ml-3.5', md: '-ml-2', lg: '-ml-3' };
 
 export function Avatar({
   name,
   color = '#4F46E5',
   size = 'md',
   ring = false,
+  className = '',
 }: {
   name: string;
   color?: string;
   size?: keyof typeof SIZES;
   /** White ring so overlapping avatars stay distinct. */
   ring?: boolean;
+  className?: string;
 }) {
   return (
     <span
       role="img"
       aria-label={name}
       style={{ backgroundColor: color, color: textOn(color) }}
-      className={`inline-flex shrink-0 items-center justify-center rounded-full font-bold ${SIZES[size]} ${ring ? 'ring-2 ring-surface' : ''}`}
+      className={`inline-flex shrink-0 items-center justify-center rounded-full font-bold ${SIZES[size]} ${ring ? 'ring-2 ring-surface' : ''} ${className}`}
     >
       <span aria-hidden="true">{initials(name)}</span>
     </span>

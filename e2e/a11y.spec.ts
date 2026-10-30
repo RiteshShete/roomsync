@@ -7,7 +7,7 @@ test.describe.configure({ timeout: 240_000 });
 /** Every screen a person can reach, with a hash route. */
 const ROUTES = [
   '/', '/activity', '/expenses', '/expenses/all', '/expenses/balances', '/expenses/settlements', '/expenses/new', '/expenses/settle',
-  '/chores', '/chores/upcoming', '/chores/completed', '/chores/new', '/house/groceries', '/house/announcements',
+  '/chores', '/chores/mine', '/chores/completed', '/chores/new', '/house/groceries', '/house/announcements',
   '/you', '/you/profile', '/you/notifications', '/you/privacy', '/you/members', '/you/invites', '/you/household', '/you/household/leave',
 ];
 
@@ -164,7 +164,7 @@ test.describe('Accessibility: keyboard only', () => {
     await box.focus();
     await page.keyboard.press('Space');
     await expect(page.getByText('Rice marked as purchased.')).toBeVisible();
-    await page.getByRole('tab', { name: /Purchased/ }).focus();
+    await page.getByRole('tab', { name: /Bought/ }).focus();
     await page.keyboard.press('Enter');
     const back = page.getByRole('checkbox', { name: 'Move Rice back to Needed' });
     await back.focus();
@@ -316,7 +316,7 @@ test.describe('Accessibility: announcements to assistive tech', () => {
 
     // an error toast is role=alert: block the next save, then tick the item back
     await page.context().setOffline(true);
-    await page.getByRole('tab', { name: /Purchased/ }).click();
+    await page.getByRole('tab', { name: /Bought/ }).click();
     await page.getByRole('checkbox', { name: 'Move Milk back to Needed' }).click();
     await expect(page.getByRole('alert').filter({ hasText: /reach RoomSync/ })).toBeVisible();
     await page.context().setOffline(false);

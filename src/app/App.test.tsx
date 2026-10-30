@@ -105,7 +105,7 @@ describe('routing and guards', () => {
     await screen.findByRole('heading', { name: 'Flat 4B' });
     const nav = within(screen.getByRole('navigation', { name: 'Main' }));
     await userEvent.click(nav.getByRole('link', { name: 'Finance' }));
-    expect(await screen.findByRole('heading', { level: 1, name: 'Finance' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { level: 1, name: 'Expenses' })).toBeInTheDocument();
     expect(nav.getByRole('link', { name: 'Finance' })).toHaveAttribute('aria-current', 'page');
   });
 

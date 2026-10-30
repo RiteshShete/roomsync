@@ -1,36 +1,51 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { copy } from '@/copy';
 import { errorMessage } from '@/lib/errors';
-import { EmptyState, ErrorState, Fab, SkeletonList } from '@/ui';
+import { EmptyState, ErrorState, Fab, Header, HeaderTabs, MenuButton, ShareButton, SkeletonList, TabLink } from '@/ui';
+import { useDirectory } from '@/features/household/useDirectory';
 import { useHouseholdAccess } from '@/features/household/useMembership';
 import { ExpenseCard } from './ExpenseCard';
-import { MoneyHeader } from './MoneyHeader';
-import { useDirectory } from '@/features/household/useDirectory';
-import { useBalances, useExpenses, useMoney } from './hooks';
+import { categoryLabel } from './categories';
+import { useAllExpenses, useMoney } from './hooks';
+import { shareExpensesText, sortExpenses, toPay, toReceive, type ExpenseSort, type MoneyTab } from './tabsModel';
+
+const pad = (n: number) => String(n).padStart(2, '0');
+
+const PILLS = [
+  { to: '/expenses/balances', label: copy.expenses.balancesLink },
+  { to: '/expenses/settlements', label: copy.expenses.settlementsLink },
+  { to: '/expenses/all', label: copy.expenses.allLink },
+];
 
 /**
- * Expenses tab: what you owe and are owed (never a single "house balance"), recent expenses, and a
- * floating "+" to add one. Loading, empty, error and success states for each part.
+ * Expenses tab, from the design: "To Pay" (others paid and I owe a share) and "To Receive" (I paid and
+ * others owe), each with a count, Filter and Sort on the right, expense cards, and a floating "+". The
+ * balances, settlements and full filtered list are one tap away in the pill row.
  */
-export function ExpensesScreen() {
+export function ExpensesScreen({ tab }: { tab: MoneyTab }) {
   const access = useHouseholdAccess();
   const { fmt } = useMoney();
   const dir = useDirectory(access?.householdId);
-  const balances = useBalances(access?.householdId);
-  const recent = useExpenses(access?.householdId, {});
+  const all = useAllExpenses(access?.householdId);
+  const [category, setCategory] = useState('');
+  const [sort, setSort] = useState<ExpenseSort>('newest');
 
   if (!access) return null;
-  const mine = balances.data?.find((b) => b.memberId === access.memberId)?.netMinor ?? 0;
-  const owe = mine < 0 ? -mine : 0;
-  const owed = mine > 0 ? mine : 0;
-  const items = recent.data?.pages[0]?.items.slice(0, 5) ?? [];
+  const me = access.memberId;
+  const pay = toPay(all.items, me);
+  const receive = toReceive(all.items, me);
+  const inTab = tab === 'pay' ? pay : receive;
+  const shown = sortExpenses(category === '' ? inTab : inTab.filter((e) => e.category === category), sort);
+  const categories = [...new Set(inTab.map((e) => e.category))];
   const avatarOf = (id: string) => dir.member(id)?.avatarColor;
+  const counts = { pay: all.isLoadingAll ? null : pay.length, receive: all.isLoadingAll ? null : receive.length };
 
   let list;
-  if (recent.isPending || dir.isPending) list = <SkeletonList rows={3} />;
-  else if (recent.isError) list = <ErrorState message={errorMessage(recent.error)} onRetry={() => void recent.refetch()} />;
+  if (all.isPending || dir.isPending) list = <SkeletonList rows={3} />;
+  else if (all.isError) list = <ErrorState message={errorMessage(all.error)} onRetry={() => void all.refetch()} />;
   else if (dir.isError) list = <ErrorState message={errorMessage(dir.error)} onRetry={() => void dir.refetch()} />;
-  else if (items.length === 0)
+  else if (all.items.filter((e) => e.deletedAt === null).length === 0)
     list = (
       <EmptyState
         title={copy.expenses.emptyTitle}
@@ -42,56 +57,56 @@ export function ExpensesScreen() {
         }
       />
     );
+  else if (shown.length === 0) list = <EmptyState title={tab === 'pay' ? copy.expenses.emptyPay : copy.expenses.emptyReceive} body={category !== '' ? copy.expenses.noMatchesBody : tab === 'pay' ? copy.expenses.emptyPayBody : copy.expenses.emptyReceiveBody} />;
   else
     list = (
       <ul className="flex flex-col gap-3">
-        {items.map((e) => (
+        {shown.map((e) => (
           <li key={e.id}>
-            <ExpenseCard expense={e} fmt={fmt} nameOf={dir.nameOf} avatarOf={avatarOf} myMemberId={access.memberId} />
+            <ExpenseCard expense={e} fmt={fmt} nameOf={dir.nameOf} avatarOf={avatarOf} myMemberId={me} showPay={tab === 'pay'} />
           </li>
         ))}
       </ul>
     );
 
+  const tabs = [
+    { to: '/expenses', label: copy.expenses.toPay, n: counts.pay, end: true },
+    { to: '/expenses/receive', label: copy.expenses.toReceive, n: counts.receive, end: true },
+  ];
+
   return (
     <>
-      <MoneyHeader />
-      <div className="flex flex-col gap-4 p-4 pb-24">
-        <section aria-label={copy.expenses.title} className="@container rounded-xl border border-line bg-surface p-4">
-          {balances.isPending ? (
-            <SkeletonList rows={1} />
-          ) : balances.isError ? (
-            <ErrorState message={errorMessage(balances.error)} onRetry={() => void balances.refetch()} />
-          ) : (
-            <>
-              {/* Two columns when there is room; stacked when large text makes the amounts too wide for half a card. */}
-              <div className="grid grid-cols-1 gap-3 @[18rem]:grid-cols-2 @[18rem]:gap-0 @[18rem]:divide-x @[18rem]:divide-line">
-                <div className="min-w-0 @[18rem]:pr-3">
-                  <p className="text-sm text-ink2">{copy.expenses.youOwe}</p>
-                  <p data-testid="you-owe" className={`text-2xl font-bold ${owe > 0 ? 'text-danger' : 'text-ink'}`}>
-                    {fmt(owe)}
-                  </p>
-                </div>
-                <div className="min-w-0 @[18rem]:pl-3">
-                  <p className="text-sm text-ink2">{copy.expenses.youAreOwed}</p>
-                  <p data-testid="you-are-owed" className={`text-2xl font-bold ${owed > 0 ? 'text-success' : 'text-ink'}`}>
-                    {fmt(owed)}
-                  </p>
-                </div>
-              </div>
-              {owe === 0 && owed === 0 ? <p className="mt-3 text-sm text-ink2">{copy.expenses.allSettled}</p> : null}
-            </>
-          )}
-        </section>
-
-        {items.length > 0 ? (
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold text-ink">{copy.expenses.recent}</h2>
-            <Link to="/expenses/all" className="inline-flex min-h-11 items-center font-semibold text-coral underline-offset-4 hover:underline">
-              {copy.expenses.viewAll}
-            </Link>
+      <Header title={copy.expenses.title} right={<ShareButton label={copy.expenses.shareLabel} title={copy.expenses.shareTitle} build={() => shareExpensesText(copy.expenses.shareTitle, shown, dir.nameOf, fmt)} />}>
+        <div className="flex flex-wrap items-center justify-between gap-x-2 px-4">
+          <HeaderTabs label={copy.expenses.title}>
+            {tabs.map((t) => (
+              <TabLink key={t.to} to={t.to} end={t.end} label={t.label} count={t.n === null ? undefined : `(${pad(t.n)})`} />
+            ))}
+          </HeaderTabs>
+          <div className="flex shrink-0 items-center">
+            <MenuButton label={copy.expenses.filter} options={[{ value: '', label: copy.expenses.allCategories }, ...categories.map((c) => ({ value: c, label: categoryLabel(c) }))]} value={category} onChange={setCategory} />
+            <MenuButton
+              label={copy.expenses.sort}
+              icon="sort"
+              options={[
+                { value: 'newest', label: copy.expenses.sortNewest },
+                { value: 'oldest', label: copy.expenses.sortOldest },
+                { value: 'amount', label: copy.expenses.sortAmount },
+              ]}
+              value={sort}
+              onChange={setSort}
+            />
           </div>
-        ) : null}
+        </div>
+      </Header>
+      <div className="flex flex-col gap-4 p-4 pb-24">
+        <nav aria-label={copy.expenses.moreLinks} className="flex flex-wrap gap-2">
+          {PILLS.map((p) => (
+            <Link key={p.to} to={p.to} className="inline-flex min-h-11 items-center rounded-full border border-field-line bg-field px-4 text-sm font-semibold text-coral hover:bg-brand-soft">
+              {p.label}
+            </Link>
+          ))}
+        </nav>
         {list}
       </div>
       <Fab to="/expenses/new" label={copy.expenses.addExpense} disabledReason={access.writeBlockedReason ?? undefined} />

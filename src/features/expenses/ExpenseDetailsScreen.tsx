@@ -88,6 +88,8 @@ export function ExpenseDetailsScreen() {
   const canChange = access.isAdmin || e.createdBy === myUserId;
   const note = roundingNote(e, dir.nameOf, fmt);
   const payer = dir.member(e.paidByMemberId);
+  const myShare = e.shares.find((s) => s.memberId === access.memberId);
+  const iPaid = e.paidByMemberId === access.memberId;
 
   return page(
     <>
@@ -174,6 +176,24 @@ export function ExpenseDetailsScreen() {
         {copy.expenseDetails.addedBy(dir.nameOfUser(e.createdBy), formatDateTime(e.createdAt))}
         {e.version > 1 ? <><br />{copy.expenseDetails.updatedBy(dir.nameOfUser(e.updatedBy), formatDateTime(e.updatedAt))}</> : null}
       </p>
+
+      {!deleted && !iPaid && myShare && myShare.shareAmountMinor > 0 ? (
+        <section aria-labelledby="pay-title" className="flex flex-col gap-2 rounded-xl border border-peach-line bg-strip p-4">
+          <h2 id="pay-title" className="text-base font-bold text-ink">
+            {copy.expenseDetails.yourShareDue(fmt(myShare.shareAmountMinor), dir.nameOf(e.paidByMemberId))}
+          </h2>
+          <p className="text-sm text-ink2">{copy.expenseDetails.markPaidNote(dir.nameOf(e.paidByMemberId))}</p>
+          <Button
+            fullWidth
+            disabled={!!access.writeBlockedReason}
+            disabledReason={access.writeBlockedReason ?? undefined}
+            showReason={!!access.writeBlockedReason}
+            onClick={() => navigate(`/expenses/settle?from=${access.memberId}&to=${e.paidByMemberId}&amount=${myShare.shareAmountMinor}`)}
+          >
+            {copy.expenseDetails.markPaid}
+          </Button>
+        </section>
+      ) : null}
 
       {deleted ? (
         <Button fullWidth loading={restore.isPending} disabled={!canChange || !!access.writeBlockedReason} disabledReason={access.writeBlockedReason ?? copy.expenseDetails.noPermission} showReason={!canChange || !!access.writeBlockedReason} onClick={() => restore.mutate(e.id)}>

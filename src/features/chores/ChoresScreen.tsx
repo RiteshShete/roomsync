@@ -2,20 +2,21 @@ import { Link } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { completeChore, reopenChore, type Chore, type CompleteResult } from '@/api/chores';
 import { copy } from '@/copy';
-import { choreBucket } from '@/domain';
 import { errorMessage, toAppError } from '@/lib/errors';
 import { useDirectory } from '@/features/household/useDirectory';
 import { todayIso } from '@/domain';
 import { useSession } from '@/features/auth/Session';
-import { TabbedHeader } from '@/features/shell/TabbedHeader';
 import { useHouseholdAccess } from '@/features/household/useMembership';
-import { EmptyState, ErrorState, Fab, SkeletonList, useToast } from '@/ui';
+import { EmptyState, ErrorState, Fab, Header, HeaderTabs, ShareButton, SkeletonList, TabLink, useToast } from '@/ui';
 import { ChoreCard } from './ChoreCard';
 import { useChores, useInvalidateChores } from './hooks';
+import { shareTasksText } from './shareText';
 
-type Tab = 'today' | 'upcoming' | 'completed';
+type Tab = 'all' | 'mine' | 'completed';
 
-/** Chores in three lists: Today (due or still waiting), Upcoming (later or undated), Completed (history). */
+const pad = (n: number) => String(n).padStart(2, '0');
+
+/** Tasks, from the design: All open tasks, the ones that are yours, and Completed (history), each with a count. */
 export function ChoresScreen({ tab }: { tab: Tab }) {
   const access = useHouseholdAccess();
   const dir = useDirectory(access?.householdId);
@@ -39,7 +40,7 @@ export function ChoresScreen({ tab }: { tab: Tab }) {
     mutationFn: (c: Chore) => completeChore(c.id, c.version),
     onSuccess: async (r: CompleteResult, c) => {
       await invalidate();
-      const parts: string[] = [copy.chores.done];
+      const parts: string[] = [copy.chores.doneToast];
       if (r.nextAssigneeMemberId) parts.push(copy.chores.nextUp(dir.nameOf(r.nextAssigneeMemberId)));
       else if (r.nextChoreId && (c.rotationMemberIds || c.assigneeMemberId)) parts.push(copy.chores.unassignedNext);
       if (r.skippedMemberIds.length > 0) parts.push(copy.chores.skipped(r.skippedMemberIds.map(dir.nameOf).join(', ')));
@@ -55,15 +56,14 @@ export function ChoresScreen({ tab }: { tab: Tab }) {
 
   if (!access) return null;
   const open = chores.data?.open ?? [];
-  const todayList = open.filter((c) => choreBucket(c.dueDate, today) === 'today');
-  const upcomingList = open.filter((c) => choreBucket(c.dueDate, today) === 'upcoming');
+  const mineList = open.filter((c) => c.assigneeMemberId === access.memberId);
   const completedList = chores.data?.completed ?? [];
   const tabs = [
-    { to: '/chores', label: `${copy.chores.today} (${todayList.length})`, end: true },
-    { to: '/chores/upcoming', label: `${copy.chores.upcoming} (${upcomingList.length})` },
-    { to: '/chores/completed', label: `${copy.chores.completed} (${completedList.length})` },
+    { to: '/chores', label: copy.chores.tabAll, count: `(${pad(open.length)})`, end: true },
+    { to: '/chores/mine', label: copy.chores.tabMine, count: `(${pad(mineList.length)})` },
+    { to: '/chores/completed', label: copy.chores.completed, count: `(${pad(completedList.length)})` },
   ];
-  const list = tab === 'today' ? todayList : tab === 'upcoming' ? upcomingList : completedList;
+  const list = tab === 'all' ? open : tab === 'mine' ? mineList : completedList;
 
   const canDone = (c: Chore) => access.isAdmin || c.createdBy === myUserId || c.assigneeMemberId === access.memberId || c.assigneeMemberId === null;
   const canEdit = (c: Chore) => access.isAdmin || c.createdBy === myUserId || c.assigneeMemberId === access.memberId;
@@ -87,18 +87,19 @@ export function ChoresScreen({ tab }: { tab: Tab }) {
       />
     );
   else if (list.length === 0) {
-    const e = tab === 'today' ? [copy.chores.emptyToday, copy.chores.emptyTodayBody] : tab === 'upcoming' ? [copy.chores.emptyUpcoming, copy.chores.emptyUpcomingBody] : [copy.chores.emptyCompleted, copy.chores.emptyCompletedBody];
+    const e = tab === 'all' ? [copy.chores.emptyTitle, copy.chores.emptyBody] : tab === 'mine' ? [copy.chores.emptyMine, copy.chores.emptyMineBody] : [copy.chores.emptyCompleted, copy.chores.emptyCompletedBody];
     body = <EmptyState title={e[0]!} body={e[1]} />;
   } else
     body = (
-      <ul className="flex flex-col gap-3">
+      <ul className="flex flex-col gap-5">
         {list.map((c) => (
           <ChoreCard
             key={c.id}
             chore={c}
             today={today}
             assignee={c.assigneeMemberId ? dir.member(c.assigneeMemberId) : undefined}
-            completer={dir.nameOfUser(c.completedBy)}
+            myMemberId={access.memberId}
+            completer={dir.members.find((m) => m.userId === c.completedBy)}
             canDone={canDone(c)}
             canEdit={canEdit(c)}
             blockedReason={access.writeBlockedReason}
@@ -112,7 +113,13 @@ export function ChoresScreen({ tab }: { tab: Tab }) {
 
   return (
     <>
-      <TabbedHeader title={copy.chores.title} tabs={tabs} />
+      <Header title={copy.chores.title} right={<ShareButton label={copy.chores.shareLabel} title={copy.chores.shareTitle} build={() => shareTasksText(copy.chores.shareTitle, list, dir.nameOf)} />}>
+        <HeaderTabs label={copy.chores.title}>
+          {tabs.map((t) => (
+            <TabLink key={t.to} to={t.to} end={t.end} label={t.label} count={t.count} />
+          ))}
+        </HeaderTabs>
+      </Header>
       <div className="p-4 pb-24">{body}</div>
       <Fab to="/chores/new" label={copy.chores.create} disabledReason={access.writeBlockedReason ?? undefined} />
     </>

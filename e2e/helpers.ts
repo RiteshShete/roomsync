@@ -76,14 +76,14 @@ export async function addEqualExpense(page: Page, title: string, amount: string)
 
 /** Reload first: re-opening the same hash is not a navigation, and live updates arrive in Phase 7. */
 export async function youOwe(page: Page): Promise<string> {
-  await page.goto('/#/expenses');
+  await page.goto('/#/expenses/balances');
   await page.reload();
   await expect(page.getByTestId('you-owe')).toBeVisible();
   return (await page.getByTestId('you-owe').innerText()).trim();
 }
 
 export async function youAreOwed(page: Page): Promise<string> {
-  await page.goto('/#/expenses');
+  await page.goto('/#/expenses/balances');
   await page.reload();
   await expect(page.getByTestId('you-are-owed')).toBeVisible();
   return (await page.getByTestId('you-are-owed').innerText()).trim();

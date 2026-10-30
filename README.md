@@ -10,6 +10,7 @@ Shared living, simplified. Shared expenses, chores, groceries, announcements and
 - **Expenses and settlements:** equal, custom or percentage splits to the smallest currency unit; balances computed in the database; suggested payments; settlements are *recorded*, never sent.
 - **Chores:** one-off or recurring, optional rotation, mark done and reopen, in-app reminders.
 - **Groceries:** needed and bought lists, duplicate check, soft delete with undo.
+- **Household chat:** a text-only group chat on Home, kept for a few days and then removed, live between devices.
 - **Announcements, activity and settings:** pinned notices, an activity centre with unread counts, notification preferences, profile, data export.
 - **Moving out:** a review of what is outstanding before leaving, with notes and disputes that are never settled automatically.
 
@@ -143,7 +144,7 @@ Light theme only. Every text colour meets WCAG AA (checked by a test that reads 
 
 - **No real payments.** Settlements are recorded after people pay each other themselves; the app never moves money or computes deposits, and it never says a payment was "sent".
 - **No push, email or SMS notifications.** Reminders and updates are in the app only: a chore reminder appears the first time someone opens the app that day, because there is no scheduler. Quiet hours only hide the unread number on the bell.
-- **No receipt scanning, no AI features, no chat.**
+- **No receipt scanning, no AI features.** Chat is text only (no photos, no editing or deleting) and messages are removed after 7 days.
 - **Nothing is saved while offline.** A banner says so, and a save attempted offline fails with a message and keeps what you typed. There is no offline queue.
 - **Activity events are readable by every member of the household** (security is per household, not per recipient). They hold titles and amounts only, never free text such as announcement messages.
 - **Deleting an account is not self-service yet.** The Privacy page says so and explains the steps.

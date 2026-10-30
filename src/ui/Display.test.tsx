@@ -136,7 +136,7 @@ describe('BottomNav', () => {
     };
     expect(current('/house/groceries')).toBe('Shopping');
     expect(current('/expenses/balances')).toBe('Finance');
-    expect(current('/chores/upcoming')).toBe('Tasks');
+    expect(current('/chores/mine')).toBe('Tasks');
     expect(current('/you/members')).toBe('Settings');
   });
 

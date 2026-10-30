@@ -1,4 +1,4 @@
-# Manual test guide (phases 0–8)
+# Manual test guide (phases 0–9 and the Figma screens)
 
 Everything here runs on your own machine against a local database, so nothing you do touches real data. Plan about 40 minutes for all of it; each scenario also stands alone.
 
@@ -31,8 +31,8 @@ To start over at any time: `npm run db:reset` then `npm run seed:dev`.
 6. Dispute a recorded settlement with a reason → it leaves the balances and shows in its own section.
 
 ### C. Chores and groceries (phase 6)
-1. Chores → + → "Take out trash", weekly, due today, rotate between two people → it appears under Today.
-2. The assignee marks it done → "Nice work — task completed." and it names who is next; Upcoming shows next week's chore. Undo reopens it.
+1. Tasks → + → "Take out trash", weekly, due today, rotate between two people → it appears under All.
+2. The assignee marks it done → "Nice work — task completed." and it names who is next; All shows next week's task. Undo reopens it.
 3. A plain member trying to complete someone else's chore → disabled with a reason.
 4. Shopping → add "Milk 2 l" → add "milk" again → "Already on the list" with Update existing / Add anyway.
 5. Two people tick the same item at nearly the same time → one wins; the other sees "Someone else already updated this item. We refreshed the list."
@@ -71,6 +71,15 @@ To start over at any time: `npm run db:reset` then `npm run seed:dev`.
 4. The overlapping circles at the card's corner are your housemates; tap them → Members.
 5. The bottom bar reads **Home, Shopping, Tasks, Finance, Settings**. Shopping is the grocery list, Tasks is chores, Finance is expenses and settlements, Settings is your profile and household. The current tab's icon is coral and its label bold; page titles match the tab names.
 6. There is **no chat tab, no message box and no points**: they are deliberately not built. The bell is on Home (top right) so notifications stay one tap away.
+
+### H. Activity, Shopping, Expenses and Tasks (from the Figma designs)
+1. Home → **Activity**: cards grouped under Today / Yesterday / dates, the actor in bold, "5 mins ago" on the right. Tap **Filter**, pick a category, then **All**; Escape closes the menu.
+2. **Shopping**: progress card, **To Buy / Bought** tabs, **Filter** and **Sort**, tap the arrow on a category band to collapse it. The share icon copies the to-buy list. Tap "⋯" on an item → sheet with **Mark as checked** and **Save item**.
+3. **Finance → Expenses**: **To Pay** shows expenses others paid that include you, **To Receive** the ones you paid. Filter by category, Sort by newest, oldest or amount. The pills open Balances, Settlements and All expenses. "You owe / You are owed" is at the top of Balances.
+4. **Tasks**: **All / Your task / Completed**. Each card has Edit and Done. Add a task with a category and a priority; a High priority shows a chip on the card. A recurring task keeps its category and priority when you complete it.
+5. **Chat:** Home → **Message**. Log in as Aarav on one device and Riya on another: a message sent on one shows on the other without reloading, with the sender's name. With the network off, sending fails with a message and what you typed stays. The **Message** tab shows a dot when there are messages you have not looked at on this device.
+6. **Pay:** Finance → To Pay → **Pay** opens the details; **Mark as paid** opens the record-payment form with your share filled in. Nothing is sent: it records a payment made outside RoomSync.
+7. Not there on purpose: points, QR, photo upload, push notifications, deleting messages.
 
 ### F. Look and feel (all phases)
 - Light theme only, even if your computer is in dark mode.

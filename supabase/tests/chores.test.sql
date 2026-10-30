@@ -153,5 +153,20 @@ select public.test_login(public.t('ua'));
 select throws_ok($$select public.complete_chore(public.t('c_free'))$$, 'P0001', 'household_archived', 'archived household rejects completion');
 select throws_ok($$select public.reopen_chore(public.t('c_free'))$$, 'P0001', 'household_archived', 'archived household rejects reopen');
 
+-- ===== category and priority (Tasks design) =====
+select public.test_logout();
+update public.households set status = 'active' where id = public.t('h');
+select public.test_login(public.t('ua'));
+select lives_ok($$with c as (insert into public.chores (household_id, title, created_by, assignee_member_id, due_date, recurrence_frequency, category, priority)
+    values (public.t('h'), 'Mop', public.t('ua'), public.t('m_ua'), current_date + 1, 'weekly', 'cleaning', 'high') returning id)
+  insert into public.t_ctx select 'c_cat', id::text from c$$, 'create a chore with a category and priority');
+select is((select priority from public.chores where id = public.t('c_cat')), 'high', 'priority is saved');
+select is((select priority from public.chores where id = public.t('c1')), 'medium', 'priority defaults to medium');
+select is((select category from public.chores where id = public.t('c1')), null, 'category is optional');
+select throws_ok($$insert into public.chores (household_id, title, created_by, priority) values (public.t('h'), 'x', public.t('ua'), 'urgent')$$, '23514', null, 'an unknown priority is refused');
+select throws_ok($$insert into public.chores (household_id, title, created_by, category) values (public.t('h'), 'x', public.t('ua'), 'party')$$, '23514', null, 'an unknown category is refused');
+select lives_ok($$select public.complete_chore(public.t('c_cat'))$$, 'complete the recurring chore');
+select is((select category || '/' || priority from public.chores where id = (select spawned_next_id from public.chores where id = public.t('c_cat'))), 'cleaning/high', 'the next occurrence keeps category and priority');
+
 select * from finish();
 rollback;

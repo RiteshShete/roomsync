@@ -136,8 +136,8 @@ reset role;
 -- the live channel only works if every table the app subscribes to is published
 select is((select array_agg(tablename::text order by tablename) from pg_publication_tables
             where pubname = 'supabase_realtime' and schemaname = 'public'
-              and tablename in ('expenses', 'settlements', 'chores', 'grocery_items', 'announcements', 'activity_events')),
-          array['activity_events', 'announcements', 'chores', 'expenses', 'grocery_items', 'settlements'],
+              and tablename in ('expenses', 'settlements', 'chores', 'grocery_items', 'announcements', 'activity_events', 'chat_messages')),
+          array['activity_events', 'announcements', 'chat_messages', 'chores', 'expenses', 'grocery_items', 'settlements'],
           'every table the UI subscribes to is in the realtime publication');
 
 update public.households set status = 'active', chore_reminders_enabled = true where id = public.t('h');

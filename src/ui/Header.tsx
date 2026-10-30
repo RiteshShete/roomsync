@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { NavLink } from 'react-router-dom';
 import { copy } from '@/copy';
 import { IconButton } from './Button';
 import { BellButton } from './BellButton';
@@ -42,5 +43,31 @@ export function HeaderTabs({ children, label }: { children: ReactNode; label: st
     <nav aria-label={label} className="flex gap-4 overflow-x-auto px-4 min-[360px]:gap-6">
       {children}
     </nav>
+  );
+}
+
+/**
+ * One tab of a header strip, from the design: a label with a smaller count, coral and heavier with a coral
+ * underline when it is the current one. `count` is shown as "(05)" style text by the caller.
+ */
+export function TabLink({ to, end, label, count }: { to: string; end?: boolean; label: string; count?: string }) {
+  return (
+    <NavLink
+      to={to}
+      end={end}
+      className={({ isActive }) =>
+        `inline-flex min-h-11 items-center border-b-2 px-1.5 whitespace-nowrap ${isActive ? 'border-primary font-extrabold text-coral' : 'border-transparent font-medium text-ink'}`
+      }
+    >
+      <span className="text-base">
+        {label}
+        {count ? (
+          <>
+            {' '}
+            <span className="text-sm">{count}</span>
+          </>
+        ) : null}
+      </span>
+    </NavLink>
   );
 }

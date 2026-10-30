@@ -32,7 +32,7 @@ describe('grocery list', () => {
     expect(screen.getByText(copy.groceries.progressOf(1, 3))).toBeInTheDocument();
     expect(screen.getByRole('progressbar')).toHaveAttribute('aria-valuenow', '33');
     expect(screen.queryByText('Eggs')).not.toBeInTheDocument();
-    await userEvent.click(screen.getByRole('tab', { name: /Purchased/ }));
+    await userEvent.click(screen.getByRole('tab', { name: /Bought/ }));
     expect(await screen.findByText('Eggs')).toBeInTheDocument();
     expect(screen.getByText(/bought by Kunal/)).toBeInTheDocument();
     expect(screen.queryByText('Milk')).not.toBeInTheDocument();
@@ -67,7 +67,7 @@ describe('grocery list', () => {
     mockHome({ items: [eggs] });
     vi.mocked(api.moveBackToNeeded).mockResolvedValue(2);
     renderApp('/house/groceries');
-    await userEvent.click(await screen.findByRole('tab', { name: /Purchased/ }));
+    await userEvent.click(await screen.findByRole('tab', { name: /Bought/ }));
     await userEvent.click(await screen.findByRole('checkbox', { name: copy.groceries.moveBack('Eggs') }));
     expect(api.moveBackToNeeded).toHaveBeenCalledWith('g3', 1);
     expect(await screen.findByText(copy.groceries.movedBackToast('Eggs'))).toBeInTheDocument();
@@ -184,9 +184,50 @@ describe('add / edit sheet', () => {
     mockHome({ items: [eggs] });
     vi.mocked(api.moveBackToNeeded).mockResolvedValue(2);
     renderApp('/house/groceries');
-    await userEvent.click(await screen.findByRole('tab', { name: /Purchased/ }));
+    await userEvent.click(await screen.findByRole('tab', { name: /Bought/ }));
     await userEvent.click(await screen.findByRole('button', { name: copy.groceries.edit('Eggs') }));
     await userEvent.click(await screen.findByRole('button', { name: copy.groceries.moveBack('Eggs') }));
     expect(api.moveBackToNeeded).toHaveBeenCalledWith('g3', 1);
+  });
+});
+
+describe('design details', () => {
+  it('shows padded tab counts, filters by category, sorts A to Z and collapses a group', async () => {
+    mockHome({ items: [milk, eggs] });
+    renderApp('/house/groceries');
+    expect(await screen.findByRole('tab', { name: 'To Buy (01)' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Bought (01)' })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: copy.groceries.collapse('Dairy') }));
+    expect(screen.queryByText('Milk')).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: copy.groceries.expand('Dairy') }));
+    expect(screen.getByText('Milk')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: copy.groceries.filter }));
+    expect(screen.getByRole('menuitemradio', { name: copy.groceries.allCategories })).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('menuitemradio', { name: 'Dairy' }));
+    expect(screen.getByText('Milk')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: copy.groceries.sort }));
+    await userEvent.click(screen.getByRole('menuitemradio', { name: copy.groceries.sortName }));
+    expect(screen.getByText('Milk')).toBeInTheDocument();
+  });
+
+  it('the share button copies what is still to buy', async () => {
+    mockHome({ items: [milk, eggs] });
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+    renderApp('/house/groceries');
+    await userEvent.click(await screen.findByRole('button', { name: copy.groceries.shareLabel }));
+    expect(writeText).toHaveBeenCalledWith(expect.stringContaining('Milk (2 l)'));
+    expect(writeText).toHaveBeenCalledWith(expect.not.stringContaining('Eggs'));
+    expect(await screen.findByText(copy.share.copied)).toBeInTheDocument();
+  });
+
+  it('an open item can be marked as checked from its sheet', async () => {
+    mockHome({ items: [milk] });
+    vi.mocked(api.markPurchased).mockResolvedValue(5);
+    renderApp('/house/groceries');
+    await userEvent.click(await screen.findByRole('button', { name: copy.groceries.edit('Milk') }));
+    await userEvent.click(await screen.findByRole('button', { name: copy.groceries.markChecked }));
+    expect(api.markPurchased).toHaveBeenCalledWith('g1', 4, expect.any(String));
+    expect(await screen.findByText(copy.groceries.purchasedToast('Milk'))).toBeInTheDocument();
   });
 });

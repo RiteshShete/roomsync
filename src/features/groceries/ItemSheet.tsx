@@ -1,9 +1,11 @@
-import { useState, type FormEvent } from 'react';
-import { addGrocery, deleteGrocery, moveBackToNeeded, updateGrocery, type GroceryInput, type GroceryItem } from '@/api/groceries';
+import { useId, useState, type FormEvent } from 'react';
+import { addGrocery, deleteGrocery, markPurchased, moveBackToNeeded, updateGrocery, type GroceryInput, type GroceryItem } from '@/api/groceries';
 import { copy } from '@/copy';
 import { findDuplicate } from '@/domain';
 import { toAppError, saveErrorMessage } from '@/lib/errors';
-import { Button, Field, FormError, SelectField, Sheet, useToast } from '@/ui';
+import { formatRelative } from '@/lib/format';
+import { useDirectory } from '@/features/household/useDirectory';
+import { Avatar, Button, Field, FormError, Icon, SelectField, Sheet, useToast } from '@/ui';
 import { useInvalidateGroceries } from './hooks';
 
 const QTY = /^\d+(?:\.\d{1,3})?$/;
@@ -67,6 +69,8 @@ export function ItemSheet({
 }) {
   // The parent remounts this with a key per item, so local state starts fresh each time.
   const toast = useToast();
+  const formId = useId();
+  const dir = useDirectory(householdId);
   const invalidate = useInvalidateGroceries();
   const [draft, setDraft] = useState<Draft>(() => draftOf(item));
   const [busy, setBusy] = useState(false);
@@ -109,7 +113,33 @@ export function ItemSheet({
   }
 
   return (
-    <Sheet open={open} onClose={onClose} title={item ? copy.groceries.editTitle : copy.groceries.addTitle}>
+    <Sheet
+      open={open}
+      onClose={onClose}
+      title={item ? copy.groceries.editTitle : copy.groceries.addTitle}
+      hideTitle
+      footerClassName="!flex-row !bg-strip [&>*]:flex-1"
+      footer={
+        duplicate ? undefined : (
+          <>
+            {item ? (
+              item.status === 'purchased' ? (
+                <Button variant="secondary" className="px-2 text-sm" disabled={!!blockedReason} disabledReason={blockedReason ?? undefined} icon={<Icon name="check" size={18} />} onClick={() => void run(() => moveBackToNeeded(item.id, item.version), copy.groceries.movedBackToast(item.name))}>
+                  {copy.groceries.moveBack(item.name)}
+                </Button>
+              ) : (
+                <Button variant="secondary" className="px-2 text-sm" disabled={!!blockedReason} disabledReason={blockedReason ?? undefined} icon={<Icon name="check" size={18} />} onClick={() => void run(() => markPurchased(item.id, item.version, myMemberId), copy.groceries.purchasedToast(item.name))}>
+                  {copy.groceries.markChecked}
+                </Button>
+              )
+            ) : null}
+            <Button type="submit" form={formId} loading={busy} loadingLabel={copy.groceries.saving} disabled={!!reason} disabledReason={reason ?? undefined}>
+              {copy.groceries.save}
+            </Button>
+          </>
+        )
+      }
+    >
       {duplicate ? (
         <div className="flex flex-col gap-3 pb-2" role="group" aria-labelledby="dup-title">
           <h3 id="dup-title" className="text-base font-bold text-ink">
@@ -142,35 +172,58 @@ export function ItemSheet({
           </Button>
         </div>
       ) : (
-        <form noValidate onSubmit={onSubmit} className="flex flex-col gap-4 pb-2">
-          <Field label={copy.groceries.name} hint={copy.groceries.nameHint} placeholder={copy.groceries.namePlaceholder} autoComplete="off" maxLength={130} value={draft.name} onChange={(e) => set({ name: e.target.value })} error={touched && nameBlank ? copy.groceries.reasonName : null} />
+        <form id={formId} noValidate onSubmit={onSubmit} className="flex flex-col gap-4 pb-2">
+          <div className="flex items-start gap-3 border-b border-line pr-12 pb-4">
+            <div className="min-w-0 flex-1">
+              <label htmlFor={`${formId}-name`} className="sr-only">
+                {copy.groceries.name}
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  id={`${formId}-name`}
+                  data-autofocus
+                  autoComplete="off"
+                  maxLength={130}
+                  placeholder={copy.groceries.namePlaceholder}
+                  value={draft.name}
+                  onChange={(e) => set({ name: e.target.value })}
+                  aria-invalid={touched && nameBlank ? true : undefined}
+                  aria-describedby={`${formId}-name-hint`}
+                  className={`min-h-11 min-w-0 flex-1 rounded-xl border bg-field px-3 text-lg text-ink-strong placeholder:text-ink3/70 ${touched && nameBlank ? 'border-danger' : 'border-field-line'}`}
+                />
+                <Icon name="pen" size={20} className="shrink-0 text-primary" />
+              </div>
+              <p id={`${formId}-name-hint`} className="mt-1.5 text-xs text-ink2">
+                {copy.groceries.nameHint}
+              </p>
+              {touched && nameBlank ? (
+                <p role="alert" className="mt-1 text-sm font-semibold text-danger">
+                  {copy.groceries.reasonName}
+                </p>
+              ) : null}
+            </div>
+          </div>
           <SelectField label={copy.groceries.category} options={CATEGORY_OPTIONS} value={draft.category} onChange={(e) => set({ category: e.target.value })} />
           <div className="grid grid-cols-2 gap-3">
             <Field label={copy.groceries.quantity} optional inputMode="decimal" placeholder="e.g. 2" value={draft.quantity} onChange={(e) => set({ quantity: e.target.value })} error={draft.quantity.trim() !== '' && input === null ? copy.groceries.reasonQuantity : null} />
             <SelectField label={copy.groceries.unit} options={UNIT_OPTIONS} value={draft.unit} onChange={(e) => set({ unit: e.target.value })} />
           </div>
           <Field label={copy.groceries.note} optional hint={copy.groceries.noteHint} maxLength={500} value={draft.note} onChange={(e) => set({ note: e.target.value })} />
-          <FormError message={formError} />
-          <Button type="submit" fullWidth loading={busy} loadingLabel={copy.groceries.saving} disabled={!!reason} disabledReason={reason ?? undefined}>
-            {copy.groceries.save}
-          </Button>
           {item ? (
-            <>
-              {item.status === 'purchased' ? (
-                <Button variant="secondary" fullWidth disabled={!!blockedReason} disabledReason={blockedReason ?? undefined} onClick={() => void run(() => moveBackToNeeded(item.id, item.version), copy.groceries.movedBackToast(item.name))}>
-                  {copy.groceries.moveBack(item.name)}
-                </Button>
-              ) : null}
-              <Button
-                variant="danger"
-                fullWidth
-                disabled={!!blockedReason}
-                disabledReason={blockedReason ?? undefined}
-                onClick={() => void run(async () => { await deleteGrocery(item.id, item.version); onDeleted(item); })}
-              >
-                {copy.groceries.delete}
-              </Button>
-            </>
+            <div className="flex items-center gap-3 border-t border-line pt-4">
+              <Avatar name={dir.nameOf(item.addedByMemberId)} color={dir.member(item.addedByMemberId)?.avatarColor} size="md" />
+              <div className="min-w-0">
+                <p className="text-xs text-ink2">{copy.groceries.addedByLabel}</p>
+                <p className="truncate text-base font-bold text-ink-strong">{dir.nameOf(item.addedByMemberId)}</p>
+                <p className="text-xs text-ink2">{formatRelative(item.createdAt)}</p>
+              </div>
+            </div>
+          ) : null}
+          <FormError message={formError} />
+          {item ? (
+            <Button variant="tertiary" className="text-danger" fullWidth disabled={!!blockedReason} disabledReason={blockedReason ?? undefined} onClick={() => void run(async () => { await deleteGrocery(item.id, item.version); onDeleted(item); })}>
+              {copy.groceries.delete}
+            </Button>
           ) : null}
         </form>
       )}

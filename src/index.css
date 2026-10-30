@@ -16,8 +16,11 @@
   --surface: #ffffff;
   --surface-tint: #ffebd5; /* House Feed banner */
   --surface-tint-border: #ffd7c1;
+  --peach-line: #ffd9d1; /* border of task cards and their action strip */
   --feed-row: #fffaf5; /* rows inside the House Feed card */
   --feed-chip: #fff6ed; /* the collapse button in the feed header */
+  --band-peach: #fff3ea; /* grocery category header (produce) */
+  --band-blue: #eef4fb; /* grocery category header (dairy) */
   --surface-sunken: #f6efe8;
   --ink: #3d3d3d;
   --ink-strong: #272525;
@@ -30,7 +33,7 @@
   --coral-text: #bf3b25;
   --brand: #fe8d76; /* logo tile */
   --brand-soft: #fff3f0; /* icon tiles, selected rows */
-  --coral-strip: #ffe7e2; /* action strips under cards */
+  --coral-strip: #ffebe6; /* action strips under cards */
   --field-bg: #fff8f6;
   --field-border: #ffe3dc;
   --amber: #feb801;
@@ -57,8 +60,11 @@
   --color-surface: var(--surface);
   --color-tint: var(--surface-tint);
   --color-tint-line: var(--surface-tint-border);
+  --color-peach-line: var(--peach-line);
   --color-feed-row: var(--feed-row);
   --color-feed-chip: var(--feed-chip);
+  --color-band-peach: var(--band-peach);
+  --color-band-blue: var(--band-blue);
   --color-sunken: var(--surface-sunken);
   --color-ink: var(--ink);
   --color-ink-strong: var(--ink-strong);

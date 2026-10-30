@@ -1,20 +1,25 @@
+import { useState } from 'react';
 import { copy } from '@/copy';
 import { errorMessage } from '@/lib/errors';
 import { RecentActivity } from '@/features/activity/RecentActivity';
+import { ChatPanel } from '@/features/chat/ChatPanel';
+import { useChatUnread } from '@/features/chat/hooks';
 import { useBell } from '@/features/activity/hooks';
 import { useHouseholdAccess, useMembers } from '@/features/household/useMembership';
 import { BellButton, BrandMark, ErrorState, SkeletonList } from '@/ui';
+import { HomeTabs, type HomeTab } from './HomeTabs';
 import { HouseFeed } from './HouseFeed';
 
 /**
- * Home, from the design: the RoomSync mark and name, the House Feed card, and below it the household's
- * activity. (The design's chat tab and message box, and its points line, are not built: no chat for now,
- * no points.) The household's name is the page's heading for screen readers.
+ * Home, from the design: the RoomSync mark and name, the House Feed card, and below it two tabs: Message (the
+ * household chat) and Activity. There are no points. The household's name is the page's heading for screen readers.
  */
 export function HomeScreen() {
   const access = useHouseholdAccess();
   const members = useMembers(access?.householdId);
   const bell = useBell();
+  const chat = useChatUnread();
+  const [tab, setTab] = useState<HomeTab>('activity');
   if (!access) return null;
 
   return (
@@ -32,7 +37,10 @@ export function HomeScreen() {
         {members.isError ? <ErrorState message={errorMessage(members.error)} onRetry={() => void members.refetch()} /> : members.isPending ? <SkeletonList rows={2} /> : <HouseFeed />}
       </div>
       <div className="p-4">
-        <RecentActivity />
+        {(() => {
+          const tabs = <HomeTabs tab={tab} onChange={setTab} unreadChat={chat.unread > 0} />;
+          return tab === 'message' ? <ChatPanel tabs={tabs} markSeen={chat.markSeen} /> : <RecentActivity tabs={tabs} />;
+        })()}
       </div>
     </div>
   );

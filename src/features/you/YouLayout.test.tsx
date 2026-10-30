@@ -76,7 +76,7 @@ describe('top bar titles', () => {
     ['/you', 'Settings'],
     ['/house/groceries', 'Shopping'],
     ['/chores', 'Tasks'],
-    ['/expenses', 'Finance'],
+    ['/expenses', 'Expenses'],
     ['/activity', copy.activity.title],
     ['/you/notifications', copy.notificationPrefs.title],
   ])('%s: the page name is bold', async (path, title) => {

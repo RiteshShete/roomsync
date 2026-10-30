@@ -10,7 +10,7 @@ describe('checkChoreForm', () => {
   it('a plain chore needs only a title and defaults to the creator as assignee', () => {
     const c = checkChoreForm(base());
     expect(c.ok).toBe(true);
-    expect(c.input).toEqual({ title: 'Dishes', description: null, assigneeMemberId: 'a', dueDate: null, recurrenceFrequency: null, rotationMemberIds: null });
+    expect(c.input).toEqual({ title: 'Dishes', description: null, assigneeMemberId: 'a', dueDate: null, recurrenceFrequency: null, rotationMemberIds: null, category: null, priority: 'medium' });
   });
 
   it('trims, and turns blanks into null', () => {
@@ -31,7 +31,7 @@ describe('checkChoreForm', () => {
 
   it('a recurring chore with a due date is valid, without rotation', () => {
     const c = checkChoreForm(base({ recurrence: 'weekly', dueDate: '2026-06-01' }));
-    expect(c.input).toMatchObject({ recurrenceFrequency: 'weekly', dueDate: '2026-06-01', rotationMemberIds: null });
+    expect(c.input).toMatchObject({ recurrenceFrequency: 'weekly', dueDate: '2026-06-01', rotationMemberIds: null, category: null, priority: 'medium' });
   });
 
   it('rotation needs at least two people and keeps the chosen order', () => {
@@ -63,10 +63,19 @@ describe('moveInOrder', () => {
   });
 });
 
+describe('category and priority', () => {
+  it('default to no category and medium priority, and flow into the payload', () => {
+    const s = emptyChoreState(['a'], 'a');
+    expect(s.category).toBe('');
+    expect(s.priority).toBe('medium');
+    expect(checkChoreForm({ ...s, title: 'Mop', category: 'cleaning', priority: 'high' }).input).toMatchObject({ category: 'cleaning', priority: 'high' });
+  });
+});
+
 describe('edit round trip', () => {
   const chore: Chore = {
     id: 'c1', title: 'Trash', description: 'Take it out', assigneeMemberId: 'b', dueDate: '2026-06-01', recurrenceFrequency: 'weekly',
-    rotationMemberIds: ['b', 'c'], status: 'open', createdBy: 'u', completedAt: null, completedBy: null, version: 4, createdAt: '',
+    rotationMemberIds: ['b', 'c'], category: 'cleaning', priority: 'high', status: 'open', createdBy: 'u', completedAt: null, completedBy: null, version: 4, createdAt: '',
   };
 
   it('rebuilds the form with the saved rotation first, then everyone else', () => {

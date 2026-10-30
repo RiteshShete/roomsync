@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getBalanceInputs, getBalances, getExpense, listExpenseHistory, listExpenses, PAGE_SIZE, type ExpenseFilters } from '@/api/expenses';
 import { listSettlements } from '@/api/settlements';
@@ -31,6 +32,16 @@ export function useExpenses(householdId: string | undefined, filters: ExpenseFil
     enabled: !!householdId,
     staleTime: 0,
   });
+}
+
+/** Every expense that matches, loading further pages in the background until all are here. */
+export function useAllExpenses(householdId: string | undefined, filters: ExpenseFilters = {}) {
+  const q = useExpenses(householdId, filters);
+  const { hasNextPage, isFetchingNextPage, fetchNextPage } = q;
+  useEffect(() => {
+    if (hasNextPage && !isFetchingNextPage) void fetchNextPage();
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+  return { ...q, items: q.data?.pages.flatMap((p) => p.items) ?? [], isLoadingAll: q.isPending || !!hasNextPage };
 }
 
 export function useExpense(expenseId: string | undefined) {

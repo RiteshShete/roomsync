@@ -3,13 +3,13 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { cancelChore, createChore, updateChore, type Chore } from '@/api/chores';
 import type { MemberWithLeft } from '@/api/households';
 import { copy } from '@/copy';
-import type { RecurrenceFrequency } from '@/domain';
+import { CHORE_CATEGORIES, CHORE_PRIORITIES, type ChorePriority, type RecurrenceFrequency } from '@/domain';
 import { errorMessage, toAppError, saveErrorMessage } from '@/lib/errors';
 import { useSession } from '@/features/auth/Session';
 import { useFreshDirectory } from '@/features/household/useDirectory';
 import { SubPage } from '@/features/shell/SubPage';
 import { useHouseholdAccess, type HouseholdAccess } from '@/features/household/useMembership';
-import { Avatar, Button, ButtonRow, ConfirmDialog, EmptyState, ErrorState, Field, FormError, SelectField, SkeletonList, Toggle, useToast } from '@/ui';
+import { Avatar, Button, ButtonRow, ConfirmDialog, EmptyState, ErrorState, Field, FormError, Icon, SelectField, SkeletonList, Toggle, useToast, type IconName } from '@/ui';
 import { checkChoreForm, emptyChoreState, inputFromChore, moveInOrder, rotationOf, sameChoreInput, stateFromChore, type ChoreFormState } from './formModel';
 import { useChore, useInvalidateChores } from './hooks';
 
@@ -20,6 +20,20 @@ const FREQ: { value: '' | RecurrenceFrequency; label: string }[] = [
   { value: 'biweekly', label: copy.chores.repeats.biweekly! },
   { value: 'monthly', label: copy.chores.repeats.monthly! },
 ];
+
+const PRIORITY_ICON: Record<ChorePriority, IconName> = { low: 'chevronDown', medium: 'equal', high: 'chevronUp' };
+
+const CATEGORY_OPTIONS = [{ value: '', label: copy.chores.noCategory }, ...CHORE_CATEGORIES.map((c) => ({ value: c, label: copy.chores.categories[c]! }))];
+
+/** One setting in the design's tinted row card: a small icon, then the control. */
+function Row({ icon, children }: { icon: IconName; children: React.ReactNode }) {
+  return (
+    <div className="flex items-start gap-3 rounded-xl border border-peach-line bg-field p-3">
+      <Icon name={icon} size={22} className="mt-3 shrink-0 text-primary" />
+      <div className="min-w-0 flex-1">{children}</div>
+    </div>
+  );
+}
 
 function Form({ access, members, chore, userId }: { access: HouseholdAccess; members: MemberWithLeft[]; chore?: Chore; userId: string | null }) {
   const navigate = useNavigate();
@@ -86,18 +100,52 @@ function Form({ access, members, chore, userId }: { access: HouseholdAccess; mem
 
   return (
     <form noValidate onSubmit={onSubmit} className="flex flex-col gap-4">
-      <p className="text-base text-ink2">{copy.chores.subtitle}</p>
-      <section className="flex flex-col gap-4 rounded-xl border border-line bg-surface p-4">
+      <section className="flex flex-col gap-4 rounded-xl border border-peach-line bg-surface p-4">
+        <div>
+          <h2 className="text-xl font-bold text-ink-strong">{chore ? copy.chores.editTitle : copy.chores.newTitle}</h2>
+          <p className="text-sm text-ink2">{copy.chores.subtitle}</p>
+        </div>
         <Field label={copy.chores.what} placeholder={copy.chores.whatPlaceholder} autoComplete="off" maxLength={130} value={state.title} onChange={(e) => patch({ title: e.target.value })} />
         <Field label={copy.chores.description} optional maxLength={1000} value={state.description} onChange={(e) => patch({ description: e.target.value })} />
-        <SelectField label={copy.chores.assignee} options={assigneeOptions} value={state.assignee} onChange={(e) => patch({ assignee: e.target.value })} />
-        <Field label={copy.chores.dueDate} hint={copy.chores.dueHint} type="date" value={state.dueDate} onChange={(e) => patch({ dueDate: e.target.value })} />
-        <SelectField
-          label={copy.chores.repeat}
-          options={FREQ}
-          value={state.recurrence}
-          onChange={(e) => patch({ recurrence: e.target.value as ChoreFormState['recurrence'], ...(e.target.value === '' ? { rotate: false } : {}) })}
-        />
+      </section>
+      <section className="flex flex-col gap-3 border-t border-line pt-4">
+        <Row icon="plus">
+          <SelectField label={copy.chores.categoryLabel} options={CATEGORY_OPTIONS} value={state.category} onChange={(e) => patch({ category: e.target.value as ChoreFormState['category'] })} />
+        </Row>
+        <Row icon="user">
+          <SelectField label={copy.chores.assignee} options={assigneeOptions} value={state.assignee} onChange={(e) => patch({ assignee: e.target.value })} />
+        </Row>
+        <Row icon="calendar">
+          <Field label={copy.chores.dueDate} hint={copy.chores.dueHint} type="date" value={state.dueDate} onChange={(e) => patch({ dueDate: e.target.value })} />
+        </Row>
+        <Row icon="swap">
+          <SelectField
+            label={copy.chores.repeat}
+            options={FREQ}
+            value={state.recurrence}
+            onChange={(e) => patch({ recurrence: e.target.value as ChoreFormState['recurrence'], ...(e.target.value === '' ? { rotate: false } : {}) })}
+          />
+        </Row>
+        <Row icon="alert">
+          <fieldset>
+            <legend className="mb-1.5 text-sm font-bold text-ink">{copy.chores.priorityLabel}</legend>
+            <div role="radiogroup" aria-label={copy.chores.priorityLabel} className="grid grid-cols-3 gap-2">
+              {CHORE_PRIORITIES.map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  role="radio"
+                  aria-checked={state.priority === p}
+                  onClick={() => patch({ priority: p })}
+                  className={`inline-flex min-h-11 cursor-pointer items-center justify-center gap-1 rounded-lg border px-2 text-sm font-semibold ${state.priority === p ? 'border-success-text bg-success-text text-white' : 'border-line bg-surface text-ink'}`}
+                >
+                  <Icon name={PRIORITY_ICON[p]} size={16} className={state.priority === p ? '' : p === 'high' ? 'text-danger' : ''} />
+                  {copy.chores.priorities[p]}
+                </button>
+              ))}
+            </div>
+          </fieldset>
+        </Row>
       </section>
 
       {state.recurrence !== '' ? (
@@ -140,7 +188,7 @@ function Form({ access, members, chore, userId }: { access: HouseholdAccess; mem
 
       <FormError message={formError} />
       {conflict && chore ? <ConflictRefresh id={chore.id} onRefreshed={(v) => { setBaseVersion(v); setConflict(false); setFormError(copy.chores.refreshed); }} /> : null}
-      <ButtonRow className="rounded-xl bg-strip p-3">
+      <ButtonRow className="rounded-xl border border-peach-line bg-strip p-3">
         <Button variant="secondary" onClick={() => navigate('/chores')}>
           Cancel
         </Button>
@@ -181,11 +229,10 @@ export function ChoreFormScreen() {
   const chore = useChore(id);
   const session = useSession();
   const userId = session.status === 'signedIn' ? session.user.id : null;
-  const title = editing ? copy.chores.editTitle : copy.chores.newTitle;
 
   if (!access) return null;
   const wrap = (children: React.ReactNode) => (
-    <SubPage title={title} backTo="/chores">
+    <SubPage title={copy.chores.title} backTo="/chores">
       {children}
     </SubPage>
   );

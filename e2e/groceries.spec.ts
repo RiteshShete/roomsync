@@ -45,13 +45,13 @@ test.describe('Journey F: groceries (three real accounts)', () => {
 
     // Asha sees who bought it, then moves it back to Needed.
     await openList(a.page);
-    await a.page.getByRole('tab', { name: /Purchased/ }).click();
+    await a.page.getByRole('tab', { name: /Bought/ }).click();
     await expect(a.page.getByText(/bought by Bilal/)).toBeVisible();
     await a.page.getByRole('checkbox', { name: 'Move Milk back to Needed' }).click();
     await expect(a.page.getByText('Milk is back on the list.')).toBeVisible();
 
     // Soft delete with Undo restores it.
-    await a.page.getByRole('tab', { name: /Needed/ }).click();
+    await a.page.getByRole('tab', { name: /To Buy/ }).click();
     await a.page.getByRole('button', { name: 'Edit Milk' }).click();
     await a.page.getByRole('button', { name: 'Delete item' }).click();
     await expect(a.page.getByText('Milk deleted.')).toBeVisible();
@@ -86,7 +86,7 @@ test.describe('Journey F: groceries (three real accounts)', () => {
     await boxB.click();
     await expect(b.page.getByText('Someone else already updated this item. We refreshed the list.')).toBeVisible();
     // After the refresh the item shows as bought by Asha.
-    await b.page.getByRole('tab', { name: /Purchased/ }).click();
+    await b.page.getByRole('tab', { name: /Bought/ }).click();
     await expect(b.page.getByText(/bought by Asha/)).toBeVisible();
 
     await Promise.all([a, b, c].map((u) => u.context.close()));

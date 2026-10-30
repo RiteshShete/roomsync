@@ -5,7 +5,7 @@ import { getSupabase } from '@/lib/supabase';
  * ...100009_realtime), because one unpublished table makes the server reject the whole subscription.
  * Member changes arrive as activity_events. Row-level security still decides which rows a client receives.
  */
-const TABLES = ['expenses', 'settlements', 'chores', 'grocery_items', 'announcements', 'activity_events'] as const;
+const TABLES = ['expenses', 'settlements', 'chores', 'grocery_items', 'announcements', 'activity_events', 'chat_messages'] as const;
 
 export type RealtimeStatus = 'connecting' | 'live' | 'down';
 

@@ -89,7 +89,7 @@ describe('the bell', () => {
     mockActivity({ events, prefs: { quietEnabled: true, ...quietAroundNow() } });
     renderApp('/activity');
     expect(await screen.findByText(copy.activity.quietNote)).toBeInTheDocument();
-    expect(await screen.findByText(/Riya added an expense: Dinner/)).toBeInTheDocument();
+    expect(await screen.findByRole('link', { name: /Riya added an expense: Dinner/ })).toBeInTheDocument();
   });
 });
 
@@ -97,7 +97,7 @@ describe('activity centre', () => {
   it('lists only my updates, newest first, with category and unread marks', async () => {
     mockActivity({ events, readIds: ['e3'] });
     renderApp('/activity');
-    const list = await screen.findByRole('list', { name: copy.activity.title });
+    const list = await screen.findByRole('group', { name: copy.activity.title });
     const rows = within(list).getAllByRole('listitem');
     expect(rows).toHaveLength(3);
     expect(rows[0]).toHaveTextContent('Riya posted an announcement: Water off');
@@ -105,7 +105,7 @@ describe('activity centre', () => {
     expect(rows[2]).toHaveTextContent('Riya assigned you a chore: Dishes');
     expect(within(rows[0]!).queryByText(`${copy.activity.unreadAria}:`, { exact: false })).not.toBeInTheDocument();
     expect(within(rows[1]!).getByText(`${copy.activity.unreadAria}:`, { exact: false })).toBeInTheDocument();
-    expect(within(rows[1]!).getByText('Expenses')).toBeInTheDocument();
+    expect(within(rows[1]!).getByText(/Expenses:/)).toBeInTheDocument();
   });
 
   it('opening an update marks it read and goes to the right screen', async () => {
@@ -153,31 +153,44 @@ describe('activity centre', () => {
     expect(await screen.findByText(copy.activity.caughtUp)).toBeInTheDocument();
   });
 
-  it('category chips stay on one row and scroll sideways instead of wrapping', async () => {
-    mockActivity({ events });
+  it('groups the cards under day labels and shows how long ago', async () => {
+    mockActivity({ events: [activityEvent({ id: 'n1', createdAt: new Date().toISOString() }), activityEvent({ id: 'n2', createdAt: new Date(Date.now() - 86_400_000).toISOString() })] });
     renderApp('/activity');
-    const group = await screen.findByRole('group', { name: copy.activity.categoriesLabel });
-    expect(group.className).toMatch(/overflow-x-auto/);
-    expect(group.className).not.toMatch(/flex-wrap/);
-    for (const chip of within(group).getAllByRole('button')) expect(chip.className).toMatch(/shrink-0/);
+    const list = await screen.findByRole('group', { name: copy.activity.title });
+    expect(within(list).getByRole('heading', { level: 3, name: 'Today' })).toBeInTheDocument();
+    expect(within(list).getByRole('heading', { level: 3, name: 'Yesterday' })).toBeInTheDocument();
+    expect(within(list).getByText('Just now')).toBeInTheDocument();
   });
 
-  it('unread and read rows share one left text edge (the dot lives in the padding)', async () => {
-    mockActivity({ events, readIds: ['e3'] });
+  it('the actor is in bold and the category is a tile, spoken as text', async () => {
+    mockActivity({ events: [events[1]!] });
     renderApp('/activity');
-    const list = await screen.findByRole('list', { name: copy.activity.title });
-    for (const link of within(list).getAllByRole('link')) expect(link.className).toMatch(/px-4/);
+    const row = within(await screen.findByRole('group', { name: copy.activity.title })).getByRole('listitem');
+    expect(within(row).getByText('Riya').tagName).toBe('STRONG');
+    expect(within(row).getByText(/Expenses:/)).toHaveClass('sr-only');
   });
 
-  it('filters by category', async () => {
+  it('filters by category from the Filter menu', async () => {
     mockActivity({ events });
     renderApp('/activity');
-    await userEvent.click(await screen.findByRole('button', { name: 'Expenses' }));
-    const list = screen.getByRole('list', { name: copy.activity.title });
-    expect(within(list).getAllByRole('listitem')).toHaveLength(1);
-    expect(screen.getByRole('button', { name: 'Expenses' })).toHaveAttribute('aria-pressed', 'true');
-    await userEvent.click(screen.getByRole('button', { name: copy.activity.all }));
-    expect(within(screen.getByRole('list', { name: copy.activity.title })).getAllByRole('listitem')).toHaveLength(3);
+    await userEvent.click(await screen.findByRole('button', { name: copy.activity.filter }));
+    await userEvent.click(screen.getByRole('menuitemradio', { name: 'Expenses' }));
+    expect(within(screen.getByRole('group', { name: copy.activity.title })).getAllByRole('listitem')).toHaveLength(1);
+    await userEvent.click(screen.getByRole('button', { name: copy.activity.filter }));
+    expect(screen.getByRole('menuitemradio', { name: 'Expenses' })).toHaveAttribute('aria-checked', 'true');
+    await userEvent.click(screen.getByRole('menuitemradio', { name: copy.activity.all }));
+    expect(within(screen.getByRole('group', { name: copy.activity.title })).getAllByRole('listitem')).toHaveLength(3);
+  });
+
+  it('Escape closes the Filter menu and returns focus to its button', async () => {
+    mockActivity({ events });
+    renderApp('/activity');
+    const button = await screen.findByRole('button', { name: copy.activity.filter });
+    await userEvent.click(button);
+    expect(screen.getByRole('menu')).toBeInTheDocument();
+    await userEvent.keyboard('{Escape}');
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+    expect(button).toHaveFocus();
   });
 
   it('empty state, then an error with retry', async () => {
@@ -192,7 +205,7 @@ describe('activity centre', () => {
     renderApp('/activity');
     expect(await screen.findByText(copy.errors.network)).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: copy.states.retry }));
-    expect(await screen.findByText(/Riya assigned you a chore/)).toBeInTheDocument();
+    expect(await screen.findByRole('link', { name: /Riya assigned you a chore/ })).toBeInTheDocument();
   });
 });
 
@@ -200,15 +213,15 @@ describe('Home: recent activity', () => {
   it('shows the latest updates with a link to all of them', async () => {
     mockActivity({ events });
     renderApp('/');
-    expect(await screen.findByText(/Riya assigned you a chore: Dishes/)).toBeInTheDocument();
+    expect(await screen.findByRole('link', { name: /Riya assigned you a chore: Dishes/ })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: copy.activity.seeAll })).toHaveAttribute('href', '/activity');
   });
 
-  it('shows at most five', async () => {
-    mockActivity({ events: Array.from({ length: 8 }, (_, i) => activityEvent({ id: `n${i}`, createdAt: `2026-05-0${i + 1}T10:00:00Z` })) });
+  it('shows at most twenty', async () => {
+    mockActivity({ events: Array.from({ length: 25 }, (_, i) => activityEvent({ id: `n${i}`, createdAt: `2026-05-01T10:00:${String(i).padStart(2, '0')}Z` })) });
     renderApp('/');
-    const list = await screen.findByRole('list', { name: copy.activity.recent });
-    expect(within(list).getAllByRole('listitem')).toHaveLength(5);
+    const list = await screen.findByRole('group', { name: copy.activity.recent });
+    expect(within(list).getAllByRole('listitem')).toHaveLength(20);
   });
 
   it('with nothing yet, shows the "Your house is ready" state', async () => {

@@ -20,6 +20,8 @@ export function chore(overrides: Partial<choresApi.Chore> = {}): choresApi.Chore
     dueDate: inDays(0),
     recurrenceFrequency: null,
     rotationMemberIds: null,
+    category: null,
+    priority: 'medium',
     status: 'open',
     createdBy: 'u-riya',
     completedAt: null,

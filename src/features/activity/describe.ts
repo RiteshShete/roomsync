@@ -24,9 +24,12 @@ export function eventLink(ev: Pick<ActivityEvent, 'eventType' | 'entityType' | '
 
 const str = (v: unknown): string => (typeof v === 'string' ? v : '');
 
+/** The actor's display name, or a neutral word when the event has none. */
+export const actorOf = (ev: ActivityEvent, nameOf: (memberId: string | null) => string): string => (ev.actorMemberId ? nameOf(ev.actorMemberId) : copy.activity.someone);
+
 /** One neutral sentence for an event, built only from the actor's name and the metadata (titles, amounts). */
 export function describeEvent(ev: ActivityEvent, nameOf: (memberId: string | null) => string): string {
-  const who = ev.actorMemberId ? nameOf(ev.actorMemberId) : copy.activity.someone;
+  const who = actorOf(ev, nameOf);
   const minor = ev.metadata.amount_minor;
   const amount = typeof minor === 'number' ? ` · ${formatMoney(minor, str(ev.metadata.currency_code) || 'INR')}` : '';
   const line = copy.activity.lines[ev.eventType];

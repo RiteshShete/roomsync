@@ -20,7 +20,7 @@ describe('activity: edge cases', () => {
   it('an event from someone who has since left still reads sensibly', async () => {
     mockActivity({ events: [activityEvent({ actorMemberId: 'm-gone', eventType: 'expense.added', metadata: { title: 'Pizza' } })] });
     renderApp('/activity');
-    expect(await screen.findByText('Former member added an expense: Pizza')).toBeInTheDocument();
+    expect(await screen.findByRole('link', { name: /Former member added an expense: Pizza/ })).toBeInTheDocument();
   });
 
   it('metadata with the wrong types never crashes the list', async () => {
@@ -31,7 +31,7 @@ describe('activity: edge cases', () => {
       ],
     });
     renderApp('/activity');
-    expect(await within(await screen.findByRole('list', { name: copy.activity.title })).findAllByRole('listitem')).toHaveLength(2);
+    expect(await within(await screen.findByRole('group', { name: copy.activity.title })).findAllByRole('listitem')).toHaveLength(2);
   });
 
   it('markup in an event title is plain text', async () => {
@@ -47,14 +47,14 @@ describe('activity: edge cases', () => {
     renderApp('/activity');
     await userEvent.click(await screen.findByRole('button', { name: copy.activity.markAll }));
     expect(await screen.findByText(copy.errors.network)).toBeInTheDocument();
-    expect(screen.getByText(/Riya assigned you a chore/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /Riya assigned you a chore/ })).toBeInTheDocument();
   });
 
-  it('when every event is in a switched-off category, the filter chips go away and the empty state shows', async () => {
+  it('when every event is in a switched-off category, the filter goes away and the empty state shows', async () => {
     mockActivity({ events: [activityEvent()], prefs: { categories: { chores: false } } });
     renderApp('/activity');
     expect(await screen.findByText(copy.activity.emptyTitle)).toBeInTheDocument();
-    expect(screen.queryByRole('group', { name: copy.activity.categoriesLabel })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: copy.activity.filter })).not.toBeInTheDocument();
   });
 
   it('a large unread count shows as 9+ on the badge and in full to screen readers', async () => {

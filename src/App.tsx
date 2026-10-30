@@ -61,7 +61,8 @@ export function AppRoutes() {
           <Route path="/start/join" element={<JoinHouseholdScreen />} />
           <Route element={<AppShell />}>
             <Route index element={<HomeScreen />} />
-            <Route path="expenses" element={<ExpensesScreen />} />
+            <Route path="expenses" element={<ExpensesScreen tab="pay" />} />
+            <Route path="expenses/receive" element={<ExpensesScreen tab="receive" />} />
             <Route path="expenses/all" element={<ExpenseListScreen />} />
             <Route path="expenses/new" element={<ExpenseFormScreen />} />
             <Route path="expenses/balances" element={<BalancesScreen />} />
@@ -69,8 +70,8 @@ export function AppRoutes() {
             <Route path="expenses/settle" element={<RecordSettlementScreen />} />
             <Route path="expenses/:id" element={<ExpenseDetailsScreen />} />
             <Route path="expenses/:id/edit" element={<ExpenseFormScreen />} />
-            <Route path="chores" element={<ChoresScreen tab="today" />} />
-            <Route path="chores/upcoming" element={<ChoresScreen tab="upcoming" />} />
+            <Route path="chores" element={<ChoresScreen tab="all" />} />
+            <Route path="chores/mine" element={<ChoresScreen tab="mine" />} />
             <Route path="chores/completed" element={<ChoresScreen tab="completed" />} />
             <Route path="chores/new" element={<ChoreFormScreen />} />
             <Route path="chores/:id/edit" element={<ChoreFormScreen />} />

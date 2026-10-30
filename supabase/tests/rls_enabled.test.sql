@@ -11,7 +11,7 @@ select is(
 select is(
   (select count(*)::int from pg_class c join pg_namespace n on n.oid = c.relnamespace
     where n.nspname = 'public' and c.relkind in ('r', 'p')),
-  17, 'public has the 17 expected tables (update this count when adding a table)');
+  18, 'public has the 18 expected tables (update this count when adding a table)');
 
 -- anon must have no privilege of any kind on any public table.
 select ok(not has_any_column_privilege('anon', c.oid, 'select, insert, update, references'),
@@ -32,8 +32,8 @@ select is(
      join pg_namespace n on n.oid = c.relnamespace
     where n.nspname = 'public' and c.relkind in ('r', 'p')
       and has_any_column_privilege('authenticated', c.oid, 'insert')),
-  array['announcements', 'chores', 'grocery_items'],
-  'direct INSERT is limited to announcements, chores, grocery_items');
+  array['announcements', 'chat_messages', 'chores', 'grocery_items'],
+  'direct INSERT is limited to announcements, chat_messages, chores, grocery_items');
 
 -- Direct UPDATE is allowed only on these tables.
 select is(

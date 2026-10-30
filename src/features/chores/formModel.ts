@@ -1,6 +1,6 @@
 import type { Chore, ChoreInput } from '@/api/chores';
 import { copy } from '@/copy';
-import type { RecurrenceFrequency } from '@/domain';
+import type { ChoreCategory, ChorePriority, RecurrenceFrequency } from '@/domain';
 
 /** Pure model for the create/edit chore form (rules, payload, "nothing changed"). */
 export interface ChoreFormState {
@@ -10,6 +10,8 @@ export interface ChoreFormState {
   dueDate: string; // ISO date, or ''
   recurrence: '' | RecurrenceFrequency;
   rotate: boolean;
+  category: '' | ChoreCategory;
+  priority: ChorePriority;
   /** Every selectable member, in rotation order. */
   order: string[];
   /** Members taking part in the rotation. */
@@ -46,6 +48,8 @@ export function checkChoreForm(state: ChoreFormState): ChoreCheck {
       dueDate: state.dueDate === '' ? null : state.dueDate,
       recurrenceFrequency: state.recurrence === '' ? null : state.recurrence,
       rotationMemberIds: rotating ? rotation : null,
+      category: state.category === '' ? null : state.category,
+      priority: state.priority,
     },
   };
 }
@@ -60,13 +64,15 @@ export function stateFromChore(c: Chore, selectable: string[]): ChoreFormState {
     dueDate: c.dueDate ?? '',
     recurrence: c.recurrenceFrequency ?? '',
     rotate: c.rotationMemberIds !== null,
+    category: c.category ?? '',
+    priority: c.priority,
     order,
     included: rot.length > 0 ? rot : selectable,
   };
 }
 
 export function emptyChoreState(selectable: string[], me: string): ChoreFormState {
-  return { title: '', description: '', assignee: me, dueDate: '', recurrence: '', rotate: false, order: selectable, included: selectable };
+  return { title: '', description: '', assignee: me, dueDate: '', recurrence: '', rotate: false, category: '', priority: 'medium', order: selectable, included: selectable };
 }
 
 export function inputFromChore(c: Chore): ChoreInput {
@@ -77,6 +83,8 @@ export function inputFromChore(c: Chore): ChoreInput {
     dueDate: c.dueDate,
     recurrenceFrequency: c.recurrenceFrequency,
     rotationMemberIds: c.rotationMemberIds,
+    category: c.category,
+    priority: c.priority,
   };
 }
 

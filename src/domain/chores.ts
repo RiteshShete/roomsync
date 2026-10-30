@@ -1,5 +1,11 @@
 import { daysBetween, isOverdue } from './dates';
 
+/** The labels a chore can carry (stored as plain text, checked by the database). */
+export const CHORE_CATEGORIES = ['cleaning', 'cooking', 'shopping', 'laundry', 'repairs', 'other'] as const;
+export type ChoreCategory = (typeof CHORE_CATEGORIES)[number];
+export const CHORE_PRIORITIES = ['low', 'medium', 'high'] as const;
+export type ChorePriority = (typeof CHORE_PRIORITIES)[number];
+
 export type ChoreBucket = 'today' | 'upcoming';
 
 /**

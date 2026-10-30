@@ -45,7 +45,7 @@ test.describe('Journey H: move out (three real accounts)', () => {
     await expect(b.page.getByText('You can keep using RoomSync until then.')).toBeVisible();
     await expect(b.page.getByText(/Balance you reviewed: ₹600.00/)).toBeVisible();
     await expect(b.page.getByText('Please split the internet refund')).toBeVisible();
-    await b.page.goto('/#/expenses');
+    await b.page.goto('/#/expenses/balances');
     await expect(b.page.getByTestId('you-are-owed')).toHaveText('₹600.00');
     await expect(b.page.getByRole('link', { name: 'Details' })).toBeVisible();
 
@@ -82,7 +82,7 @@ test.describe('Journey H: move out (three real accounts)', () => {
     await expect(c.page.getByText('Bilal', { exact: true })).toHaveCount(0);
     await reloadAt(c.page, '/chores');
     const moved = c.page.getByRole('listitem').filter({ hasText: 'Recycling' });
-    await expect(moved).toContainText('Chitra');
+    await expect(moved).toContainText('Assigned to You');
     await reloadAt(c.page, '/expenses/all');
     await expect(c.page.getByText('Internet bill')).toBeVisible();
     await reloadAt(c.page, '/activity');

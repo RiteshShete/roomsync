@@ -25,6 +25,16 @@ const PATHS = {
   calendar: 'M4 6h16v14H4zM4 10h16M8 3v4M16 3v4',
   filter: 'M3 5h18M6 12h12M10 19h4',
   receipt: 'M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6',
+  cart: 'M3 4h2l2.4 11h10.2l2-8H6M9 20a1 1 0 100-2 1 1 0 000 2zM17 20a1 1 0 100-2 1 1 0 000 2z',
+  megaphone: 'M3 10v4h3l8 4V6L6 10H3zM18 9a4 4 0 010 6',
+  send: 'M21 3L10 14M21 3l-7 18-4-7-7-4 18-7z',
+  chevronUp: 'M6 15l6-6 6 6',
+  equal: 'M5 9h14M5 15h14',
+  share: 'M12 16V4M7.5 8.5L12 4l4.5 4.5M5 13v6h14v-6',
+  chevronDown: 'M6 9l6 6 6-6',
+  sort: 'M7 4v16M3.5 16.5L7 20l3.5-3.5M17 20V4M13.5 7.5L17 4l3.5 3.5',
+  dots: 'M5 12h.01M12 12h.01M19 12h.01',
+  leaf: 'M5 19c0-9 5-14 15-14 0 10-5 15-14 15M5 19l8-8',
   swap: 'M7 7h13M16 3l4 4-4 4M17 17H4M8 13l-4 4 4 4',
 } as const;
 

@@ -37,26 +37,26 @@ test.describe('Journey E: chores (three real accounts)', () => {
     await expect(a.page.getByText('Nice work — task completed.')).toBeVisible();
     await expect(a.page.getByText(/Next up: Bilal\./)).toBeVisible();
 
-    // It now sits under Upcoming (due next week), assigned to Bilal, and Bilal can finish it from his own device.
-    await reloadAt(b.page, '/chores/upcoming');
+    // The next occurrence (due next week) is assigned to Bilal, who sees it as his own on his device.
+    await reloadAt(b.page, '/chores');
     const next = b.page.getByRole('listitem').filter({ hasText: 'Take out the trash' });
-    await expect(next).toContainText('Bilal');
+    await expect(next).toContainText('Assigned to You');
     await expect(next).toContainText('Weekly');
 
     // Completed history shows who did it.
     await reloadAt(a.page, '/chores/completed');
-    await expect(a.page.getByText(/Completed by Asha/)).toBeVisible();
+    await expect(a.page.getByText(/Completed by You/)).toBeVisible();
 
     // Undo: allowed because the follow-up occurrence has not been completed.
     await a.page.getByRole('listitem').filter({ hasText: 'Take out the trash' }).getByRole('button', { name: 'Undo' }).click();
     await expect(a.page.getByText('Chore reopened.')).toBeVisible();
 
-    // Reopening cancelled the untouched follow-up occurrence, so the chore is back in Today for everyone.
+    // Reopening cancelled the untouched follow-up occurrence, so the chore is back for everyone.
     await reloadAt(c.page, '/chores');
     const cRow = c.page.getByRole('listitem').filter({ hasText: 'Take out the trash' });
     await expect(cRow).toHaveCount(1);
     await expect(cRow.getByRole('button', { name: 'Mark as done' })).toHaveAttribute('aria-disabled', 'true');
-    await reloadAt(b.page, '/chores/upcoming');
+    await reloadAt(b.page, '/chores/mine');
     await expect(b.page.getByRole('listitem').filter({ hasText: 'Take out the trash' })).toHaveCount(0);
 
     await Promise.all([a, b, c].map((u) => u.context.close()));

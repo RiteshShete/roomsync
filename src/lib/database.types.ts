@@ -121,6 +121,32 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"chat_messages": {
+                  Row: {
+                    "body": string,"created_at": string,"household_id": string,"id": string,"sender_member_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "body": string,"created_at"?: string,"household_id": string,"id"?: string,"sender_member_id": string
+                  }
+                  Update: {
+                    "body"?: string,"created_at"?: string,"household_id"?: string,"id"?: string,"sender_member_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "chat_messages_household_id_fkey"
+      columns: ["household_id"]
+isOneToOne: false
+      referencedRelation: "households"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "chat_messages_sender_member_id_household_id_fkey"
+      columns: ["sender_member_id","household_id"]
+isOneToOne: false
+      referencedRelation: "household_members"
+      referencedColumns: ["id","household_id"]
+    }
+                  ]
                 },"chore_completions": {
                   Row: {
                     "assignee_member_id": string | null,"chore_id": string,"chore_title": string,"completed_at": string,"completed_by_member_id": string,"created_at": string,"due_date": string | null,"household_id": string,"id": string,"reopened_at": string | null
@@ -155,14 +181,14 @@ isOneToOne: false
                   ]
                 },"chores": {
                   Row: {
-                    "assignee_member_id": string | null,"cancel_reason": string | null,"completed_at": string | null,"completed_by": string | null,"created_at": string,"created_by": string,"description": string | null,"due_date": string | null,"household_id": string,"id": string,"recurrence_frequency": string | null,"rotation_member_ids": (string)[] | null,"spawned_next_id": string | null,"status": string,"title": string,"updated_at": string,"version": number
+                    "assignee_member_id": string | null,"cancel_reason": string | null,"category": string | null,"completed_at": string | null,"completed_by": string | null,"created_at": string,"created_by": string,"description": string | null,"due_date": string | null,"household_id": string,"id": string,"priority": string,"recurrence_frequency": string | null,"rotation_member_ids": (string)[] | null,"spawned_next_id": string | null,"status": string,"title": string,"updated_at": string,"version": number
                   }
                   ComputedFields: never
                   Insert: {
-                    "assignee_member_id"?: string | null,"cancel_reason"?: string | null,"completed_at"?: string | null,"completed_by"?: string | null,"created_at"?: string,"created_by": string,"description"?: string | null,"due_date"?: string | null,"household_id": string,"id"?: string,"recurrence_frequency"?: string | null,"rotation_member_ids"?: (string)[] | null,"spawned_next_id"?: string | null,"status"?: string,"title": string,"updated_at"?: string,"version"?: number
+                    "assignee_member_id"?: string | null,"cancel_reason"?: string | null,"category"?: string | null,"completed_at"?: string | null,"completed_by"?: string | null,"created_at"?: string,"created_by": string,"description"?: string | null,"due_date"?: string | null,"household_id": string,"id"?: string,"priority"?: string,"recurrence_frequency"?: string | null,"rotation_member_ids"?: (string)[] | null,"spawned_next_id"?: string | null,"status"?: string,"title": string,"updated_at"?: string,"version"?: number
                   }
                   Update: {
-                    "assignee_member_id"?: string | null,"cancel_reason"?: string | null,"completed_at"?: string | null,"completed_by"?: string | null,"created_at"?: string,"created_by"?: string,"description"?: string | null,"due_date"?: string | null,"household_id"?: string,"id"?: string,"recurrence_frequency"?: string | null,"rotation_member_ids"?: (string)[] | null,"spawned_next_id"?: string | null,"status"?: string,"title"?: string,"updated_at"?: string,"version"?: number
+                    "assignee_member_id"?: string | null,"cancel_reason"?: string | null,"category"?: string | null,"completed_at"?: string | null,"completed_by"?: string | null,"created_at"?: string,"created_by"?: string,"description"?: string | null,"due_date"?: string | null,"household_id"?: string,"id"?: string,"priority"?: string,"recurrence_frequency"?: string | null,"rotation_member_ids"?: (string)[] | null,"spawned_next_id"?: string | null,"status"?: string,"title"?: string,"updated_at"?: string,"version"?: number
                   }
                   Relationships: [
                     {

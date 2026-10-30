@@ -19,24 +19,17 @@ beforeEach(() => {
 });
 
 describe('Expenses tab', () => {
-  it('shows what you are owed (and zero owed) as separate figures, never one house balance', async () => {
+  it('splits what I owe from what I am owed, with padded counts, and never shows one house balance', async () => {
+    mockMoney({ expenses: [expense(), expense({ id: 'e2', title: 'Milk', amountMinor: 5000, paidByMemberId: 'm-aarav', shares: [{ memberId: 'm-aarav', shareAmountMinor: 2500, percentBp: null }, { memberId: 'm-riya', shareAmountMinor: 2500, percentBp: null }] })] });
     renderApp('/expenses');
-    expect(await screen.findByTestId('you-are-owed')).toHaveTextContent('₹400.00');
-    expect(screen.getByTestId('you-owe')).toHaveTextContent('₹0.00');
+    expect(await screen.findByRole('link', { name: /^To Pay\s+\(01\)$/ })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^To Receive\s+\(01\)$/ })).toBeInTheDocument();
+    expect(await screen.findByText('Electricity bill')).toBeInTheDocument();
+    expect(screen.queryByText('Milk')).not.toBeInTheDocument();
     expect(screen.queryByText(/house balance/i)).not.toBeInTheDocument();
-  });
-
-  it('shows what you owe when you are the debtor', async () => {
-    mockMoney({ balances: [{ memberId: 'm-aarav', netMinor: -25050 }, { memberId: 'm-riya', netMinor: 25050 }] });
-    renderApp('/expenses');
-    expect(await screen.findByTestId('you-owe')).toHaveTextContent('₹250.50');
-    expect(screen.getByTestId('you-are-owed')).toHaveTextContent('₹0.00');
-  });
-
-  it('says so when everything is settled', async () => {
-    mockMoney({ balances: [{ memberId: 'm-aarav', netMinor: 0 }] });
-    renderApp('/expenses');
-    expect(await screen.findByText(copy.expenses.allSettled)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('link', { name: /To Receive/ }));
+    expect(await screen.findByText('Milk')).toBeInTheDocument();
+    expect(screen.queryByText('Electricity bill')).not.toBeInTheDocument();
   });
 
   it('empty state uses the spec copy and offers Add expense', async () => {
@@ -48,23 +41,65 @@ describe('Expenses tab', () => {
     for (const a of adds) expect(a).toHaveAttribute('href', '/expenses/new');
   });
 
-  it('lists recent expenses with payer, date, total and what it means for you', async () => {
+  it('an empty tab says what would show up there', async () => {
+    mockMoney({ expenses: [expense()] });
+    renderApp('/expenses/receive');
+    expect(await screen.findByText(copy.expenses.emptyReceive)).toBeInTheDocument();
+    expect(screen.getByText(copy.expenses.emptyReceiveBody)).toBeInTheDocument();
+  });
+
+  it('lists expenses with payer, date, total and what it means for you', async () => {
     mockMoney({ expenses: [expense(), expense({ id: 'e2', title: 'Milk', amountMinor: 5000, paidByMemberId: 'm-aarav', shares: [{ memberId: 'm-aarav', shareAmountMinor: 2500, percentBp: null }, { memberId: 'm-riya', shareAmountMinor: 2500, percentBp: null }] })] });
     renderApp('/expenses');
     const bill = (await screen.findByText('Electricity bill')).closest('a')!;
     expect(bill).toHaveAttribute('href', '/expenses/e1');
     expect(within(bill).getByText('₹1,200.00')).toBeInTheDocument();
+    expect(within(bill).getByText(copy.expenseDetails.totalLine)).toBeInTheDocument();
     expect(within(bill).getByText('Riya')).toBeInTheDocument();
     expect(within(bill).getByText(copy.expenses.yourShare('₹400.00'))).toBeInTheDocument();
-    const milk = screen.getByText('Milk').closest('a')!;
+    await userEvent.click(screen.getByRole('link', { name: /To Receive/ }));
+    const milk = (await screen.findByText('Milk')).closest('a')!;
     expect(within(milk).getByText(copy.expenses.youPaid, { exact: false })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: copy.expenses.viewAll })).toHaveAttribute('href', '/expenses/all');
   });
 
-  it('tells you when you are not part of an expense', async () => {
-    mockMoney({ expenses: [expense({ shares: [{ memberId: 'm-riya', shareAmountMinor: 120000, percentBp: null }] })] });
+  it('keeps balances, settlements and the full list one tap away', async () => {
+    mockMoney({ expenses: [expense()] });
     renderApp('/expenses');
-    expect(await screen.findByText(copy.expenses.notInvolved)).toBeInTheDocument();
+    const more = await screen.findByRole('navigation', { name: copy.expenses.moreLinks });
+    expect(within(more).getByRole('link', { name: copy.expenses.balancesLink })).toHaveAttribute('href', '/expenses/balances');
+    expect(within(more).getByRole('link', { name: copy.expenses.settlementsLink })).toHaveAttribute('href', '/expenses/settlements');
+    expect(within(more).getByRole('link', { name: copy.expenses.allLink })).toHaveAttribute('href', '/expenses/all');
+    expect(screen.queryByRole('link', { name: copy.expenses.recordSettlement })).not.toBeInTheDocument();
+  });
+
+  it('filters by category and sorts from the menus', async () => {
+    mockMoney({
+      expenses: [
+        expense({ id: 'a', title: 'Power', category: 'utilities', amountMinor: 100, expenseDate: '2026-05-01' }),
+        expense({ id: 'b', title: 'Veg', category: 'groceries', amountMinor: 900, expenseDate: '2026-05-02' }),
+      ],
+    });
+    renderApp('/expenses');
+    await screen.findByText('Power');
+    const order = () => screen.getAllByText(/^(Power|Veg)$/).map((el) => el.textContent);
+    expect(order()).toEqual(['Veg', 'Power']);
+    await userEvent.click(screen.getByRole('button', { name: copy.expenses.sort }));
+    await userEvent.click(screen.getByRole('menuitemradio', { name: copy.expenses.sortOldest }));
+    expect(order()).toEqual(['Power', 'Veg']);
+    await userEvent.click(screen.getByRole('button', { name: copy.expenses.filter }));
+    await userEvent.click(screen.getByRole('menuitemradio', { name: 'Groceries' }));
+    expect(screen.queryByText('Power')).not.toBeInTheDocument();
+    expect(screen.getByText('Veg')).toBeInTheDocument();
+  });
+
+  it('shares the current list', async () => {
+    mockMoney({ expenses: [expense()] });
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
+    renderApp('/expenses');
+    await screen.findByText('Electricity bill');
+    await userEvent.click(screen.getByRole('button', { name: copy.expenses.shareLabel }));
+    expect(writeText).toHaveBeenCalledWith(expect.stringContaining('Electricity bill: ₹1,200.00 (paid by Riya'));
   });
 
   it('has a loading state, then an error with retry for the list', async () => {
@@ -74,24 +109,6 @@ describe('Expenses tab', () => {
     vi.mocked(expensesApi.listExpenses).mockResolvedValue({ items: [expense()], hasMore: false });
     await userEvent.click(screen.getAllByRole('button', { name: copy.states.retry })[0]!);
     expect(await screen.findByText('Electricity bill')).toBeInTheDocument();
-  });
-
-  it('shows a balances error with retry without hiding the list', async () => {
-    vi.mocked(expensesApi.getBalances).mockRejectedValueOnce(new TypeError('Failed to fetch'));
-    mockMoney({ expenses: [expense()] });
-    vi.mocked(expensesApi.getBalances).mockRejectedValueOnce(new TypeError('Failed to fetch'));
-    renderApp('/expenses');
-    expect(await screen.findByText('Electricity bill')).toBeInTheDocument();
-    expect(await screen.findByText(copy.errors.network)).toBeInTheDocument();
-  });
-
-  it('shows just the owe/owed card (no duplicate buttons): balances and settlements are reached through the tabs', async () => {
-    renderApp('/expenses');
-    expect(await screen.findByTestId('you-owe')).toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: copy.expenses.recordSettlement })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: copy.expenses.recordSettlement })).not.toBeInTheDocument();
-    const tabs = screen.getByRole('navigation', { name: copy.expenses.title });
-    expect(within(tabs).getAllByRole('link').map((l) => l.textContent)).toEqual(['Expenses', 'Balances', 'Settlements']);
   });
 
   it('the floating add button links to the form', async () => {
@@ -169,5 +186,47 @@ describe('All expenses', () => {
     expect(screen.getByText('First page')).toBeInTheDocument();
     expect(expensesApi.listExpenses).toHaveBeenLastCalledWith('h1', {}, 1);
     expect(screen.queryByRole('button', { name: copy.expenses.loadMore })).not.toBeInTheDocument();
+  });
+});
+
+describe('Pay and Mark as paid', () => {
+  const theirs = () => expense({ id: 'e1', title: 'Wifi', paidByMemberId: 'm-riya' });
+
+  it('To Pay cards have a Pay button that opens the details; To Receive cards do not', async () => {
+    mockMoney({ expenses: [theirs(), expense({ id: 'e2', title: 'Milk', paidByMemberId: 'm-aarav' })] });
+    renderApp('/expenses');
+    const pay = await screen.findByRole('link', { name: copy.expenses.payLabel('Wifi') });
+    expect(pay).toHaveTextContent(copy.expenses.pay);
+    expect(pay).toHaveAttribute('href', '/expenses/e1');
+    await userEvent.click(screen.getByRole('link', { name: /To Receive/ }));
+    await screen.findByText('Milk');
+    expect(screen.queryByRole('link', { name: /^Pay for/ })).not.toBeInTheDocument();
+  });
+
+  it('the details offer Mark as paid, which opens the record-payment form filled with my share', async () => {
+    mockMoney({ expenses: [theirs()] });
+    vi.mocked(expensesApi.getExpense).mockResolvedValue(theirs());
+    renderApp('/expenses/e1');
+    expect(await screen.findByText(copy.expenseDetails.yourShareDue('₹400.00', 'Riya'))).toBeInTheDocument();
+    expect(screen.getByText(copy.expenseDetails.markPaidNote('Riya'))).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: copy.expenseDetails.markPaid }));
+    expect(await screen.findByRole('heading', { level: 1, name: copy.settle.title })).toBeInTheDocument();
+  });
+
+  it('the person who paid has nothing to mark as paid', async () => {
+    mockMoney({ expenses: [expense({ id: 'e2', title: 'Milk', paidByMemberId: 'm-aarav' })] });
+    vi.mocked(expensesApi.getExpense).mockResolvedValue(expense({ id: 'e2', title: 'Milk', paidByMemberId: 'm-aarav' }));
+    renderApp('/expenses/e2');
+    await screen.findByText('Milk');
+    expect(screen.queryByRole('button', { name: copy.expenseDetails.markPaid })).not.toBeInTheDocument();
+  });
+
+  it('in an archived household Mark as paid is disabled with the reason', async () => {
+    mockMoney({ me: membership({ archived: true }), expenses: [theirs()] });
+    vi.mocked(expensesApi.getExpense).mockResolvedValue(theirs());
+    renderApp('/expenses/e1');
+    const button = await screen.findByRole('button', { name: copy.expenseDetails.markPaid });
+    expect(button).toHaveAttribute('aria-disabled', 'true');
+    expect(button).toHaveAccessibleDescription(copy.errors.householdArchived);
   });
 });

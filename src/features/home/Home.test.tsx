@@ -2,6 +2,7 @@ import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as announcementsApi from '@/api/announcements';
+import * as chatApi from '@/api/chat';
 import * as expensesApi from '@/api/expenses';
 import * as households from '@/api/households';
 import { copy } from '@/copy';
@@ -14,10 +15,14 @@ vi.mock('@/api/households');
 vi.mock('@/api/invites');
 vi.mock('@/api/profile');
 vi.mock('@/api/auth');
+vi.mock('@/api/chat');
 
 beforeEach(() => {
   vi.resetAllMocks();
   mockApi();
+  vi.mocked(chatApi.listMessages).mockResolvedValue([]);
+  vi.mocked(chatApi.sendMessage).mockResolvedValue();
+  window.localStorage.clear();
 });
 
 describe('Home (from the design)', () => {
@@ -141,14 +146,72 @@ describe('Home (from the design)', () => {
     expect(await screen.findByRole('button', { name: copy.header.notificationsUnread(1) })).toBeInTheDocument();
   });
 
-  it('has no chat and no points anywhere (they are not built)', async () => {
+  it('has no points anywhere, and no leaderboard', async () => {
     mockMoney();
     renderApp('/');
     await screen.findByRole('heading', { level: 2, name: copy.feed.title });
-    expect(screen.queryByRole('tab', { name: /message/i })).not.toBeInTheDocument();
-    expect(screen.queryByPlaceholderText(/your message/i)).not.toBeInTheDocument();
-    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
     expect(document.body.textContent).not.toMatch(/points|#1 this week|leaderboard/i);
+  });
+
+  it('Activity is the default tab; Message opens the chat with its composer', async () => {
+    mockMoney();
+    renderApp('/');
+    expect(await screen.findByRole('tab', { name: copy.activity.recent })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.queryByLabelText(copy.chat.label)).not.toBeInTheDocument();
+    await userEvent.click(screen.getByRole('tab', { name: copy.chat.title }));
+    expect(await screen.findByLabelText(copy.chat.label)).toBeInTheDocument();
+    expect(await screen.findByText(copy.chat.emptyTitle)).toBeInTheDocument();
+  });
+
+  it('shows messages with who sent them, and sends a new one', async () => {
+    mockMoney();
+    vi.mocked(chatApi.listMessages).mockResolvedValue([
+      { id: 'c1', senderMemberId: 'm-riya', body: 'Milk is finished', createdAt: new Date().toISOString() },
+      { id: 'c2', senderMemberId: 'm-aarav', body: 'I will buy it', createdAt: new Date().toISOString() },
+    ]);
+    renderApp('/');
+    await userEvent.click(await screen.findByRole('tab', { name: copy.chat.title }));
+    expect(await screen.findByText('Milk is finished')).toBeInTheDocument();
+    expect(screen.getByText('I will buy it')).toBeInTheDocument();
+    const send = screen.getByRole('button', { name: copy.chat.send });
+    expect(send).toHaveAttribute('aria-disabled', 'true');
+    await userEvent.type(screen.getByLabelText(copy.chat.label), '  See you at 8  ');
+    await userEvent.click(send);
+    expect(chatApi.sendMessage).toHaveBeenCalledWith('h1', 'm-aarav', 'See you at 8');
+    expect(screen.getByLabelText(copy.chat.label)).toHaveValue('');
+  });
+
+  it('a failed send keeps what was typed and says so', async () => {
+    mockMoney();
+    vi.mocked(chatApi.sendMessage).mockRejectedValue(new TypeError('Failed to fetch'));
+    renderApp('/');
+    await userEvent.click(await screen.findByRole('tab', { name: copy.chat.title }));
+    await userEvent.type(await screen.findByLabelText(copy.chat.label), 'Important');
+    await userEvent.click(screen.getByRole('button', { name: copy.chat.send }));
+    expect(await screen.findByText(copy.errors.network)).toBeInTheDocument();
+    expect(screen.getByLabelText(copy.chat.label)).toHaveValue('Important');
+  });
+
+  it('an archived household is read-only: sending is disabled with the reason', async () => {
+    mockMoney({ me: membership({ archived: true }) });
+    renderApp('/');
+    await userEvent.click(await screen.findByRole('tab', { name: copy.chat.title }));
+    const input = await screen.findByLabelText(copy.chat.label);
+    expect(input).toHaveAttribute('readonly');
+    expect(screen.getByText(copy.errors.householdArchived)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: copy.chat.send }));
+    expect(chatApi.sendMessage).not.toHaveBeenCalled();
+  });
+
+  it('a dot marks unread messages on the Message tab until it is opened', async () => {
+    mockMoney();
+    vi.mocked(chatApi.listMessages).mockResolvedValue([{ id: 'c1', senderMemberId: 'm-riya', body: 'Hi', createdAt: new Date().toISOString() }]);
+    renderApp('/');
+    const tab = await screen.findByRole('tab', { name: /Message/ });
+    await vi.waitFor(() => expect(tab).toHaveTextContent(copy.chat.newMessages));
+    await userEvent.click(tab);
+    await userEvent.click(screen.getByRole('tab', { name: copy.activity.recent }));
+    expect(screen.getByRole('tab', { name: /Message/ })).not.toHaveTextContent(copy.chat.newMessages);
   });
 
   it('has no quick-add buttons any more: the bottom bar and each screen cover that', async () => {

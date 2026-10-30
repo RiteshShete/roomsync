@@ -19,7 +19,7 @@ test.describe('Journeys C and D: expenses and settlements (three real accounts)'
     await expect(a.page.getByText('Expense saved.')).toBeVisible();
 
     // Balances are right for everyone: the payer is owed 666.66, the other two owe 333.33 each.
-    await expect(a.page.getByTestId('you-are-owed')).toHaveText('₹666.66');
+    expect(await youAreOwed(a.page)).toBe('₹666.66');
     expect(await youOwe(b.page)).toBe('₹333.33');
     expect(await youOwe(c.page)).toBe('₹333.33');
 

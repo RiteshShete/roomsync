@@ -1,4 +1,4 @@
-import type { RecurrenceFrequency } from '@/domain';
+import type { ChoreCategory, ChorePriority, RecurrenceFrequency } from '@/domain';
 import { toAppError } from '@/lib/errors';
 import { resolveGuardedUpdate } from './guard';
 import type { Database } from '@/lib/database.types';
@@ -14,6 +14,8 @@ export interface Chore {
   dueDate: string | null;
   recurrenceFrequency: RecurrenceFrequency | null;
   rotationMemberIds: string[] | null;
+  category: ChoreCategory | null;
+  priority: ChorePriority;
   status: 'open' | 'completed' | 'cancelled';
   createdBy: string;
   completedAt: string | null;
@@ -23,7 +25,7 @@ export interface Chore {
 }
 
 const COLUMNS =
-  'id, title, description, assignee_member_id, due_date, recurrence_frequency, rotation_member_ids, status, created_by, completed_at, completed_by, version, created_at';
+  'id, title, description, assignee_member_id, due_date, recurrence_frequency, rotation_member_ids, category, priority, status, created_by, completed_at, completed_by, version, created_at';
 
 type Row = {
   id: string;
@@ -33,6 +35,8 @@ type Row = {
   due_date: string | null;
   recurrence_frequency: string | null;
   rotation_member_ids: string[] | null;
+  category: string | null;
+  priority: string;
   status: string;
   created_by: string;
   completed_at: string | null;
@@ -50,6 +54,8 @@ function toChore(r: Row): Chore {
     dueDate: r.due_date,
     recurrenceFrequency: r.recurrence_frequency as RecurrenceFrequency | null,
     rotationMemberIds: r.rotation_member_ids,
+    category: r.category as ChoreCategory | null,
+    priority: r.priority as ChorePriority,
     status: r.status as Chore['status'],
     createdBy: r.created_by,
     completedAt: r.completed_at,
@@ -84,6 +90,8 @@ export interface ChoreInput {
   dueDate: string | null;
   recurrenceFrequency: RecurrenceFrequency | null;
   rotationMemberIds: string[] | null;
+  category: ChoreCategory | null;
+  priority: ChorePriority;
 }
 
 export async function createChore(householdId: string, createdBy: string, input: ChoreInput): Promise<string> {
@@ -98,6 +106,8 @@ export async function createChore(householdId: string, createdBy: string, input:
       due_date: input.dueDate,
       recurrence_frequency: input.recurrenceFrequency,
       rotation_member_ids: input.rotationMemberIds,
+      category: input.category,
+      priority: input.priority,
     })
     .select('id')
     .single();
@@ -127,6 +137,8 @@ export function updateChore(id: string, version: number, input: ChoreInput): Pro
     due_date: input.dueDate,
     recurrence_frequency: input.recurrenceFrequency,
     rotation_member_ids: input.rotationMemberIds,
+    category: input.category,
+    priority: input.priority,
   });
 }
 

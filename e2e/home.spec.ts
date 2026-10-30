@@ -43,17 +43,46 @@ test.describe('Home and the bottom bar (from the Figma design)', () => {
     await Promise.all([a, b, c].map((u) => u.context.close()));
   });
 
-  test('chat and points are not there; the bell and the activity list are', async ({ browser }) => {
+  test('the bell and the activity list are there, and there are no points', async ({ browser }) => {
     const { a, b, c } = await threePersonHousehold(browser, ['Asha', 'Bilal', 'Chitra'], 'Flat 52');
     await reloadAt(a.page, '/');
     await expect(a.page.getByRole('heading', { level: 2, name: 'House Feed' })).toBeVisible();
-    await expect(a.page.getByRole('tab', { name: /message/i })).toHaveCount(0);
-    await expect(a.page.getByPlaceholder(/your message/i)).toHaveCount(0);
-    await expect(a.page.getByRole('textbox')).toHaveCount(0);
     expect(await a.page.locator('body').innerText()).not.toMatch(/contribution points|#1 this week|leaderboard/i);
     await expect(bell(a.page)).toBeVisible();
-    await expect(a.page.getByRole('heading', { level: 2, name: 'Activity' })).toBeVisible();
+    await expect(a.page.getByRole('heading', { level: 2, name: 'Activity' })).toBeAttached();
     await expect(a.page.getByRole('link', { name: 'See all activity' })).toHaveAttribute('href', '#/activity');
+    await Promise.all([a, b, c].map((u) => u.context.close()));
+  });
+
+  test('the household chat: messages reach the others live, failures keep the text, and other households cannot see them', async ({ browser }) => {
+    const { a, b, c } = await threePersonHousehold(browser, ['Asha', 'Bilal', 'Chitra'], 'Flat 55');
+    await reloadAt(a.page, '/');
+    await reloadAt(b.page, '/');
+    await b.page.getByRole('tab', { name: 'Message' }).click();
+    await expect(b.page.getByText('No messages yet')).toBeVisible();
+
+    await a.page.getByRole('tab', { name: 'Message' }).click();
+    await a.page.getByLabel('Your message').fill('Who is buying milk?');
+    await a.page.getByRole('button', { name: 'Send message' }).click();
+    await expect(a.page.getByRole('log').getByText('Who is buying milk?')).toBeVisible();
+    await expect(a.page.getByLabel('Your message')).toHaveValue('');
+
+    // Bilal sees it without reloading, with the sender's name.
+    await expect(b.page.getByRole('log').getByText('Who is buying milk?')).toBeVisible();
+    await expect(b.page.getByRole('log').getByText('Asha')).toBeVisible();
+
+    // Chitra has not opened the chat: the Message tab carries an unread marker until she does.
+    await reloadAt(c.page, '/');
+    await expect(c.page.getByRole('tab', { name: /Message/ })).toContainText('New messages');
+    await c.page.getByRole('tab', { name: 'Message' }).click();
+    await expect(c.page.getByText('Who is buying milk?')).toBeVisible();
+
+    // A failed send keeps what was typed.
+    await b.page.route('**/rest/v1/chat_messages*', (route) => (route.request().method() === 'POST' ? route.abort('connectionfailed') : route.continue()));
+    await b.page.getByLabel('Your message').fill('I will');
+    await b.page.getByRole('button', { name: 'Send message' }).click();
+    await expect(b.page.getByRole('alert').filter({ hasText: /reach RoomSync/ })).toBeVisible();
+    await expect(b.page.getByLabel('Your message')).toHaveValue('I will');
     await Promise.all([a, b, c].map((u) => u.context.close()));
   });
 
@@ -67,7 +96,7 @@ test.describe('Home and the bottom bar (from the Figma design)', () => {
     for (const [tab, title] of [
       ['Shopping', 'Shopping'],
       ['Tasks', 'Tasks'],
-      ['Finance', 'Finance'],
+      ['Finance', 'Expenses'],
       ['Settings', 'Settings'],
     ] as const) {
       await nav.getByRole('link', { name: tab }).click();

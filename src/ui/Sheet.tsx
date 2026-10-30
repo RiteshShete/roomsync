@@ -16,13 +16,17 @@ export interface SheetProps {
   variant?: 'bottom' | 'center';
   /** Hide the close (×) button, e.g. when the dialog has its own Cancel. */
   hideClose?: boolean;
+  /** Keep the title for screen readers only; the close button then floats at the top right (the design's item sheet). */
+  hideTitle?: boolean;
+  /** Extra classes for the footer bar, e.g. a tinted background. */
+  footerClassName?: string;
 }
 
 /**
  * Modal dialog: traps focus, closes on Escape or backdrop click, locks page scroll, and restores
  * focus to the element that opened it. Put `data-autofocus` on the control that should start focused.
  */
-export function Sheet({ open, onClose, title, children, footer, variant = 'bottom', hideClose = false }: SheetProps) {
+export function Sheet({ open, onClose, title, children, footer, variant = 'bottom', hideClose = false, hideTitle = false, footerClassName = '' }: SheetProps) {
   const titleId = useId();
   const panel = useRef<HTMLDivElement>(null);
   const onCloseRef = useRef(onClose);
@@ -86,8 +90,8 @@ export function Sheet({ open, onClose, title, children, footer, variant = 'botto
         ].join(' ')}
       >
         {isBottom ? <div aria-hidden="true" className="mx-auto mt-3 h-1.5 w-12 rounded-full bg-line" /> : null}
-        <div className="flex items-start justify-between gap-2 px-5 pt-4">
-          <h2 id={titleId} className="text-xl font-bold text-ink">
+        <div className={hideTitle ? '' : 'flex items-start justify-between gap-2 px-5 pt-4'}>
+          <h2 id={titleId} className={hideTitle ? 'sr-only' : 'text-xl font-bold text-ink'}>
             {title}
           </h2>
           {hideClose ? null : (
@@ -95,14 +99,14 @@ export function Sheet({ open, onClose, title, children, footer, variant = 'botto
               type="button"
               aria-label={copy.header.close}
               onClick={() => onCloseRef.current()}
-              className="-mr-2 flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full text-ink2 hover:bg-brand-soft"
+              className={`flex h-11 w-11 shrink-0 cursor-pointer items-center justify-center rounded-full text-ink2 hover:bg-brand-soft ${hideTitle ? 'absolute top-3 right-3 z-10' : '-mr-2'}`}
             >
               <Icon name="close" size={22} />
             </button>
           )}
         </div>
         <div className="overflow-y-auto px-5 py-3">{children}</div>
-        {footer ? <div className="flex flex-col gap-2 border-t border-line px-5 py-4 sm:flex-row sm:justify-end">{footer}</div> : null}
+        {footer ? <div className={`flex flex-col gap-2 border-t border-line px-5 py-4 sm:flex-row sm:justify-end ${footerClassName}`}>{footer}</div> : null}
       </div>
     </div>,
     document.body,
